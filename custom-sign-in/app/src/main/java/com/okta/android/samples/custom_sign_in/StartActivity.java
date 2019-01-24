@@ -17,6 +17,9 @@ public class StartActivity extends AppCompatActivity {
 
         ((Button)findViewById(R.id.password_reset)).setOnClickListener(v ->
                 startActivity(new Intent(StartActivity.this, PasswordRecoverActivity.class)));
+
+        ((Button)findViewById(R.id.native_sing_in_mfa)).setOnClickListener(v ->
+                startActivity(new Intent(StartActivity.this, NativeSignInWithMFAActivity.class)));
     }
 }
 

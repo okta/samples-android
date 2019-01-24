@@ -6,6 +6,7 @@
     <string name="security_question">Security Question</string>
     <string name="native_sign_in_mfa_btn">Native sign-in with MFA</string>
     <string name="password_reset_login_hint">Enter your login</string>
+    <string name="password_reset_password_hint">Enter your password</string>
     <string name="password_reset_new_hint">New password</string>
     <string name="password_reset_repeat_hint">Repeat password</string>
     <string name="empty_field_error">Field must not be empty</string>
@@ -16,7 +17,6 @@
     <string name="progress_dialog_message">Please wait! This may take a moment.</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
-    <string name="password_reset_password_hint">Enter your password</string>
     <string name="sign_in">Sign In</string>
     <string name="init_error">Error during init</string>
     <string name="not_authorized">You aren\'t authorized</string>
@@ -36,8 +36,10 @@
     <string name="user_name_title">Username:</string>
     <string name="clear_data">Clear data</string>
     <string name="logout_btn">Logout</string>
-
-
-
-
+    <string name="cancel">Cancel</string>
+    <string name="select_mfa">Select MFA</string>
+    <string name="sms_mfa_title">You should receive code via SMS on %s</string>
+    <string name="sms_mfa_enter_code_hint">Enter code</string>
+    <string name="resend">Resend</string>
+    <string name="verify">Verify</string>
 </resources>

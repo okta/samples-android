@@ -35,6 +35,8 @@
             android:label="@string/security_question"/>
         <activity android:name=".PasswordResetActivity"
             android:label="@string/password_reset"/>
+        <activity android:name=".NativeSignInWithMFAActivity"
+            android:label="@string/native_sign_in_mfa_btn"/>
     </application>
 
 </manifest>
