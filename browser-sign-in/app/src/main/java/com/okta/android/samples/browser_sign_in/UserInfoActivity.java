@@ -69,7 +69,7 @@ public class UserInfoActivity extends AppCompatActivity {
                 mUserInfoJson.set(new JSONObject(savedInstanceState.getString(KEY_USER_INFO)));
             } catch (JSONException ex) {
                 showMessage("JSONException: " + ex);
-                ex.printStackTrace();
+                Log.e(TAG, Log.getStackTraceString(e));
             }
         }
     }
@@ -219,7 +219,7 @@ public class UserInfoActivity extends AppCompatActivity {
                 ((TextView) findViewById(R.id.zoneinfo_textview)).setText(user.getString("zoneinfo"));
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, Log.getStackTraceString(e));
             showMessage(e.getMessage());
         }
     }

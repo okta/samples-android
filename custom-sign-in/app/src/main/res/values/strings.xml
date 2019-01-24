@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">Okta Android Samples</string>
+    <string name="native_sign_in_btn">Native sign-in</string>
+    <string name="password_reset">Reset Password</string>
+    <string name="password_recover">Recover Password</string>
+    <string name="security_question">Security Question</string>
+    <string name="native_sign_in_mfa_btn">Native sign-in with MFA</string>
+    <string name="password_reset_login_hint">Enter your login</string>
+    <string name="password_reset_new_hint">New password</string>
+    <string name="password_reset_repeat_hint">Repeat password</string>
+    <string name="empty_field_error">Field must not be empty</string>
+    <string name="password_not_equal">Passwords don\'t equal</string>
+    <string name="answer_title">Answer</string>
+    <string name="letter_with_reset_link_success">Letter with reset password link sent on your email: %s</string>
+    <string name="password_reset_successfully">You\'ve reset password successfully</string>
+    <string name="progress_dialog_message">Please wait! This may take a moment.</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+</resources>
