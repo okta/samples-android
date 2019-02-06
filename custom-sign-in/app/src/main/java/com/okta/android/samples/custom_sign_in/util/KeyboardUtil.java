@@ -8,7 +8,9 @@ public class KeyboardUtil {
         InputMethodManager inputMethodManager =
                 (InputMethodManager) activity.getSystemService(
                         Activity.INPUT_METHOD_SERVICE);
-        inputMethodManager.hideSoftInputFromWindow(
-                activity.getCurrentFocus().getWindowToken(), 0);
+        if(activity.getCurrentFocus() != null && activity.getCurrentFocus().getWindowToken() != null) {
+            inputMethodManager.hideSoftInputFromWindow(
+                    activity.getCurrentFocus().getWindowToken(), 0);
+        }
     }
 }

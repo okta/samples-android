@@ -16,4 +16,28 @@
     <string name="progress_dialog_message">Please wait! This may take a moment.</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
+    <string name="password_reset_password_hint">Enter your password</string>
+    <string name="sign_in">Sign In</string>
+    <string name="init_error">Error during init</string>
+    <string name="not_authorized">You aren\'t authorized</string>
+    <string name="user_info_loading">Fetching user info</string>
+    <string name="access_token_loading">Refreshing access token</string>
+    <string name="ending_current_session">Ending current session</string>
+    <string name="unable_to_clean_data">Unable to clean data</string>
+    <string name="token_refreshed_successfully">Token refreshed successfully</string>
+    <string name="error_message">Error</string>
+    <string name="refresh_token_btn">Refresh token</string>
+    <string name="access_token_btn">Access token</string>
+    <string name="id_token_btn">IdToken</string>
+    <string name="name_title">Name:</string>
+    <string name="locale_title">Locale:</string>
+    <string name="zoneinfo_title">Zone Info:</string>
+    <string name="get_user_btn">Get User Info</string>
+    <string name="user_name_title">Username:</string>
+    <string name="clear_data">Clear data</string>
+    <string name="logout_btn">Logout</string>
+
+
+
+
 </resources>

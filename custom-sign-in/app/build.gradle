@@ -11,7 +11,10 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
         buildConfigField("String", "BASE_URL", "\"{org-domain-with-https-schema}\"")
-        manifestPlaceholders = [hostName:"{only-org-domain}"]
+        manifestPlaceholders = [
+                hostName:"{only-org-domain}",
+                "appAuthRedirectScheme": "{redirect_uri_schema}"
+        ]
     }
     buildTypes {
         release {
@@ -35,6 +38,10 @@ dependencies {
         exclude group: 'com.okta.sdk', module: 'okta-sdk-httpclient'
     }
     runtimeOnly 'com.okta.sdk:okta-sdk-okhttp:1.4.0-SNAPSHOT'
+
+    implementation 'com.okta.android:appauth-android:0.2.1'
+
+
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'

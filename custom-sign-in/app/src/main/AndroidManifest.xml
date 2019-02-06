@@ -18,6 +18,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".NativeSignInActivity"
+            android:label="@string/native_sign_in_btn"/>
+        <activity android:name=".UserInfoActivity" />
         <activity android:name=".PasswordRecoverActivity"
             android:label="@string/password_recover"/>
         <activity android:name=".DeepLinksHandlerActivity">

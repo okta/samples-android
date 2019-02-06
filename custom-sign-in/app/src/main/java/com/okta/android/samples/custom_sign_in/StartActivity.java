@@ -12,6 +12,9 @@ public class StartActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
 
+        ((Button)findViewById(R.id.native_sing_in)).setOnClickListener(v ->
+                startActivity(new Intent(StartActivity.this, NativeSignInActivity.class)));
+
         ((Button)findViewById(R.id.password_reset)).setOnClickListener(v ->
                 startActivity(new Intent(StartActivity.this, PasswordRecoverActivity.class)));
     }
