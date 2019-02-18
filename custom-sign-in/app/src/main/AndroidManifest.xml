@@ -18,11 +18,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".base.ContainerActivity"/>
+        <activity android:name=".PasswordRecoveryActivity"/>
+
+
         <activity android:name=".NativeSignInActivity"
             android:label="@string/native_sign_in_btn"/>
         <activity android:name=".UserInfoActivity" />
-        <activity android:name=".PasswordRecoverActivity"
-            android:label="@string/password_recover"/>
         <activity android:name=".DeepLinksHandlerActivity">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -31,12 +33,6 @@
                 <data android:host="${hostName}" android:scheme="https" android:pathPrefix="/" />
             </intent-filter>
         </activity>
-        <activity android:name=".RecoveryQuestionActivity"
-            android:label="@string/security_question"/>
-        <activity android:name=".PasswordResetActivity"
-            android:label="@string/password_reset"/>
-        <activity android:name=".NativeSignInWithMFAActivity"
-            android:label="@string/native_sign_in_mfa_btn"/>
     </application>
 
 </manifest>

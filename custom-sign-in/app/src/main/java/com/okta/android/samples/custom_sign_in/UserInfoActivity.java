@@ -1,5 +1,6 @@
 package com.okta.android.samples.custom_sign_in;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.MainThread;
@@ -29,6 +30,13 @@ public class UserInfoActivity extends AppCompatActivity {
     private final AtomicReference<JSONObject> mUserInfoJson = new AtomicReference<>();
 
     private static final String KEY_USER_INFO = "userInfo";
+
+    public static Intent createIntent(Context context) {
+        Intent intent = new Intent(context, UserInfoActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        return intent;
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -207,7 +215,7 @@ public class UserInfoActivity extends AppCompatActivity {
     }
 
     private void navigateToStartActivity() {
-        startActivity(new Intent(UserInfoActivity.this, NativeSignInActivity.class));
+        startActivity(StartActivity.createIntent(this));
     }
 
     @MainThread

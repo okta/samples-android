@@ -10,7 +10,6 @@ import com.okta.authn.sdk.AuthenticationStateHandlerAdapter;
 import com.okta.authn.sdk.client.AuthenticationClient;
 import com.okta.authn.sdk.client.AuthenticationClients;
 import com.okta.authn.sdk.resource.AuthenticationResponse;
-import com.okta.authn.sdk.resource.Link;
 
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -61,31 +60,26 @@ public class DeepLinksHandlerActivity extends Activity {
             try {
                 AuthenticationResponse response = authenticationClient.verifyRecoveryToken(token, new AuthenticationStateHandlerAdapter() {
                     @Override
-                    public void handleUnknown(AuthenticationResponse authenticationResponse) { }
+                    public void handleUnknown(AuthenticationResponse authenticationResponse) {
+                        showMessage(authenticationResponse.toString());
+                        finish();
+                    }
+
+                    @Override
+                    public void handleRecovery(AuthenticationResponse recovery) {
+                        // Get next action
+                        String stateToken = recovery.getStateToken();
+                        if(stateToken == null)
+                            throw new IllegalArgumentException("Missed stateToken");
+
+                        Map<String, String> recovery_question = recovery.getUser().getRecoveryQuestion();
+                        String question = recovery_question.get("question");
+                        if(question == null)
+                            throw new IllegalArgumentException("Missed question");
+
+                        startActivity(PasswordRecoveryActivity.createPasswordRecoveryQuestion(getBaseContext(), question, stateToken));
+                    }
                 });
-
-                // Get next action
-                String stateToken = response.getStateToken();
-                if(stateToken == null)
-                    throw new IllegalArgumentException("Missed stateToken");
-
-                Map<String, Link> links = response.getLinks();
-                if(links == null || links.isEmpty())
-                    throw new IllegalArgumentException("Missed _links or empty");
-                Link next = links.get("next");
-                if(next == null)
-                    throw new IllegalArgumentException("Missed next");
-                String name = next.getName();
-                if(!"answer".equalsIgnoreCase(name))
-                    throw new IllegalArgumentException("Name should equal 'answer' value");
-
-
-                Map<String, String> recovery_question = response.getUser().getRecoveryQuestion();
-                String question = recovery_question.get("question");
-                if(question == null)
-                    throw new IllegalArgumentException("Missed question");
-
-                startActivity(RecoveryQuestionActivity.createIntent(getBaseContext(),question, stateToken));
             } catch (Exception e) {
                 runOnUiThread(() -> {
                     showMessage(e.getLocalizedMessage());

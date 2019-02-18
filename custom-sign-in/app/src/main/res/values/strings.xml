@@ -40,6 +40,9 @@
     <string name="select_mfa">Select MFA</string>
     <string name="sms_mfa_title">You should receive code via SMS on %s</string>
     <string name="sms_mfa_enter_code_hint">Enter code</string>
-    <string name="resend">Resend</string>
+    <string name="send_code">Send code</string>
     <string name="verify">Verify</string>
+    <string name="remember_device_title">Remember Device</string>
+    <string name="mfa_sms_title">SMS Authentication</string>
+    <string name="mfa_sms_sent_code">You should receive code via SMS</string>
 </resources>
