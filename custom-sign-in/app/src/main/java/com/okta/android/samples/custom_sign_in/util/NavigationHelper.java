@@ -17,6 +17,7 @@ public class NavigationHelper implements INavigation {
 
     @Override
     public void close() {
+
         this.activity.finish();
     }
 
@@ -24,6 +25,7 @@ public class NavigationHelper implements INavigation {
     public void present(Fragment fragment) {
         this.manager.beginTransaction()
                 .replace(container, fragment)
+                .addToBackStack(null)
                 .commit();
     }
 
@@ -31,6 +33,7 @@ public class NavigationHelper implements INavigation {
     public void push(Fragment fragment) {
         this.manager.beginTransaction()
                 .add(container, fragment)
+                .addToBackStack(null)
                 .commit();
     }
 }

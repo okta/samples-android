@@ -26,7 +26,6 @@ public class RecoveryQuestionFragment extends BaseFragment {
     private String TAG = "RecoveryQuestion";
     private static String QUESTION_KEY = "QUESTION_KEY";
     private static String STATE_TOKEN_KEY = "STATE_TOKEN_KEY";
-    private ExecutorService executor = Executors.newSingleThreadExecutor();
 
     private String question = null;
     private String token = null;
@@ -78,15 +77,15 @@ public class RecoveryQuestionFragment extends BaseFragment {
 
         KeyboardUtil.hideSoftKeyboard(getActivity());
         String answer = answerQuestionEditText.getText().toString();
-        loadingView.show();
-        executor.submit(() -> {
+        showLoading();
+        submit(() -> {
             try {
                 AuthenticationResponse response = authenticationClient.answerRecoveryQuestion(answer, token, new AuthenticationStateHandlerAdapter() {
                     @Override
                     public void handleUnknown(AuthenticationResponse authenticationResponse) {
-                        answerQuestionEditText.post(() -> {
-                            loadingView.hide();
-                            messageView.showMessage(authenticationResponse.toString());
+                        runOnUIThread(() -> {
+                            hideLoading();
+                            showMessage(authenticationResponse.toString());
                             navigation.close();
                         });
                     }
@@ -97,8 +96,8 @@ public class RecoveryQuestionFragment extends BaseFragment {
                         if (stateToken == null)
                             throw new IllegalArgumentException("Missed stateToken");
 
-                        answerQuestionEditText.post(() ->  {
-                            loadingView.hide();
+                        runOnUIThread(() ->  {
+                            hideLoading();
                             navigation.present(PasswordResetFragment.createFragment(stateToken, passwordReset));
                         });
                     }
@@ -106,9 +105,9 @@ public class RecoveryQuestionFragment extends BaseFragment {
 
 
             } catch (Exception e) {
-                answerQuestionEditText.post(() -> {
-                    messageView.showMessage(e.getLocalizedMessage());
-                    loadingView.hide();
+               runOnUIThread(() -> {
+                    showMessage(e.getLocalizedMessage());
+                    hideLoading();
                 });
                 Log.e(TAG, Log.getStackTraceString(e));
             }

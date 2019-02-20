@@ -27,7 +27,6 @@ import java.util.concurrent.Executors;
 
 public class NativeSignInFragment extends BaseFragment {
     private String TAG = "NativeSignIn";
-    private ExecutorService executor = Executors.newSingleThreadExecutor();
 
     private EditText loginEditText;
     private EditText passwordEditText;
@@ -78,15 +77,15 @@ public class NativeSignInFragment extends BaseFragment {
 
 
         KeyboardUtil.hideSoftKeyboard(getActivity());
-        loadingView.show();
-        executor.submit(() -> {
+        showLoading();
+        submit(() -> {
             try {
                 authenticationClient.authenticate(login, password.toCharArray(), null, new AuthenticationStateHandlerAdapter() {
                     @Override
                     public void handleUnknown(AuthenticationResponse authenticationResponse) {
-                        loginEditText.post(() -> {
-                            loadingView.hide();
-                            messageView.showMessage(authenticationResponse.toString());
+                        runOnUIThread(() -> {
+                            hideLoading();
+                            showMessage(authenticationResponse.toString());
                         });
                     }
 
@@ -97,9 +96,9 @@ public class NativeSignInFragment extends BaseFragment {
                     }
                 });
             } catch (Exception e) {
-                loginEditText.post(() -> {
-                    loadingView.hide();
-                    messageView.showMessage(e.getMessage());
+                runOnUIThread(() -> {
+                    hideLoading();
+                    showMessage(e.getMessage());
                 });
                 Log.e(TAG, Log.getStackTraceString(e));
             }
@@ -110,17 +109,17 @@ public class NativeSignInFragment extends BaseFragment {
         this.oktaAppAuth.authenticate(sessionToken, new OktaAppAuth.OktaNativeAuthListener() {
             @Override
             public void onSuccess() {
-                loginEditText.post(() -> {
-                    loadingView.hide();
+                runOnUIThread(() -> {
+                    hideLoading();
                     showUserInfo();
                 });
             }
 
             @Override
             public void onTokenFailure(@NonNull AuthenticationError authenticationError) {
-                loginEditText.post(() -> {
-                    loadingView.hide();
-                    messageView.showMessage(authenticationError.getLocalizedMessage());
+                runOnUIThread(() -> {
+                    hideLoading();
+                    showMessage(authenticationError.getLocalizedMessage());
                     navigation.close();
                 });
             }

@@ -14,34 +14,38 @@ import android.widget.TextView;
 
 import com.okta.android.samples.custom_sign_in.R;
 import com.okta.android.samples.custom_sign_in.base.BaseFragment;
-import com.okta.android.samples.custom_sign_in.util.KeyboardUtil;
 import com.okta.authn.sdk.AuthenticationStateHandlerAdapter;
 import com.okta.authn.sdk.resource.AuthenticationResponse;
 import com.okta.authn.sdk.resource.Factor;
 import com.okta.authn.sdk.resource.VerifyFactorRequest;
 import com.okta.authn.sdk.resource.VerifyPassCodeFactorRequest;
+import com.okta.authn.sdk.resource.VerifyPushFactorRequest;
+import com.okta.authn.sdk.resource.VerifyU2fFactorRequest;
+import com.okta.sdk.resource.user.factor.FactorResultType;
 
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
-public class MfaSMSFragment extends BaseFragment {
+public class MfaOktaVerifyCodeFragment extends BaseFragment {
 
     public static final String FACTOR_ID_KEY = "FACTOR_ID_KEY";
     public static final String STATE_TOKEN_KEY = "STATE_TOKEN_KEY";
-    public static final String PHONE_NUMBER_KEY = "PHONE_NUMBER_KEY";
-    private TextView phoneNumberTextView;
-    private EditText codeEditText;
-    private Button sendBtn;
-    private Button verifyBtn;
+    public static final String DEVICE_NAME_KEY = "DEVICE_NAME_KEY";
+    private TextView deviceTextView;
+    private EditText enterCodeEdittext;
+    private Button verifyCodeBtn;
+
+    private String deviceName;
 
     public static Fragment createFragment(String stateToken, Factor factor) {
-        MfaSMSFragment fragment = new MfaSMSFragment();
+        MfaOktaVerifyCodeFragment fragment = new MfaOktaVerifyCodeFragment();
 
         Bundle arguments = new Bundle();
         arguments.putString(FACTOR_ID_KEY, factor.getId());
         arguments.putString(STATE_TOKEN_KEY, stateToken);
-        arguments.putString(PHONE_NUMBER_KEY, (String) factor.getProfile().get("phoneNumber"));
+        arguments.putString(DEVICE_NAME_KEY, (String) factor.getProfile().get("name"));
 
         fragment.setArguments(arguments);
         return fragment;
@@ -50,60 +54,48 @@ public class MfaSMSFragment extends BaseFragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.mfa_sms_code_layout, container, false);
+        return inflater.inflate(R.layout.mfa_okta_verify_code_layout, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        this.phoneNumberTextView = view.findViewById(R.id.phonenumber_textview);
-        this.codeEditText = view.findViewById(R.id.code_edittext);
-        this.sendBtn = view.findViewById(R.id.resend_btn);
-        this.verifyBtn = view.findViewById(R.id.verify_btn);
+        this.deviceTextView = view.findViewById(R.id.device_textview);
+        this.enterCodeEdittext = view.findViewById(R.id.enter_code_edittext);
+        this.verifyCodeBtn = view.findViewById(R.id.verify_code_btn);
 
         String factorId = getArguments().getString(FACTOR_ID_KEY);
         String stateToken = getArguments().getString(STATE_TOKEN_KEY);
-        String phoneNumber = getArguments().getString(PHONE_NUMBER_KEY);
+        this.deviceName = getArguments().getString(DEVICE_NAME_KEY);
 
-        initView(factorId, stateToken, phoneNumber);
+        initView(factorId, stateToken, deviceName);
     }
 
-    public void initView(String factorId, String stateToken, String phoneNumber) {
-        phoneNumberTextView.setText(phoneNumber);
+    public void initView(String factorId, String stateToken, String deviceName) {
+        this.deviceTextView.setText(String.format(getString(R.string.mfa_push_device), deviceName));
 
-        sendBtn.setOnClickListener((v) -> {
-            sendCode(factorId, stateToken);
-        });
-        verifyBtn.setOnClickListener((v) -> {
+        verifyCodeBtn.setOnClickListener((v) -> {
             verifyCode(factorId, stateToken);
         });
     }
 
-    private void sendCode(String factorId, String stateToken) {
-        VerifyFactorRequest smsVerifyRequest = authenticationClient.instantiate(VerifyPassCodeFactorRequest.class)
-                .setStateToken(stateToken);
-
-        verifyFactor(factorId, smsVerifyRequest);
-    }
-
     private void verifyCode(String factorId, String stateToken) {
-        String code = codeEditText.getText().toString();
+        String code = enterCodeEdittext.getText().toString();
         if(TextUtils.isEmpty(code)) {
-            codeEditText.setError(getString(R.string.empty_field_error));
+            enterCodeEdittext.setError(getString(R.string.empty_field_error));
         } else {
-            codeEditText.setError(null);
+            enterCodeEdittext.setError(null);
         }
-        VerifyFactorRequest smsVerifyRequest = authenticationClient.instantiate(VerifyPassCodeFactorRequest.class)
+        VerifyFactorRequest codeVerifyRequest = authenticationClient.instantiate(VerifyPassCodeFactorRequest.class)
                 .setPassCode(code)
                 .setStateToken(stateToken);
 
-        verifyFactor(factorId, smsVerifyRequest);
+        verifyFactor(factorId, codeVerifyRequest);
     }
 
     private void verifyFactor(String factorId, VerifyFactorRequest request) {
-        KeyboardUtil.hideSoftKeyboard(getActivity());
-        hideLoading();
-         submit(() -> {
+        showLoading();
+        submit(() -> {
             try {
                 authenticationClient.verifyFactor(factorId, request, new AuthenticationStateHandlerAdapter() {
                     @Override
@@ -118,7 +110,7 @@ public class MfaSMSFragment extends BaseFragment {
                     public void handleMfaChallenge(AuthenticationResponse mfaChallengeResponse) {
                         runOnUIThread(() -> {
                             hideLoading();
-                            showMessage(getString(R.string.mfa_sms_sent_code));
+                            showMessage(String.format(getString(R.string.mfa_push_sent), deviceName));
                         });
                     }
 

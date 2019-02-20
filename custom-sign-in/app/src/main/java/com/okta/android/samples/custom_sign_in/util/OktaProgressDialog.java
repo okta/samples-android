@@ -40,9 +40,10 @@ public class OktaProgressDialog {
 
     private AlertDialog createAlertDialog(String message) {
         if(mContext.get() != null) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(mContext.get());
+            Context context = mContext.get();
+            AlertDialog.Builder builder = new AlertDialog.Builder(context);
             builder.setCancelable(false); // if you want user to wait for some process to finish,
-            LayoutInflater mInflater = (LayoutInflater) mContext.get().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            LayoutInflater mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             View view = mInflater.inflate(R.layout.layout_progress_dialog, null, false);
             String textViewMessage = (message == null) ? mContext.get().getString(R.string.progress_dialog_message) : message;
             ((TextView)view.findViewById(R.id.message_textview)).setText(textViewMessage);

@@ -45,4 +45,8 @@
     <string name="remember_device_title">Remember Device</string>
     <string name="mfa_sms_title">SMS Authentication</string>
     <string name="mfa_sms_sent_code">You should receive code via SMS</string>
+    <string name="mfa_push_title">Okta Verify</string>
+    <string name="mfa_push_device">Device %s</string>
+    <string name="mfa_push_btn">Send Push</string>
+    <string name="mfa_push_sent">You should receive push on %s</string>
 </resources>

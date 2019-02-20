@@ -28,7 +28,6 @@ public class PasswordResetFragment extends BaseFragment {
     private String TAG = "PasswordReset";
     private static String STATE_TOKEN_KEY = "STATE_TOKEN_KEY";
     private static String PASSWORD_POLICY_KEY = "PASSWORD_POLICY_KEY";
-    private ExecutorService executor = Executors.newSingleThreadExecutor();
 
     private String stateToken = null;
     private Map<String,Integer> passwordPolicy = null;
@@ -124,20 +123,20 @@ public class PasswordResetFragment extends BaseFragment {
         }
 
         if(!password.equalsIgnoreCase(repeatPassword)) {
-            messageView.showMessage(getString(R.string.password_not_equal));
+            showMessage(getString(R.string.password_not_equal));
             return;
         }
 
         KeyboardUtil.hideSoftKeyboard(getActivity());
-        loadingView.show();
-        executor.submit(() -> {
+        showLoading();
+        submit(() -> {
             try {
                 AuthenticationResponse response = authenticationClient.resetPassword(password.toCharArray(), stateToken, new AuthenticationStateHandlerAdapter() {
                     @Override
                     public void handleUnknown(AuthenticationResponse authenticationResponse) {
                         passwordPolicyTextView.post(() -> {
-                            loadingView.hide();
-                            messageView.showMessage(authenticationResponse.toString());
+                            hideLoading();
+                            showMessage(authenticationResponse.toString());
                         });
                     }
 
@@ -145,8 +144,8 @@ public class PasswordResetFragment extends BaseFragment {
                     public void handleSuccess(AuthenticationResponse successResponse) {
                         super.handleSuccess(successResponse);
                         passwordPolicyTextView.post(() -> {
-                            messageView.showMessage(getString(R.string.password_reset_successfully));
-                            loadingView.hide();
+                            showMessage(getString(R.string.password_reset_successfully));
+                            hideLoading();
                             navigation.close();
                             startActivity(StartActivity.createIntent(getContext()));
                         });
@@ -155,8 +154,8 @@ public class PasswordResetFragment extends BaseFragment {
             } catch (Exception e) {
                 Log.e(TAG, Log.getStackTraceString(e));
                 passwordPolicyTextView.post(() -> {
-                    loadingView.hide();
-                    messageView.showMessage(e.getMessage());
+                    hideLoading();
+                    showMessage(e.getMessage());
                 });
             }
         });

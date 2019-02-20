@@ -1,6 +1,7 @@
 package com.okta.android.samples.custom_sign_in.base;
 
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
@@ -21,6 +22,7 @@ public class ContainerActivity extends AppCompatActivity implements
     AuthenticationClient authenticationClient = null;
     OktaProgressDialog oktaProgressDialog = null;
     protected INavigation navigation = null;
+    private FragmentManager fragmentManager = getSupportFragmentManager();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,7 +30,7 @@ public class ContainerActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_container);
 
         this.oktaProgressDialog = new OktaProgressDialog(this);
-        this.navigation = new NavigationHelper(this, getSupportFragmentManager(), R.id.container);
+        this.navigation = new NavigationHelper(this, fragmentManager, R.id.container);
 
         init();
 
@@ -38,6 +40,18 @@ public class ContainerActivity extends AppCompatActivity implements
         authenticationClient = AuthenticationClients.builder()
                 .setOrgUrl(BuildConfig.BASE_URL)
                 .build();
+    }
+
+    @Override
+    public void onBackPressed() {
+        int fragmentsCount = fragmentManager.getBackStackEntryCount();
+        if (fragmentsCount == 1) {
+            finish();
+        } else if(fragmentsCount > 1) {
+            fragmentManager.popBackStack();
+        } else {
+            super.onBackPressed();
+        }
     }
 
     @Override

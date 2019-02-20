@@ -20,6 +20,8 @@ import com.okta.android.samples.custom_sign_in.UserInfoActivity;
 import com.okta.android.samples.custom_sign_in.base.BaseFragment;
 import com.okta.android.samples.custom_sign_in.base.IOktaAppAuthClientProvider;
 import com.okta.android.samples.custom_sign_in.fragments.mfa_types.IMFAResult;
+import com.okta.android.samples.custom_sign_in.fragments.mfa_types.MfaOktaVerifyCodeFragment;
+import com.okta.android.samples.custom_sign_in.fragments.mfa_types.MfaOktaVerifyPushFragment;
 import com.okta.android.samples.custom_sign_in.fragments.mfa_types.MfaSMSFragment;
 import com.okta.android.samples.custom_sign_in.util.KeyboardUtil;
 import com.okta.appauth.android.AuthenticationError;
@@ -35,7 +37,7 @@ import java.util.concurrent.Executors;
 public class NativeSignInWithMFAFragment extends BaseFragment implements IMFAResult {
     private String TAG = "NativeSignInWithMFA";
     private static final int SESSION_TOKEN_RES_CODE = 1;
-    private ExecutorService executor = Executors.newSingleThreadExecutor();
+
 
     private EditText loginEditText;
     private EditText passwordEditText;
@@ -71,8 +73,9 @@ public class NativeSignInWithMFAFragment extends BaseFragment implements IMFARes
     }
 
     private void signIn() {
-        String login = loginEditText.getText().toString();
-        String password = passwordEditText.getText().toString();
+        String login = "imartsekha@lohika.com";//loginEditText.getText().toString();
+        String password = "Mayonez1989_";//passwordEditText.getText().toString();
+
         if (TextUtils.isEmpty(login)) {
             loginEditText.setError(getString(R.string.empty_field_error));
             return;
@@ -83,22 +86,22 @@ public class NativeSignInWithMFAFragment extends BaseFragment implements IMFARes
 
 
         KeyboardUtil.hideSoftKeyboard(getActivity());
-        loadingView.show();
-        executor.submit(() -> {
+        showLoading();
+        submit(() -> {
             try {
                 authenticationClient.authenticate(login, password.toCharArray(), null, new AuthenticationStateHandlerAdapter() {
                     @Override
                     public void handleUnknown(AuthenticationResponse authenticationResponse) {
-                        loginEditText.post(() -> {
-                            loadingView.hide();
-                            messageView.showMessage(authenticationResponse.toString());
+                        runOnUIThread(() -> {
+                            hideLoading();
+                            showMessage(authenticationResponse.toString());
                         });
                     }
 
                     @Override
                     public void handleMfaRequired(AuthenticationResponse mfaRequiredResponse) {
-                        loginEditText.post(() -> {
-                            loadingView.hide();
+                        runOnUIThread(() -> {
+                            hideLoading();
                             showDialogWithPromptFactors(mfaRequiredResponse.getStateToken(), mfaRequiredResponse.getFactors());
                         });
                     }
@@ -110,9 +113,9 @@ public class NativeSignInWithMFAFragment extends BaseFragment implements IMFARes
                     }
                 });
             } catch (Exception e) {
-                loginEditText.post(() -> {
-                    loadingView.hide();
-                    messageView.showMessage(e.getMessage());
+                runOnUIThread(() -> {
+                    hideLoading();
+                    showMessage(e.getMessage());
                 });
                 e.printStackTrace();
             }
@@ -121,7 +124,7 @@ public class NativeSignInWithMFAFragment extends BaseFragment implements IMFARes
 
     @Override
     public void onSuccess(String sessionToken) {
-        loadingView.show();
+        showLoading();
         authenticateViaOktaAndroidSDK(sessionToken);
     }
 
@@ -136,17 +139,17 @@ public class NativeSignInWithMFAFragment extends BaseFragment implements IMFARes
         this.oktaAppAuth.authenticate(sessionToken, new OktaAppAuth.OktaNativeAuthListener() {
             @Override
             public void onSuccess() {
-                loginEditText.post(() -> {
-                    loadingView.hide();
+                runOnUIThread(() -> {
+                    hideLoading();
                     showUserInfo();
                 });
             }
 
             @Override
             public void onTokenFailure(@NonNull AuthenticationError authenticationError) {
-                loginEditText.post(() -> {
-                    loadingView.hide();
-                    messageView.showMessage(authenticationError.getLocalizedMessage());
+                runOnUIThread(() -> {
+                    hideLoading();
+                    showMessage(authenticationError.getLocalizedMessage());
                     navigation.close();
                 });
             }
@@ -181,12 +184,22 @@ public class NativeSignInWithMFAFragment extends BaseFragment implements IMFARes
     }
 
     private void showFactor(String stateToken, Factor factor) {
+        Fragment fragment = null;
         switch (factor.getType()) {
             case SMS:
-                String factorId = factor.getId();
-                String phoneNumber = (String) factor.getProfile().get("phoneNumber");
+                fragment = MfaSMSFragment.createFragment(stateToken, factor);
+                fragment.setTargetFragment(this, SESSION_TOKEN_RES_CODE);
 
-                Fragment fragment = MfaSMSFragment.createFragment(factorId, stateToken, phoneNumber);
+                this.navigation.push(fragment);
+                break;
+            case PUSH:
+                fragment = MfaOktaVerifyPushFragment.createFragment(stateToken, factor);
+                fragment.setTargetFragment(this, SESSION_TOKEN_RES_CODE);
+
+                this.navigation.push(fragment);
+                break;
+            case TOKEN_SOFTWARE_TOTP:
+                fragment = MfaOktaVerifyCodeFragment.createFragment(stateToken, factor);
                 fragment.setTargetFragment(this, SESSION_TOKEN_RES_CODE);
 
                 this.navigation.push(fragment);

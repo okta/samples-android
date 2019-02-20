@@ -4,44 +4,43 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import com.okta.android.samples.custom_sign_in.R;
 import com.okta.android.samples.custom_sign_in.base.BaseFragment;
-import com.okta.android.samples.custom_sign_in.util.KeyboardUtil;
 import com.okta.authn.sdk.AuthenticationStateHandlerAdapter;
 import com.okta.authn.sdk.resource.AuthenticationResponse;
 import com.okta.authn.sdk.resource.Factor;
 import com.okta.authn.sdk.resource.VerifyFactorRequest;
-import com.okta.authn.sdk.resource.VerifyPassCodeFactorRequest;
+import com.okta.authn.sdk.resource.VerifyPushFactorRequest;
+import com.okta.sdk.resource.user.factor.FactorResultType;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
-public class MfaSMSFragment extends BaseFragment {
+public class MfaOktaVerifyPushFragment extends BaseFragment {
 
     public static final String FACTOR_ID_KEY = "FACTOR_ID_KEY";
     public static final String STATE_TOKEN_KEY = "STATE_TOKEN_KEY";
-    public static final String PHONE_NUMBER_KEY = "PHONE_NUMBER_KEY";
-    private TextView phoneNumberTextView;
-    private EditText codeEditText;
-    private Button sendBtn;
-    private Button verifyBtn;
+    public static final String DEVICE_NAME_KEY = "DEVICE_NAME_KEY";
+    private TextView deviceTextView;
+    private Button sendPushBtn;
+
+    private String deviceName;
+
+    private final int CHECK_STATUS_DELAY = 5;
 
     public static Fragment createFragment(String stateToken, Factor factor) {
-        MfaSMSFragment fragment = new MfaSMSFragment();
+        MfaOktaVerifyPushFragment fragment = new MfaOktaVerifyPushFragment();
 
         Bundle arguments = new Bundle();
         arguments.putString(FACTOR_ID_KEY, factor.getId());
         arguments.putString(STATE_TOKEN_KEY, stateToken);
-        arguments.putString(PHONE_NUMBER_KEY, (String) factor.getProfile().get("phoneNumber"));
+        arguments.putString(DEVICE_NAME_KEY, (String) factor.getProfile().get("name"));
 
         fragment.setArguments(arguments);
         return fragment;
@@ -50,60 +49,53 @@ public class MfaSMSFragment extends BaseFragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.mfa_sms_code_layout, container, false);
+        return inflater.inflate(R.layout.mfa_okta_verify_push_layout, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        this.phoneNumberTextView = view.findViewById(R.id.phonenumber_textview);
-        this.codeEditText = view.findViewById(R.id.code_edittext);
-        this.sendBtn = view.findViewById(R.id.resend_btn);
-        this.verifyBtn = view.findViewById(R.id.verify_btn);
+        this.deviceTextView = view.findViewById(R.id.device_textview);
+        this.sendPushBtn = view.findViewById(R.id.send_push_btn);
 
         String factorId = getArguments().getString(FACTOR_ID_KEY);
         String stateToken = getArguments().getString(STATE_TOKEN_KEY);
-        String phoneNumber = getArguments().getString(PHONE_NUMBER_KEY);
+        this.deviceName = getArguments().getString(DEVICE_NAME_KEY);
 
-        initView(factorId, stateToken, phoneNumber);
+        initView(factorId, stateToken, deviceName);
     }
 
-    public void initView(String factorId, String stateToken, String phoneNumber) {
-        phoneNumberTextView.setText(phoneNumber);
+    public void initView(String factorId, String stateToken, String deviceName) {
+        this.deviceTextView.setText(String.format(getString(R.string.mfa_push_device), deviceName));
 
-        sendBtn.setOnClickListener((v) -> {
-            sendCode(factorId, stateToken);
-        });
-        verifyBtn.setOnClickListener((v) -> {
-            verifyCode(factorId, stateToken);
+        sendPushBtn.setOnClickListener((v) -> {
+            sendPush(factorId, stateToken);
         });
     }
 
-    private void sendCode(String factorId, String stateToken) {
-        VerifyFactorRequest smsVerifyRequest = authenticationClient.instantiate(VerifyPassCodeFactorRequest.class)
+    private void sendPush(String factorId, String stateToken) {
+        VerifyFactorRequest pushVerifyRequest = authenticationClient.instantiate(VerifyPushFactorRequest.class)
                 .setStateToken(stateToken);
 
-        verifyFactor(factorId, smsVerifyRequest);
+        verifyFactor(factorId, pushVerifyRequest, true);
     }
 
-    private void verifyCode(String factorId, String stateToken) {
-        String code = codeEditText.getText().toString();
-        if(TextUtils.isEmpty(code)) {
-            codeEditText.setError(getString(R.string.empty_field_error));
-        } else {
-            codeEditText.setError(null);
+    private void checkPushStatus(String factorId, String stateToken) {
+        VerifyFactorRequest pushVerifyRequest = authenticationClient.instantiate(VerifyPushFactorRequest.class)
+                .setStateToken(stateToken);
+
+        verifyFactor(factorId, pushVerifyRequest, false);
+    }
+
+    private void runPushStatusChecking(String factorId, String stateToken) {
+        schedule(() -> checkPushStatus(factorId, stateToken), CHECK_STATUS_DELAY, TimeUnit.SECONDS);
+    }
+
+    private void verifyFactor(String factorId, VerifyFactorRequest request, Boolean showLoading) {
+        if(showLoading) {
+           showLoading();
         }
-        VerifyFactorRequest smsVerifyRequest = authenticationClient.instantiate(VerifyPassCodeFactorRequest.class)
-                .setPassCode(code)
-                .setStateToken(stateToken);
-
-        verifyFactor(factorId, smsVerifyRequest);
-    }
-
-    private void verifyFactor(String factorId, VerifyFactorRequest request) {
-        KeyboardUtil.hideSoftKeyboard(getActivity());
-        hideLoading();
-         submit(() -> {
+        submit(() -> {
             try {
                 authenticationClient.verifyFactor(factorId, request, new AuthenticationStateHandlerAdapter() {
                     @Override
@@ -117,19 +109,34 @@ public class MfaSMSFragment extends BaseFragment {
                     @Override
                     public void handleMfaChallenge(AuthenticationResponse mfaChallengeResponse) {
                         runOnUIThread(() -> {
-                            hideLoading();
-                            showMessage(getString(R.string.mfa_sms_sent_code));
+                            if(mfaChallengeResponse.getFactorResult().equalsIgnoreCase(FactorResultType.WAITING.toString())) {
+                                if (sendPushBtn.isEnabled()) {
+                                    sendPushBtn.setEnabled(false);
+                                    hideLoading();
+                                    showMessage(String.format(getString(R.string.mfa_push_sent), deviceName));
+                                }
+                                runPushStatusChecking(factorId, mfaChallengeResponse.getStateToken());
+                            } else if(mfaChallengeResponse.getFactorResult().equalsIgnoreCase(FactorResultType.REJECTED.toString())) {
+                                sendPushBtn.setEnabled(true);
+                                hideLoading();
+                                showMessage(mfaChallengeResponse.toString());
+                                navigation.close();
+                            }
                         });
                     }
 
                     @Override
                     public void handleSuccess(AuthenticationResponse successResponse) {
+                        if(Thread.interrupted()) {
+                            return;
+                        }
                         runOnUIThread(() -> {
                             hideLoading();
                             sendSessionToken(successResponse.getSessionToken());
                         });
                     }
-                });
+                }
+                );
             } catch (Exception e) {
                 runOnUIThread(() -> {
                     hideLoading();
@@ -145,5 +152,4 @@ public class MfaSMSFragment extends BaseFragment {
             ((IMFAResult)getTargetFragment()).onSuccess(sessionToken);
         }
     }
-
 }

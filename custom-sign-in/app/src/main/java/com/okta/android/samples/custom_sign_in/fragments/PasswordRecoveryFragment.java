@@ -23,7 +23,6 @@ import java.util.concurrent.Executors;
 
 public class PasswordRecoveryFragment extends BaseFragment {
     private String TAG = "PasswordRecovery";
-    private ExecutorService executor = Executors.newSingleThreadExecutor();
     Button passwordResetBtn = null;
     EditText loginEditText = null;
 
@@ -51,8 +50,8 @@ public class PasswordRecoveryFragment extends BaseFragment {
         String username = loginEditText.getText().toString();
 
         KeyboardUtil.hideSoftKeyboard(getActivity());
-        loadingView.show();
-        executor.submit(() -> {
+        showLoading();
+        submit(() -> {
             try {
                 AuthenticationResponse response = authenticationClient.recoverPassword(username, FactorType.EMAIL, null, new AuthenticationStateHandler() {
                     @Override
@@ -79,8 +78,8 @@ public class PasswordRecoveryFragment extends BaseFragment {
                     public void handleRecoveryChallenge(AuthenticationResponse authenticationResponse) {
                         loginEditText.post(() -> {
                             String finishMessage = String.format(getString(R.string.letter_with_reset_link_success), username)+"\n"+authenticationResponse.toString();
-                            messageView.showMessage(finishMessage);
-                            loadingView.hide();
+                            showMessage(finishMessage);
+                            hideLoading();
                             navigation.close();
                         });
                     }
@@ -126,9 +125,9 @@ public class PasswordRecoveryFragment extends BaseFragment {
                     }
                 });
             } catch (Exception e) {
-                loginEditText.post(() -> {
-                    messageView.showMessage(e.getLocalizedMessage());
-                    loadingView.hide();
+                runOnUIThread(() -> {
+                    showMessage(e.getLocalizedMessage());
+                    hideLoading();
                 });
                 Log.e(TAG, Log.getStackTraceString(e));
             }
@@ -136,9 +135,16 @@ public class PasswordRecoveryFragment extends BaseFragment {
     }
 
     private void showUnhandledStateMessage(AuthenticationResponse authenticationResponse) {
-        loginEditText.post(() -> {
-            messageView.showMessage(authenticationResponse.toString());
-            loadingView.hide();
+        runOnUIThread(() -> {
+            showMessage(authenticationResponse.toString());
+            hideLoading();
         });
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+
+        Log.d("MfaOktaVerify", "Finalize");
+        super.finalize();
     }
 }
