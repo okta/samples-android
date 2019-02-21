@@ -20,6 +20,8 @@ import com.okta.android.samples.custom_sign_in.UserInfoActivity;
 import com.okta.android.samples.custom_sign_in.base.BaseFragment;
 import com.okta.android.samples.custom_sign_in.base.IOktaAppAuthClientProvider;
 import com.okta.android.samples.custom_sign_in.fragments.mfa_types.IMFAResult;
+import com.okta.android.samples.custom_sign_in.fragments.mfa_types.MfaCallFragment;
+import com.okta.android.samples.custom_sign_in.fragments.mfa_types.MfaGoogleVerifyCodeFragment;
 import com.okta.android.samples.custom_sign_in.fragments.mfa_types.MfaOktaVerifyCodeFragment;
 import com.okta.android.samples.custom_sign_in.fragments.mfa_types.MfaOktaVerifyPushFragment;
 import com.okta.android.samples.custom_sign_in.fragments.mfa_types.MfaSMSFragment;
@@ -161,30 +163,28 @@ public class NativeSignInWithMFAFragment extends BaseFragment implements IMFARes
         AlertDialog.Builder alertBuilder = new AlertDialog.Builder(getContext());
         alertBuilder.setTitle(getString(R.string.select_mfa));
 
-        final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(getContext(), android.R.layout.select_dialog_item);
+        final ArrayAdapter<FactorItemModel> arrayAdapter = new ArrayAdapter<FactorItemModel>(getContext(), android.R.layout.select_dialog_item);
         for(Factor factor : factors) {
-            arrayAdapter.add(factor.getType().toString().toUpperCase());
+            arrayAdapter.add(new FactorItemModel(factor));
         }
 
         alertBuilder.setNegativeButton(getString(R.string.cancel), (dialog, which) -> dialog.dismiss());
 
         alertBuilder.setAdapter(arrayAdapter, (dialog, which) -> {
-            String factorType = arrayAdapter.getItem(which);
+            FactorItemModel factorItemModel = arrayAdapter.getItem(which);
             Factor selectedFactor = null;
-            for(Factor factor:factors) {
-                if(factor.getType().toString().equalsIgnoreCase(factorType)) {
-                    selectedFactor = factor;
-                    break;
-                }
-            }
+            if(factorItemModel != null)
+                selectedFactor = factorItemModel.getFactor();
+
             dialog.dismiss();
-            showFactor(stateToken, selectedFactor);
+            if(selectedFactor != null)
+                showFactor(stateToken, selectedFactor);
         });
         alertBuilder.show();
     }
 
     private void showFactor(String stateToken, Factor factor) {
-        Fragment fragment = null;
+        Fragment fragment;
         switch (factor.getType()) {
             case SMS:
                 fragment = MfaSMSFragment.createFragment(stateToken, factor);
@@ -199,11 +199,38 @@ public class NativeSignInWithMFAFragment extends BaseFragment implements IMFARes
                 this.navigation.push(fragment);
                 break;
             case TOKEN_SOFTWARE_TOTP:
-                fragment = MfaOktaVerifyCodeFragment.createFragment(stateToken, factor);
+                if("GOOGLE".equalsIgnoreCase(factor.getVendorName())) {
+                    fragment = MfaGoogleVerifyCodeFragment.createFragment(stateToken, factor);
+                } else {
+                    fragment = MfaOktaVerifyCodeFragment.createFragment(stateToken, factor);
+                }
                 fragment.setTargetFragment(this, SESSION_TOKEN_RES_CODE);
 
                 this.navigation.push(fragment);
                 break;
+            case CALL:
+                fragment = MfaCallFragment.createFragment(stateToken, factor);
+                fragment.setTargetFragment(this, SESSION_TOKEN_RES_CODE);
+
+                this.navigation.push(fragment);
+                break;
+        }
+    }
+
+    private static class FactorItemModel {
+        private Factor factor;
+
+        public FactorItemModel(Factor factor) {
+            this.factor = factor;
+        }
+
+        public Factor getFactor() {
+            return factor;
+        }
+
+        @Override
+        public String toString() {
+            return factor.getType().toString().toUpperCase() + " [" + factor.getVendorName() + "]";
         }
     }
 }

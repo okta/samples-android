@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,6 +24,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import static com.okta.appauth.android.OktaAppAuth.getInstance;
 
 public class UserInfoActivity extends AppCompatActivity {
+    private final String TAG = "UserInfo";
     private OktaAppAuth mOktaAppAuth;
     private OktaProgressDialog oktaProgressDialog;
     private final AtomicReference<JSONObject> mUserInfoJson = new AtomicReference<>();
@@ -69,7 +71,7 @@ public class UserInfoActivity extends AppCompatActivity {
                 mUserInfoJson.set(new JSONObject(savedInstanceState.getString(KEY_USER_INFO)));
             } catch (JSONException ex) {
                 showMessage("JSONException: " + ex);
-                Log.e(TAG, Log.getStackTraceString(e));
+                Log.e(TAG, Log.getStackTraceString(ex));
             }
         }
     }
@@ -196,7 +198,7 @@ public class UserInfoActivity extends AppCompatActivity {
 
         ((TextView) findViewById(R.id.accesstoken_textview)).setText(mOktaAppAuth.getTokens().getAccessToken());
         ((TextView) findViewById(R.id.idtoken_textview)).setText(mOktaAppAuth.getTokens().getIdToken());
-        ((TextView) findViewById(R.id.refresh_token)).setText(mOktaAppAuth.getTokens().getRefreshToken());
+        ((TextView) findViewById(R.id.refreshtoken_textview)).setText(mOktaAppAuth.getTokens().getRefreshToken());
 
         if(user == null) {
             return;

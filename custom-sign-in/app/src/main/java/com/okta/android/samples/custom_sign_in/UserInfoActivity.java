@@ -186,7 +186,7 @@ public class UserInfoActivity extends AppCompatActivity {
 
         ((TextView) findViewById(R.id.accesstoken_textview)).setText(mOktaAppAuth.getTokens().getAccessToken());
         ((TextView) findViewById(R.id.idtoken_textview)).setText(mOktaAppAuth.getTokens().getIdToken());
-        ((TextView) findViewById(R.id.refresh_token)).setText(mOktaAppAuth.getTokens().getRefreshToken());
+        ((TextView) findViewById(R.id.refreshtoken_textview)).setText(mOktaAppAuth.getTokens().getRefreshToken());
 
         if(user == null) {
             return;

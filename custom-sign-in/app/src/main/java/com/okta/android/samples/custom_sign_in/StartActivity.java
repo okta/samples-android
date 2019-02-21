@@ -18,7 +18,7 @@ public class StartActivity extends AppCompatActivity {
         setContentView(R.layout.activity_start);
 
         ((Button)findViewById(R.id.native_sing_in)).setOnClickListener(v ->
-                startActivity(NativeSignInActivity.createNativeSingIn(this)));
+                startActivity(NativeSignInActivity.createNativeSignIn(this)));
 
         ((Button)findViewById(R.id.native_sing_in_mfa)).setOnClickListener(v ->
                 startActivity(NativeSignInActivity.createNativeSingInWithMFA(this)));

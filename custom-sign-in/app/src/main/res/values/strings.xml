@@ -46,7 +46,15 @@
     <string name="mfa_sms_title">SMS Authentication</string>
     <string name="mfa_sms_sent_code">You should receive code via SMS</string>
     <string name="mfa_push_title">Okta Verify</string>
+    <string name="mfa_google_authenticator_title">Google Authenticator</string>
     <string name="mfa_push_device">Device %s</string>
+    <string name="mfa_google_authenticator_account">Credential ID %s</string>
     <string name="mfa_push_btn">Send Push</string>
+    <string name="mfa_push_sent_btn">Push sent!</string>
     <string name="mfa_push_sent">You should receive push on %s</string>
+    <string name="mfa_call_sent">You should receive call on %s</string>
+    <string name="mfa_call_btn">Call</string>
+    <string name="mfa_call_title">Voice Call Authentication</string>
+    <string name="mfa_push_reject_title">You have chosen to reject this login.</string>
+    <string name="mfa_require">This action requires MFA. To test this action you can disable MFA in admin panel or implemented MFA verify.</string>
 </resources>

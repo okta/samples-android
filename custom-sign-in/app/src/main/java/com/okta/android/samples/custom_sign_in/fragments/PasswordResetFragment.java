@@ -134,16 +134,23 @@ public class PasswordResetFragment extends BaseFragment {
                 AuthenticationResponse response = authenticationClient.resetPassword(password.toCharArray(), stateToken, new AuthenticationStateHandlerAdapter() {
                     @Override
                     public void handleUnknown(AuthenticationResponse authenticationResponse) {
-                        passwordPolicyTextView.post(() -> {
+                        runOnUIThread(() -> {
                             hideLoading();
                             showMessage(authenticationResponse.toString());
                         });
                     }
 
                     @Override
+                    public void handleMfaRequired(AuthenticationResponse mfaRequiredResponse) {
+                        runOnUIThread(() -> {
+                            hideLoading();
+                            showMessage(getString(R.string.mfa_require));
+                        });
+                    }
+
+                    @Override
                     public void handleSuccess(AuthenticationResponse successResponse) {
-                        super.handleSuccess(successResponse);
-                        passwordPolicyTextView.post(() -> {
+                        runOnUIThread(() -> {
                             showMessage(getString(R.string.password_reset_successfully));
                             hideLoading();
                             navigation.close();
@@ -153,7 +160,7 @@ public class PasswordResetFragment extends BaseFragment {
                 });
             } catch (Exception e) {
                 Log.e(TAG, Log.getStackTraceString(e));
-                passwordPolicyTextView.post(() -> {
+                runOnUIThread(() -> {
                     hideLoading();
                     showMessage(e.getMessage());
                 });

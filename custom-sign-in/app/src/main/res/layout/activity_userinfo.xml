@@ -204,9 +204,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="16dp"
         android:text="@string/get_user_btn"
-        app:layout_constraintStart_toEndOf="@+id/refresh_token"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/userinfo_container" />
 
     <Button
@@ -218,8 +218,8 @@
         android:layout_marginTop="8dp"
         android:background="@android:color/holo_red_dark"
         android:text="@string/clear_data"
-        app:layout_constraintStart_toEndOf="@+id/userinfo_btn"
-        app:layout_constraintTop_toBottomOf="@+id/userinfo_container" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/userinfo_btn" />
 
     <Button
         android:id="@+id/refresh_token"
@@ -227,11 +227,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="16dp"
         android:text="@string/refresh_token_btn"
         android:textSize="11sp"
         android:visibility="gone"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/userinfo_btn"
         app:layout_constraintTop_toBottomOf="@+id/userinfo_container" />
 
 </android.support.constraint.ConstraintLayout>

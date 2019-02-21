@@ -15,33 +15,33 @@ import android.widget.TextView;
 import com.okta.android.samples.custom_sign_in.R;
 import com.okta.android.samples.custom_sign_in.base.BaseFragment;
 import com.okta.android.samples.custom_sign_in.util.KeyboardUtil;
+import com.okta.authn.sdk.AuthenticationException;
 import com.okta.authn.sdk.AuthenticationStateHandlerAdapter;
 import com.okta.authn.sdk.resource.AuthenticationResponse;
 import com.okta.authn.sdk.resource.Factor;
 import com.okta.authn.sdk.resource.VerifyFactorRequest;
 import com.okta.authn.sdk.resource.VerifyPassCodeFactorRequest;
+import com.okta.authn.sdk.resource.VerifyPushFactorRequest;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-
-public class MfaSMSFragment extends BaseFragment {
+public class MfaCallFragment extends BaseFragment {
 
     public static final String FACTOR_ID_KEY = "FACTOR_ID_KEY";
     public static final String STATE_TOKEN_KEY = "STATE_TOKEN_KEY";
-    public static final String PHONE_NUMBER_KEY = "PHONE_NUMBER_KEY";
+    public static final String PHONE_NAME_KEY = "PHONE_NAME_KEY";
     private TextView phoneNumberTextView;
-    private EditText codeEditText;
-    private Button sendBtn;
+    private Button callBtn;
     private Button verifyBtn;
+    private EditText codeEditText;
+
+    private String phoneNumber;
 
     public static Fragment createFragment(String stateToken, Factor factor) {
-        MfaSMSFragment fragment = new MfaSMSFragment();
+        MfaCallFragment fragment = new MfaCallFragment();
 
         Bundle arguments = new Bundle();
         arguments.putString(FACTOR_ID_KEY, factor.getId());
         arguments.putString(STATE_TOKEN_KEY, stateToken);
-        arguments.putString(PHONE_NUMBER_KEY, (String) factor.getProfile().get("phoneNumber"));
+        arguments.putString(PHONE_NAME_KEY, (String) factor.getProfile().get("phoneNumber"));
 
         fragment.setArguments(arguments);
         return fragment;
@@ -50,7 +50,7 @@ public class MfaSMSFragment extends BaseFragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.mfa_sms_code_layout, container, false);
+        return inflater.inflate(R.layout.mfa_call_code_layout, container, false);
     }
 
     @Override
@@ -58,32 +58,32 @@ public class MfaSMSFragment extends BaseFragment {
         super.onViewCreated(view, savedInstanceState);
         this.phoneNumberTextView = view.findViewById(R.id.phonenumber_textview);
         this.codeEditText = view.findViewById(R.id.code_edittext);
-        this.sendBtn = view.findViewById(R.id.resend_btn);
+        this.callBtn = view.findViewById(R.id.call_btn);
         this.verifyBtn = view.findViewById(R.id.verify_btn);
 
         String factorId = getArguments().getString(FACTOR_ID_KEY);
         String stateToken = getArguments().getString(STATE_TOKEN_KEY);
-        String phoneNumber = getArguments().getString(PHONE_NUMBER_KEY);
+        this.phoneNumber = getArguments().getString(PHONE_NAME_KEY);
 
         initView(factorId, stateToken, phoneNumber);
     }
 
     public void initView(String factorId, String stateToken, String phoneNumber) {
-        phoneNumberTextView.setText(phoneNumber);
+        this.phoneNumberTextView.setText(phoneNumber);
 
-        sendBtn.setOnClickListener((v) -> {
-            sendCode(factorId, stateToken);
+        callBtn.setOnClickListener((v) -> {
+            sendCall(factorId, stateToken);
         });
         verifyBtn.setOnClickListener((v) -> {
             verifyCode(factorId, stateToken);
         });
     }
 
-    private void sendCode(String factorId, String stateToken) {
-        VerifyFactorRequest smsVerifyRequest = authenticationClient.instantiate(VerifyPassCodeFactorRequest.class)
+    private void sendCall(String factorId, String stateToken) {
+        VerifyFactorRequest pushVerifyRequest = authenticationClient.instantiate(VerifyPassCodeFactorRequest.class)
                 .setStateToken(stateToken);
 
-        verifyFactor(factorId, smsVerifyRequest);
+        verifyFactor(factorId, pushVerifyRequest);
     }
 
     private void verifyCode(String factorId, String stateToken) {
@@ -118,7 +118,7 @@ public class MfaSMSFragment extends BaseFragment {
                     public void handleMfaChallenge(AuthenticationResponse mfaChallengeResponse) {
                         runOnUIThread(() -> {
                             hideLoading();
-                            showMessage(getString(R.string.mfa_sms_sent_code));
+                            showMessage(String.format(getString(R.string.mfa_call_sent), phoneNumberTextView));
                         });
                     }
 
@@ -130,12 +130,11 @@ public class MfaSMSFragment extends BaseFragment {
                         });
                     }
                 });
-            } catch (Exception e) {
+            } catch (AuthenticationException e) {
                 runOnUIThread(() -> {
                     hideLoading();
                     showMessage(e.getMessage());
                 });
-                e.printStackTrace();
             }
         });
     }
@@ -145,5 +144,4 @@ public class MfaSMSFragment extends BaseFragment {
             ((IMFAResult)getTargetFragment()).onSuccess(sessionToken);
         }
     }
-
 }

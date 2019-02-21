@@ -3,63 +3,107 @@ package com.okta.android.samples.custom_sign_in;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.text.TextUtils;
 
 import com.okta.android.samples.custom_sign_in.base.ContainerActivity;
 import com.okta.android.samples.custom_sign_in.fragments.PasswordRecoveryFragment;
 import com.okta.android.samples.custom_sign_in.fragments.RecoveryQuestionFragment;
+import com.okta.authn.sdk.AuthenticationStateHandlerAdapter;
+import com.okta.authn.sdk.resource.AuthenticationResponse;
+
+import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 public class PasswordRecoveryActivity extends ContainerActivity {
-    private static String MODE_KEY = "MODE_KEY";
-    private static String STATE_TOKEN_KEY = "STATE_TOKEN_KEY";
-    private static String QUESTION_KEY = "QUESTION_KEY";
-
-    enum MODE {
-        PASSWORD_RECOVERY,
-        PASSWORD_RECOVERY_QUESTION,
-        UNKNOWN
-    }
+    private static String RESET_PASSWORD_PATH = "/signin/reset-password/";
+    private ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
 
     public static Intent createPasswordRecovery(Context context) {
-        Intent intent = new Intent(context, PasswordRecoveryActivity.class);
-        intent.putExtra(MODE_KEY, MODE.PASSWORD_RECOVERY.ordinal());
-        return intent;
-    }
-
-    public static Intent createPasswordRecoveryQuestion(Context context, String question, String stateToken) {
-        Intent intent = new Intent(context, PasswordRecoveryActivity.class);
-        intent.putExtra(MODE_KEY, MODE.PASSWORD_RECOVERY_QUESTION.ordinal());
-        intent.putExtra(QUESTION_KEY, question);
-        intent.putExtra(STATE_TOKEN_KEY, stateToken);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        return intent;
-    }
-
-    private Fragment getFragmentByModeId(int id, Intent intent){
-        if(id == MODE.PASSWORD_RECOVERY.ordinal()) {
-            return new PasswordRecoveryFragment();
-        } else if(id == MODE.PASSWORD_RECOVERY_QUESTION.ordinal()) {
-            String question = intent.getStringExtra(QUESTION_KEY);
-            String token = intent.getStringExtra(STATE_TOKEN_KEY);
-            if(TextUtils.isEmpty(question) || TextUtils.isEmpty(token)) {
-                return null;
-            }
-
-            return RecoveryQuestionFragment.createFragment(token, question);
-        } else {
-            return null;
-        }
+        return new Intent(context, PasswordRecoveryActivity.class);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Fragment fragment = getFragmentByModeId(getIntent().getIntExtra(MODE_KEY, -1), getIntent());
-        if(fragment != null) {
-            this.navigation.present(fragment);
+        String path = getDeepLinkPath(getIntent());
+        if(path != null) {
+            if (path.startsWith(RESET_PASSWORD_PATH)) {
+                handleResetPassword(path);
+            }
+        } else {
+            this.navigation.present(new PasswordRecoveryFragment());
         }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        String path = getDeepLinkPath(getIntent());
+        if(path != null) {
+            if (path.startsWith(RESET_PASSWORD_PATH)) {
+                handleResetPassword(path);
+            }
+        }
+
+    }
+
+    private String getDeepLinkPath(Intent intent) {
+        if (intent.getData() != null) {
+            String path = intent.getData().getPath();
+            if (path != null) {
+                return path;
+            }
+        }
+        return null;
+    }
+
+    private void handleResetPassword(String path) {
+        String[] elements = path.split("/");
+        if(elements.length == 0) {
+            finish();
+        }
+
+        String token = elements[elements.length-1];
+
+        show();
+        executor.submit(() -> {
+            try {
+                AuthenticationResponse response = provideAuthenticationClient().verifyRecoveryToken(token, new AuthenticationStateHandlerAdapter() {
+                    @Override
+                    public void handleUnknown(AuthenticationResponse authenticationResponse) {
+                        runOnUiThread(() -> {
+                            showMessage(authenticationResponse.toString());
+                            finish();
+                        });
+                    }
+
+                    @Override
+                    public void handleRecovery(AuthenticationResponse recovery) {
+                        String stateToken = recovery.getStateToken();
+                        if(stateToken == null)
+                            throw new IllegalArgumentException("Missed stateToken");
+
+                        Map<String, String> recovery_question = recovery.getUser().getRecoveryQuestion();
+                        String question = recovery_question.get("question");
+                        if(question == null)
+                            throw new IllegalArgumentException("Missed question");
+
+
+                        runOnUiThread(() -> {
+                            hide();
+                            navigation.present(RecoveryQuestionFragment.createFragment(stateToken, question));
+                        });
+                    }
+                });
+            } catch (Exception e) {
+                runOnUiThread(() -> {
+                    hide();
+                    showMessage(e.getLocalizedMessage());
+                    finish();
+                });
+            }
+        });
     }
 }

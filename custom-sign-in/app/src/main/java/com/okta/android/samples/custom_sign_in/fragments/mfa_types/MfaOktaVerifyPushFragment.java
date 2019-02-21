@@ -28,6 +28,7 @@ public class MfaOktaVerifyPushFragment extends BaseFragment {
     public static final String STATE_TOKEN_KEY = "STATE_TOKEN_KEY";
     public static final String DEVICE_NAME_KEY = "DEVICE_NAME_KEY";
     private TextView deviceTextView;
+    private TextView rejectStatusTextview;
     private Button sendPushBtn;
 
     private String deviceName;
@@ -56,6 +57,7 @@ public class MfaOktaVerifyPushFragment extends BaseFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         this.deviceTextView = view.findViewById(R.id.device_textview);
+        this.rejectStatusTextview = view.findViewById(R.id.reject_status_textview);
         this.sendPushBtn = view.findViewById(R.id.send_push_btn);
 
         String factorId = getArguments().getString(FACTOR_ID_KEY);
@@ -71,6 +73,8 @@ public class MfaOktaVerifyPushFragment extends BaseFragment {
         sendPushBtn.setOnClickListener((v) -> {
             sendPush(factorId, stateToken);
         });
+
+        setPushNotSentState();
     }
 
     private void sendPush(String factorId, String stateToken) {
@@ -89,6 +93,23 @@ public class MfaOktaVerifyPushFragment extends BaseFragment {
 
     private void runPushStatusChecking(String factorId, String stateToken) {
         schedule(() -> checkPushStatus(factorId, stateToken), CHECK_STATUS_DELAY, TimeUnit.SECONDS);
+    }
+
+    private void setPushSentState() {
+        sendPushBtn.setEnabled(false);
+        sendPushBtn.setText(getString(R.string.mfa_push_sent_btn));
+    }
+
+    private void setPushNotSentState() {
+        rejectStatusTextview.setVisibility(View.GONE);
+        sendPushBtn.setEnabled(true);
+        sendPushBtn.setText(getString(R.string.mfa_push_btn));
+    }
+
+    private void setRejectState() {
+        setPushNotSentState();
+        rejectStatusTextview.setVisibility(View.VISIBLE);
+        this.rejectStatusTextview.setText(getString(R.string.mfa_push_reject_title));
     }
 
     private void verifyFactor(String factorId, VerifyFactorRequest request, Boolean showLoading) {
@@ -111,25 +132,20 @@ public class MfaOktaVerifyPushFragment extends BaseFragment {
                         runOnUIThread(() -> {
                             if(mfaChallengeResponse.getFactorResult().equalsIgnoreCase(FactorResultType.WAITING.toString())) {
                                 if (sendPushBtn.isEnabled()) {
-                                    sendPushBtn.setEnabled(false);
+                                    setPushSentState();
                                     hideLoading();
                                     showMessage(String.format(getString(R.string.mfa_push_sent), deviceName));
                                 }
                                 runPushStatusChecking(factorId, mfaChallengeResponse.getStateToken());
                             } else if(mfaChallengeResponse.getFactorResult().equalsIgnoreCase(FactorResultType.REJECTED.toString())) {
-                                sendPushBtn.setEnabled(true);
+                                setRejectState();
                                 hideLoading();
-                                showMessage(mfaChallengeResponse.toString());
-                                navigation.close();
                             }
                         });
                     }
 
                     @Override
                     public void handleSuccess(AuthenticationResponse successResponse) {
-                        if(Thread.interrupted()) {
-                            return;
-                        }
                         runOnUIThread(() -> {
                             hideLoading();
                             sendSessionToken(successResponse.getSessionToken());

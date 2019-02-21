@@ -29,7 +29,7 @@ public class NativeSignInActivity extends ContainerActivity implements IOktaAppA
     }
 
 
-    public static Intent createNativeSingIn(Context context) {
+    public static Intent createNativeSignIn(Context context) {
         Intent intent = new Intent(context, NativeSignInActivity.class);
         intent.putExtra(MODE_KEY, NativeSignInActivity.MODE.NATIVE_SIGN_IN.ordinal());
         return intent;
