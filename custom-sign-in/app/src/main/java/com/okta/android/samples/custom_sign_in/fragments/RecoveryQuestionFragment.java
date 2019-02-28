@@ -12,9 +12,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.okta.android.samples.custom_sign_in.StartActivity;
 import com.okta.android.samples.custom_sign_in.base.BaseFragment;
 import com.okta.android.samples.custom_sign_in.R;
 import com.okta.android.samples.custom_sign_in.util.KeyboardUtil;
+import com.okta.authn.sdk.AuthenticationException;
 import com.okta.authn.sdk.AuthenticationStateHandlerAdapter;
 import com.okta.authn.sdk.resource.AuthenticationResponse;
 
@@ -85,7 +87,7 @@ public class RecoveryQuestionFragment extends BaseFragment {
                     public void handleUnknown(AuthenticationResponse authenticationResponse) {
                         runOnUIThread(() -> {
                             hideLoading();
-                            showMessage(authenticationResponse.toString());
+                            showMessage(String.format(getString(R.string.not_handle_message), authenticationResponse.getStatus().name()));
                             navigation.close();
                         });
                     }
@@ -101,15 +103,25 @@ public class RecoveryQuestionFragment extends BaseFragment {
                             navigation.present(PasswordResetFragment.createFragment(stateToken, passwordReset));
                         });
                     }
+
+                    @Override
+                    public void handleSuccess(AuthenticationResponse successResponse) {
+                        runOnUIThread(() ->  {
+                            hideLoading();
+                            showMessage(successResponse.getRecoveryType() + " " + successResponse.getStatusString());
+                            navigation.close();
+                            startActivity(StartActivity.createIntent(getContext()));
+                        });
+                    }
                 });
 
 
-            } catch (Exception e) {
-               runOnUIThread(() -> {
+            } catch (AuthenticationException e) {
+                Log.e(TAG, Log.getStackTraceString(e));
+                runOnUIThread(() -> {
                     showMessage(e.getLocalizedMessage());
                     hideLoading();
                 });
-                Log.e(TAG, Log.getStackTraceString(e));
             }
         });
     }

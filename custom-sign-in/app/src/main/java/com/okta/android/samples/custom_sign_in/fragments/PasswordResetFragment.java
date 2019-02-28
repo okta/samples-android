@@ -16,6 +16,7 @@ import com.okta.android.samples.custom_sign_in.base.BaseFragment;
 import com.okta.android.samples.custom_sign_in.R;
 import com.okta.android.samples.custom_sign_in.StartActivity;
 import com.okta.android.samples.custom_sign_in.util.KeyboardUtil;
+import com.okta.authn.sdk.AuthenticationException;
 import com.okta.authn.sdk.AuthenticationStateHandlerAdapter;
 import com.okta.authn.sdk.resource.AuthenticationResponse;
 
@@ -158,7 +159,7 @@ public class PasswordResetFragment extends BaseFragment {
                         });
                     }
                 });
-            } catch (Exception e) {
+            } catch (AuthenticationException e) {
                 Log.e(TAG, Log.getStackTraceString(e));
                 runOnUIThread(() -> {
                     hideLoading();

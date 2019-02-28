@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,13 +29,12 @@ import com.okta.android.samples.custom_sign_in.fragments.mfa_types.MfaSMSFragmen
 import com.okta.android.samples.custom_sign_in.util.KeyboardUtil;
 import com.okta.appauth.android.AuthenticationError;
 import com.okta.appauth.android.OktaAppAuth;
+import com.okta.authn.sdk.AuthenticationException;
 import com.okta.authn.sdk.AuthenticationStateHandlerAdapter;
 import com.okta.authn.sdk.resource.AuthenticationResponse;
 import com.okta.authn.sdk.resource.Factor;
 
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class NativeSignInWithMFAFragment extends BaseFragment implements IMFAResult {
     private String TAG = "NativeSignInWithMFA";
@@ -75,8 +75,8 @@ public class NativeSignInWithMFAFragment extends BaseFragment implements IMFARes
     }
 
     private void signIn() {
-        String login = "imartsekha@lohika.com";//loginEditText.getText().toString();
-        String password = "Mayonez1989_";//passwordEditText.getText().toString();
+        String login = loginEditText.getText().toString();
+        String password = passwordEditText.getText().toString();
 
         if (TextUtils.isEmpty(login)) {
             loginEditText.setError(getString(R.string.empty_field_error));
@@ -96,7 +96,7 @@ public class NativeSignInWithMFAFragment extends BaseFragment implements IMFARes
                     public void handleUnknown(AuthenticationResponse authenticationResponse) {
                         runOnUIThread(() -> {
                             hideLoading();
-                            showMessage(authenticationResponse.toString());
+                            showMessage(String.format(getString(R.string.not_handle_message), authenticationResponse.getStatus().name()));
                         });
                     }
 
@@ -109,17 +109,25 @@ public class NativeSignInWithMFAFragment extends BaseFragment implements IMFARes
                     }
 
                     @Override
+                    public void handleLockedOut(AuthenticationResponse lockedOut) {
+                        runOnUIThread(() -> {
+                            hideLoading();
+                            showLockedAccountMessage(getContext());
+                        });
+                    }
+
+                    @Override
                     public void handleSuccess(AuthenticationResponse successResponse) {
                         String sessionToken = successResponse.getSessionToken();
                         authenticateViaOktaAndroidSDK(sessionToken);
                     }
                 });
-            } catch (Exception e) {
+            } catch (AuthenticationException e) {
+                Log.e(TAG, Log.getStackTraceString(e));
                 runOnUIThread(() -> {
                     hideLoading();
                     showMessage(e.getMessage());
                 });
-                e.printStackTrace();
             }
         });
     }
@@ -215,6 +223,20 @@ public class NativeSignInWithMFAFragment extends BaseFragment implements IMFARes
                 this.navigation.push(fragment);
                 break;
         }
+    }
+
+    private void showLockedAccountMessage(Context context) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle(R.string.account_lock_out);
+        builder.setMessage(R.string.unlock_account_message);
+        builder.setNegativeButton(R.string.cancel, (dialog, which) -> {
+            dialog.cancel();
+        });
+        builder.setPositiveButton(R.string.yes, (dialog, which) -> {
+            dialog.cancel();
+            navigation.present(UnlockAccountFragment.createFragment());
+        });
+        builder.create().show();
     }
 
     private static class FactorItemModel {

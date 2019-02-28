@@ -37,10 +37,10 @@ public class BrowserSignInActivity extends AppCompatActivity {
 
     private void init() {
         oktaProgressDialog.show();
-        mOktaAuth = OktaAppAuth.getInstance(getApplicationContext());
+        mOktaAuth = OktaAppAuth.getInstance(this);
 
         mOktaAuth.init(
-                getApplicationContext(),
+                this,
                 new OktaAppAuth.OktaAuthListener() {
                     @Override
                     public void onSuccess() {
@@ -78,7 +78,7 @@ public class BrowserSignInActivity extends AppCompatActivity {
         cancelIntent.putExtra(EXTRA_FAILED, true);
 
         mOktaAuth.login(
-                getApplicationContext(),
+                this,
                 PendingIntent.getActivity(this, 0, completionIntent, 0),
                 PendingIntent.getActivity(this, 0, cancelIntent, 0)
         );
@@ -105,5 +105,14 @@ public class BrowserSignInActivity extends AppCompatActivity {
     private void showUserInfo(){
         startActivity(new Intent(BrowserSignInActivity.this, UserInfoActivity.class));
         finish();
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (mOktaAuth != null) {
+            mOktaAuth.dispose();
+            mOktaAuth = null;
+        }
+        super.onDestroy();
     }
 }

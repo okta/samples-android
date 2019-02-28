@@ -17,7 +17,6 @@ public class NavigationHelper implements INavigation {
 
     @Override
     public void close() {
-
         this.activity.finish();
     }
 

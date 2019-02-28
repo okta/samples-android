@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,7 @@ import android.widget.TextView;
 
 import com.okta.android.samples.custom_sign_in.R;
 import com.okta.android.samples.custom_sign_in.base.BaseFragment;
+import com.okta.authn.sdk.AuthenticationException;
 import com.okta.authn.sdk.AuthenticationStateHandlerAdapter;
 import com.okta.authn.sdk.resource.AuthenticationResponse;
 import com.okta.authn.sdk.resource.Factor;
@@ -21,7 +23,7 @@ import com.okta.authn.sdk.resource.VerifyFactorRequest;
 import com.okta.authn.sdk.resource.VerifyPassCodeFactorRequest;
 
 public class MfaGoogleVerifyCodeFragment extends BaseFragment {
-
+    private String TAG = "MfaGoogleVerifyCode";
     public static final String FACTOR_ID_KEY = "FACTOR_ID_KEY";
     public static final String STATE_TOKEN_KEY = "STATE_TOKEN_KEY";
     public static final String ACCOUNT_NAME_KEY = "ACCOUNT_NAME_KEY";
@@ -94,7 +96,7 @@ public class MfaGoogleVerifyCodeFragment extends BaseFragment {
                     public void handleUnknown(AuthenticationResponse authenticationResponse) {
                         runOnUIThread(() -> {
                             hideLoading();
-                            showMessage(authenticationResponse.toString());
+                            showMessage(String.format(getString(R.string.not_handle_message), authenticationResponse.getStatus().name()));
                         });
                     }
 
@@ -114,12 +116,12 @@ public class MfaGoogleVerifyCodeFragment extends BaseFragment {
                         });
                     }
                 });
-            } catch (Exception e) {
+            } catch (AuthenticationException e) {
+                Log.e(TAG, Log.getStackTraceString(e));
                 runOnUIThread(() -> {
                     hideLoading();
                     showMessage(e.getMessage());
                 });
-                e.printStackTrace();
             }
         });
     }

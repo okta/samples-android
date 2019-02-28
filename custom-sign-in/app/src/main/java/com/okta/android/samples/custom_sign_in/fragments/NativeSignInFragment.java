@@ -1,5 +1,6 @@
 package com.okta.android.samples.custom_sign_in.fragments;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.MainThread;
@@ -19,11 +20,9 @@ import com.okta.android.samples.custom_sign_in.base.IOktaAppAuthClientProvider;
 import com.okta.android.samples.custom_sign_in.util.KeyboardUtil;
 import com.okta.appauth.android.AuthenticationError;
 import com.okta.appauth.android.OktaAppAuth;
+import com.okta.authn.sdk.AuthenticationException;
 import com.okta.authn.sdk.AuthenticationStateHandlerAdapter;
 import com.okta.authn.sdk.resource.AuthenticationResponse;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class NativeSignInFragment extends BaseFragment {
     private String TAG = "NativeSignIn";
@@ -85,7 +84,15 @@ public class NativeSignInFragment extends BaseFragment {
                     public void handleUnknown(AuthenticationResponse authenticationResponse) {
                         runOnUIThread(() -> {
                             hideLoading();
-                            showMessage(authenticationResponse.toString());
+                            showMessage(String.format(getString(R.string.not_handle_message), authenticationResponse.getStatus().name()));
+                        });
+                    }
+
+                    @Override
+                    public void handleLockedOut(AuthenticationResponse lockedOut) {
+                        runOnUIThread(() -> {
+                            hideLoading();
+                            showLockedAccountMessage(getContext());
                         });
                     }
 
@@ -95,12 +102,12 @@ public class NativeSignInFragment extends BaseFragment {
                         authenticateViaOktaAndroidSDK(sessionToken);
                     }
                 });
-            } catch (Exception e) {
+            } catch (AuthenticationException e) {
+                Log.e(TAG, Log.getStackTraceString(e));
                 runOnUIThread(() -> {
                     hideLoading();
                     showMessage(e.getMessage());
                 });
-                Log.e(TAG, Log.getStackTraceString(e));
             }
         });
     }
@@ -125,4 +132,19 @@ public class NativeSignInFragment extends BaseFragment {
             }
         });
     }
+
+    private void showLockedAccountMessage(Context context) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle(R.string.account_lock_out);
+        builder.setMessage(R.string.unlock_account_message);
+        builder.setNegativeButton(R.string.cancel, (dialog, which) -> {
+            dialog.cancel();
+        });
+        builder.setPositiveButton(R.string.yes, (dialog, which) -> {
+            dialog.cancel();
+            navigation.present(UnlockAccountFragment.createFragment());
+        });
+        builder.create().show();
+    }
+
 }

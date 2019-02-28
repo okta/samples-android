@@ -40,7 +40,7 @@ dependencies {
     runtimeOnly 'com.okta.authn.sdk:okta-authn-sdk-impl:0.3.0'
     runtimeOnly 'com.okta.sdk:okta-sdk-okhttp:1.4.1'
 
-    implementation 'com.okta.android:appauth-android:0.2.1'
+    implementation 'com.okta.android:appauth-android:0.2.2'
 
 
     testImplementation 'junit:junit:4.12'

@@ -37,7 +37,7 @@ public class UserInfoActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_userinfo);
         this.oktaProgressDialog = new OktaProgressDialog(this);
-        this.mOktaAppAuth = getInstance(getApplicationContext());
+        this.mOktaAppAuth = getInstance(this);
 
         if (!mOktaAppAuth.isUserLoggedIn()) {
             showMessage(getString(R.string.not_authorized));
@@ -161,7 +161,7 @@ public class UserInfoActivity extends AppCompatActivity {
         cancelIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         completionIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
-        mOktaAppAuth.signOutFromOkta(getApplicationContext(),
+        mOktaAppAuth.signOutFromOkta(this,
                 PendingIntent.getActivity(this, 0, completionIntent, 0),
                 PendingIntent.getActivity(this, 0, cancelIntent, 0)
         );
@@ -233,5 +233,14 @@ public class UserInfoActivity extends AppCompatActivity {
     @MainThread
     private void showMessage(String message) {
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (mOktaAppAuth != null) {
+            mOktaAppAuth.dispose();
+            mOktaAppAuth = null;
+        }
+        super.onDestroy();
     }
 }

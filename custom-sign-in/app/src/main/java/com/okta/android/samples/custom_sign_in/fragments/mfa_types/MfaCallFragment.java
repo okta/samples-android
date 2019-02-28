@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,7 +25,7 @@ import com.okta.authn.sdk.resource.VerifyPassCodeFactorRequest;
 import com.okta.authn.sdk.resource.VerifyPushFactorRequest;
 
 public class MfaCallFragment extends BaseFragment {
-
+    private String TAG = "MfaCall";
     public static final String FACTOR_ID_KEY = "FACTOR_ID_KEY";
     public static final String STATE_TOKEN_KEY = "STATE_TOKEN_KEY";
     public static final String PHONE_NAME_KEY = "PHONE_NAME_KEY";
@@ -110,7 +111,7 @@ public class MfaCallFragment extends BaseFragment {
                     public void handleUnknown(AuthenticationResponse authenticationResponse) {
                         runOnUIThread(() -> {
                             hideLoading();
-                            showMessage(authenticationResponse.toString());
+                            showMessage(String.format(getString(R.string.not_handle_message), authenticationResponse.getStatus().name()));
                         });
                     }
 
@@ -131,6 +132,7 @@ public class MfaCallFragment extends BaseFragment {
                     }
                 });
             } catch (AuthenticationException e) {
+                Log.e(TAG, Log.getStackTraceString(e));
                 runOnUIThread(() -> {
                     hideLoading();
                     showMessage(e.getMessage());

@@ -14,12 +14,15 @@
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity android:name=".base.ContainerActivity"/>
-        <activity android:name=".PasswordRecoveryActivity">
+        <activity android:name=".RecoveryActivity"/>
+        <activity android:name=".NativeSignInActivity"
+            android:label="@string/native_sign_in_btn"/>
+        <activity android:name=".UserInfoActivity" />
+        <activity android:name=".DeepLinksHandlerActivity">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -27,9 +30,6 @@
                 <data android:host="${hostName}" android:scheme="https" android:pathPrefix="/" />
             </intent-filter>
         </activity>
-        <activity android:name=".NativeSignInActivity"
-            android:label="@string/native_sign_in_btn"/>
-        <activity android:name=".UserInfoActivity" />
     </application>
 
 </manifest>

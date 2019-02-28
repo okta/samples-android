@@ -14,6 +14,7 @@ import android.widget.EditText;
 import com.okta.android.samples.custom_sign_in.base.BaseFragment;
 import com.okta.android.samples.custom_sign_in.R;
 import com.okta.android.samples.custom_sign_in.util.KeyboardUtil;
+import com.okta.authn.sdk.AuthenticationException;
 import com.okta.authn.sdk.AuthenticationStateHandler;
 import com.okta.authn.sdk.resource.AuthenticationResponse;
 import com.okta.sdk.resource.user.factor.FactorType;
@@ -76,7 +77,7 @@ public class PasswordRecoveryFragment extends BaseFragment {
 
                     @Override
                     public void handleRecoveryChallenge(AuthenticationResponse authenticationResponse) {
-                        loginEditText.post(() -> {
+                        runOnUIThread(() -> {
                             String finishMessage = String.format(getString(R.string.letter_with_reset_link_success), username)+"\n"+authenticationResponse.toString();
                             showMessage(finishMessage);
                             hideLoading();
@@ -124,27 +125,20 @@ public class PasswordRecoveryFragment extends BaseFragment {
                         showUnhandledStateMessage(authenticationResponse);
                     }
                 });
-            } catch (Exception e) {
+            } catch (AuthenticationException e) {
+                Log.e(TAG, Log.getStackTraceString(e));
                 runOnUIThread(() -> {
                     showMessage(e.getLocalizedMessage());
                     hideLoading();
                 });
-                Log.e(TAG, Log.getStackTraceString(e));
             }
         });
     }
 
     private void showUnhandledStateMessage(AuthenticationResponse authenticationResponse) {
         runOnUIThread(() -> {
-            showMessage(authenticationResponse.toString());
+            showMessage(String.format(getString(R.string.not_handle_message), authenticationResponse.getStatus().name()));
             hideLoading();
         });
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-
-        Log.d("MfaOktaVerify", "Finalize");
-        super.finalize();
     }
 }

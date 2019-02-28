@@ -13,6 +13,7 @@
     <string name="password_not_equal">Passwords don\'t equal</string>
     <string name="answer_title">Answer</string>
     <string name="letter_with_reset_link_success">Letter with reset password link sent on your email: %s</string>
+    <string name="letter_with_unlock_account_success">Letter with unlock account link sent</string>
     <string name="password_reset_successfully">You\'ve reset password successfully</string>
     <string name="progress_dialog_message">Please wait! This may take a moment.</string>
     <string name="yes">Yes</string>
@@ -43,6 +44,7 @@
     <string name="send_code">Send code</string>
     <string name="verify">Verify</string>
     <string name="remember_device_title">Remember Device</string>
+    <string name="not_handle_message">Something unexpected happened. Status: %s</string>
     <string name="mfa_sms_title">SMS Authentication</string>
     <string name="mfa_sms_sent_code">You should receive code via SMS</string>
     <string name="mfa_push_title">Okta Verify</string>
@@ -56,5 +58,11 @@
     <string name="mfa_call_btn">Call</string>
     <string name="mfa_call_title">Voice Call Authentication</string>
     <string name="mfa_push_reject_title">You have chosen to reject this login.</string>
+    <string name="account_lock_out">Your account has been locked</string>
+    <string name="unlock_account_message">Are you want to unlock account?</string>
+    <string name="unlock_account_title">Unlock account</string>
+    <string name="send_email">Send email</string>
+    <string name="send_sms">Send SMS</string>
+    <string name="email_or_username">Email or Username</string>
     <string name="mfa_require">This action requires MFA. To test this action you can disable MFA in admin panel or implemented MFA verify.</string>
 </resources>
