@@ -13,12 +13,14 @@ Before running this sample, you will need the following:
     1. After login, from the Admin dashboard, navigate to **Applications**&rarr;**Add Application**
     2. Choose **Native** as the platform
     3. Populate your new Native OpenID Connect application with values similar to:
+        
         | Setting              | Value                                               |
         | -------------------- | --------------------------------------------------- |
         | Application Name     | Native OpenId Connect App *(must be unique)*        |
         | Login URI            | com.okta.example:/callback                          |
         | End Session URI      | com.okta.example:/logoutCallback                    |
         | Allowed grant types  | Authorization Code, Refresh Token *(recommended)*   |
+
     4. Click **Finish** to redirect back to the *General Settings* of your application.
     5. Copy the **Client ID**, as it will be needed for the client configuration.
     6. Get your issuer, which is a combination of your Org URL (found in the upper right of the console home page) and /oauth2/default. For example, https://dev-1234.oktapreview.com/oauth2/default.
