@@ -14,28 +14,32 @@
  */
 package com.okta.android.samples.browser_sign_in;
 
-import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.MainThread;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.okta.android.samples.browser_sign_in.util.OktaProgressDialog;
-import com.okta.appauth.android.OktaAppAuth;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 
-import net.openid.appauth.AuthorizationException;
+import com.okta.android.samples.browser_sign_in.util.OktaProgressDialog;
+import com.okta.oidc.AuthorizationStatus;
+import com.okta.oidc.ResultCallback;
+import com.okta.oidc.clients.sessions.SessionClient;
+import com.okta.oidc.clients.web.WebAuthClient;
+import com.okta.oidc.util.AuthorizationException;
+
 
 public class BrowserSignInActivity extends AppCompatActivity {
     private String TAG = "BrowserSignIn";
     private static final String EXTRA_FAILED = "failed";
     private OktaProgressDialog oktaProgressDialog;
 
-    private OktaAppAuth mOktaAuth;
+    private WebAuthClient mWebAuth;
+    private SessionClient mSessionClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,89 +48,83 @@ public class BrowserSignInActivity extends AppCompatActivity {
 
         oktaProgressDialog = new OktaProgressDialog(this);
 
-        ((Button) findViewById(R.id.browser_sing_in)).setOnClickListener(v -> signIn());
+        ((Button) findViewById(R.id.browser_sign_in)).setOnClickListener(v -> signIn());
 
         init();
     }
 
-    private void init() {
-        oktaProgressDialog.show();
-        mOktaAuth = OktaAppAuth.getInstance(this);
-
-        mOktaAuth.init(
-                this,
-                new OktaAppAuth.OktaAuthListener() {
-                    @Override
-                    public void onSuccess() {
-                        runOnUiThread(() -> {
-                            oktaProgressDialog.hide();
-                            if (mOktaAuth.isUserLoggedIn()) {
-
-                                Log.i(TAG, "User is already authenticated, proceeding " +
-                                        "to token activity");
-                                showUserInfo();
-                            } else {
-                                Log.i(TAG, "Login activity setup finished");
-                                displayAuth();
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onTokenFailure(@NonNull AuthorizationException ex) {
-                        runOnUiThread(() -> {
-                            oktaProgressDialog.hide();
-                            showMessage(getString(R.string.init_error)
-                                    + ":"
-                                    + ex.errorDescription);
-                        });
-                    }
-                },
-                getResources().getColor(R.color.colorPrimary));
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (mWebAuth.isInProgress()) {
+            oktaProgressDialog.show();
+        }
     }
+
+    private void init() {
+
+        mWebAuth = ServiceLocator.provideWebAuthClient(this);
+        mSessionClient = mWebAuth.getSessionClient();
+
+        if (mSessionClient.isAuthenticated()) {
+            showUserInfo();
+        }
+
+        setupCallback();
+    }
+
+    void setupCallback() {
+        ResultCallback<AuthorizationStatus, AuthorizationException> callback =
+                new ResultCallback<AuthorizationStatus, AuthorizationException>() {
+                    @Override
+                    public void onSuccess(@NonNull AuthorizationStatus status) {
+                        Log.d("SampleActivity", "AUTHORIZED");
+
+                        if (status == AuthorizationStatus.AUTHORIZED) {
+                            oktaProgressDialog.hide();
+
+                            Log.i(TAG, "User is already authenticated, proceeding " +
+                                    "to token activity");
+                            showUserInfo();
+                        } else if (status == AuthorizationStatus.SIGNED_OUT) {
+                            displayAuth();
+                        }
+                    }
+
+                    @Override
+                    public void onCancel() {
+                        Log.d(TAG, "CANCELED!");
+                        oktaProgressDialog.hide();
+                        showMessage(getString(R.string.auth_canceled));
+                    }
+
+                    @Override
+                    public void onError(@Nullable String msg, AuthorizationException error) {
+                        oktaProgressDialog.hide();
+                        showMessage(getString(R.string.init_error)
+                                + ":"
+                                + error.errorDescription);
+                    }
+                };
+
+        mWebAuth.registerCallback(callback, this);
+    }
+
 
     private void signIn() {
-        Intent completionIntent = new Intent(this, UserInfoActivity.class);
-        Intent cancelIntent = new Intent(this, BrowserSignInActivity.class);
-        cancelIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        cancelIntent.putExtra(EXTRA_FAILED, true);
-
-        mOktaAuth.login(
-                this,
-                PendingIntent.getActivity(this, 0, completionIntent, 0),
-                PendingIntent.getActivity(this, 0, cancelIntent, 0)
-        );
-    }
-
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        if (getIntent().getBooleanExtra(EXTRA_FAILED, false)) {
-            showMessage(getString(R.string.auth_canceled));
-        }
+        mWebAuth.signIn(this, null);
     }
 
     private void displayAuth() {
         findViewById(R.id.auth_container).setVisibility(View.VISIBLE);
     }
 
-    @MainThread
     private void showMessage(String message) {
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 
-    @MainThread
-    private void showUserInfo(){
+    private void showUserInfo() {
         startActivity(new Intent(BrowserSignInActivity.this, UserInfoActivity.class));
         finish();
-    }
-
-    @Override
-    protected void onDestroy() {
-        if (mOktaAuth != null) {
-            mOktaAuth.dispose();
-            mOktaAuth = null;
-        }
-        super.onDestroy();
     }
 }

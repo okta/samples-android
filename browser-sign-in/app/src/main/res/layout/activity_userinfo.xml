@@ -41,13 +41,24 @@
         app:layout_constraintTop_toBottomOf="@+id/constraintLayout2" />
 
     <Button
+        android:id="@+id/revoke_tokens_btn"
+        style="@style/OktaButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/revoke_tokens"
+        app:layout_constraintStart_toEndOf="@+id/clear_data_btn"
+        app:layout_constraintTop_toBottomOf="@+id/constraintLayout2" />
+
+    <Button
         android:id="@+id/logout_btn"
         style="@style/OktaButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:text="@string/sign_out_btn"
-        app:layout_constraintStart_toEndOf="@+id/clear_data_btn"
+        app:layout_constraintStart_toEndOf="@+id/revoke_tokens_btn"
         app:layout_constraintTop_toTopOf="@+id/clear_data_btn" />
 
     <FrameLayout

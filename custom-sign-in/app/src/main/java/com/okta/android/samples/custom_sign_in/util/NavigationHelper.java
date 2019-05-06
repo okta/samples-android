@@ -15,8 +15,9 @@
 package com.okta.android.samples.custom_sign_in.util;
 
 import android.app.Activity;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
+
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 public class NavigationHelper implements INavigation {
     private Activity activity;

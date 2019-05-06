@@ -27,6 +27,7 @@
     <string name="access_token_btn">Access token</string>
     <string name="id_token_btn">IdToken</string>
     <string name="clear_data">Clear data</string>
+    <string name="revoke_tokens">Revoke tokens</string>
     <string name="sign_out_btn">Sign out</string>
     <string name="token_refreshed_successfully">Token refreshed successfully</string>
     <string name="error_message">Error</string>
@@ -36,6 +37,8 @@
     <string name="ending_current_session">Ending current session</string>
     <string name="progress_dialog_message">Please wait! This may take a moment.</string>
     <string name="unable_to_clean_data">Unable to clean data</string>
+    <string name="unable_to_revoke_tokens">Unable to revoke tokens</string>
+    <string name="tokens_revoke_success">Tokens revoke successfully</string>
     <string name="welcome_title">Welcome, %s</string>
     <string name="timezone_title">Timezone</string>
     <string name="last_update_title">Last Updated</string>

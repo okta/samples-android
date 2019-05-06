@@ -12,10 +12,21 @@
  * See the License for the specific language governing permissions and limitations under the
  * License.
  */
-package com.okta.android.samples.custom_sign_in.base;
 
-import com.okta.oidc.clients.AuthClient;
+package com.okta.android.samples.custom_sign_in.rx_client;
 
-public interface IOktaAppAuthClientProvider {
-    AuthClient provideOktaAppAuthClient();
+import com.okta.oidc.AuthenticationPayload;
+import com.okta.oidc.clients.BaseAuth;
+import com.okta.oidc.results.Result;
+
+import io.reactivex.Single;
+
+/**
+ * The Authentication client for logging in using a sessionToken.
+ *
+ * For login using web browser
+ * {@link RxWebAuthClient}
+ */
+public interface RxAuthClient extends BaseAuth<RxSessionClient> {
+    Single<Result> logIn(String sessionToken, AuthenticationPayload payload);
 }

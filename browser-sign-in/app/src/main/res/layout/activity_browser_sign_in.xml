@@ -32,7 +32,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <Button
-            android:id="@+id/browser_sing_in"
+            android:id="@+id/browser_sign_in"
             style="@style/OktaButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

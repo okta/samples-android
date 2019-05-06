@@ -7,5 +7,5 @@
     "profile",
     "offline_access"
   ],
-  "issuer_uri": ""
+  "discovery_uri": ""
 }
