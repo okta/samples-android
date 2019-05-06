@@ -17,24 +17,25 @@ package com.okta.android.samples.custom_sign_in;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.MainThread;
-import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
-import android.util.Log;
+
+import androidx.annotation.MainThread;
+import androidx.fragment.app.Fragment;
 
 import com.okta.android.samples.custom_sign_in.base.ContainerActivity;
 import com.okta.android.samples.custom_sign_in.base.IOktaAppAuthClientProvider;
 import com.okta.android.samples.custom_sign_in.fragments.NativeSignInFragment;
 import com.okta.android.samples.custom_sign_in.fragments.NativeSignInWithMFAFragment;
-import com.okta.appauth.android.OktaAppAuth;
-
-import net.openid.appauth.AuthorizationException;
+import com.okta.oidc.clients.AuthClient;
+import com.okta.oidc.clients.sessions.SessionClient;
 
 public class NativeSignInActivity extends ContainerActivity implements IOktaAppAuthClientProvider {
     private String TAG = "NativeSignInActivity";
 
     private static String MODE_KEY = "MODE_KEY";
-    private OktaAppAuth mOktaAuth;
+
+    private AuthClient mAuth;
+    private SessionClient mSessionClient;
+
 
     enum MODE {
         NATIVE_SIGN_IN,
@@ -73,40 +74,14 @@ public class NativeSignInActivity extends ContainerActivity implements IOktaAppA
     }
 
     private void init() {
-        show();
+        mAuth = ServiceLocator.provideWebAuthClient(this);
+        mSessionClient = mAuth.getSessionClient();
 
-        mOktaAuth = OktaAppAuth.getInstance(getApplicationContext());
-
-        mOktaAuth.init(
-                getApplicationContext(),
-                new OktaAppAuth.OktaAuthListener() {
-                    @Override
-                    public void onSuccess() {
-                        runOnUiThread(() -> {
-                            hide();
-                            if (mOktaAuth.isUserLoggedIn()) {
-
-                                Log.i(TAG, "User is already authenticated, proceeding " +
-                                        "to token activity");
-                                showUserInfo();
-                            } else {
-                                Log.i(TAG, "Login activity setup finished");
-                                showLoginForm();
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onTokenFailure(@NonNull AuthorizationException ex) {
-                        runOnUiThread(() -> {
-                            hide();
-                            showMessage(getString(R.string.init_error)
-                                    + ":"
-                                    + ex.errorDescription);
-                        });
-                    }
-                },
-                getResources().getColor(R.color.colorPrimary));
+        if (mSessionClient.isAuthenticated()) {
+            showUserInfo();
+        } else {
+            showLoginForm();
+        }
     }
 
     @MainThread
@@ -123,7 +98,7 @@ public class NativeSignInActivity extends ContainerActivity implements IOktaAppA
     }
 
     @Override
-    public OktaAppAuth provideOktaAppAuthClient() {
-        return mOktaAuth;
+    public AuthClient provideOktaAppAuthClient() {
+        return mAuth;
     }
 }

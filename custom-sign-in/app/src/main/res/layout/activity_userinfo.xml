@@ -40,6 +40,17 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/constraintLayout2" />
 
+    <Button
+        android:id="@+id/revoke_tokens_btn"
+        style="@style/OktaButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/revoke_tokens"
+        app:layout_constraintStart_toEndOf="@+id/clear_data_btn"
+        app:layout_constraintTop_toBottomOf="@+id/constraintLayout2" />
+
     <FrameLayout
         android:id="@+id/frameLayout"
         android:layout_width="0dp"

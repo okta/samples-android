@@ -14,7 +14,7 @@
  */
 package com.okta.android.samples.custom_sign_in.util;
 
-import android.support.v4.app.Fragment;
+import androidx.fragment.app.Fragment;
 
 public interface INavigation {
     void close();

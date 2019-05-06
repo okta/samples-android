@@ -14,37 +14,50 @@
  */
 package com.okta.android.samples.browser_sign_in;
 
-import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.MainThread;
-import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
-import android.support.v7.app.AppCompatActivity;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.okta.android.samples.browser_sign_in.util.OktaProgressDialog;
-import com.okta.appauth.android.OktaAppAuth;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 
-import net.openid.appauth.AuthorizationException;
+import com.okta.android.samples.browser_sign_in.util.FingerprintDialog;
+import com.okta.android.samples.browser_sign_in.util.OktaProgressDialog;
+import com.okta.android.samples.browser_sign_in.util.PreferenceRepository;
+import com.okta.android.samples.browser_sign_in.util.SmartLockHelper;
+import com.okta.oidc.RequestCallback;
+import com.okta.oidc.Tokens;
+import com.okta.oidc.clients.sessions.SessionClient;
+import com.okta.oidc.clients.web.WebAuthClient;
+import com.okta.oidc.net.response.UserInfo;
+import com.okta.oidc.storage.security.EncryptionManager;
+import com.okta.oidc.storage.security.FingerprintUtils;
+import com.okta.oidc.storage.security.SmartLockBaseEncryptionManager;
+import com.okta.oidc.util.AuthorizationException;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Calendar;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static com.okta.appauth.android.OktaAppAuth.getInstance;
+import static com.okta.oidc.util.AuthorizationException.*;
 
 public class UserInfoActivity extends AppCompatActivity {
     private final String TAG = "UserInfo";
-    private OktaAppAuth mOktaAppAuth;
+    private static final String ASK_FINGERPRINT = "ASK_FINGERPRINT";
+    private WebAuthClient mWebAuth;
+    private SessionClient mSessionClient;
+
     private OktaProgressDialog oktaProgressDialog;
-    private final AtomicReference<JSONObject> mUserInfoJson = new AtomicReference<>();
+    private SmartLockHelper mSmartLockHelper;
+    private final AtomicReference<UserInfo> mUserInfoJson = new AtomicReference<>();
 
     private ConstraintLayout userinfoContainer;
     private ConstraintLayout tokensContainer;
@@ -52,17 +65,30 @@ public class UserInfoActivity extends AppCompatActivity {
     private static final String EXTRA_FAILED = "failed";
     private static final String KEY_USER_INFO = "userInfo";
 
+    private EncryptionManager mEncryptionManager;
+    private PreferenceRepository mPreferenceRepository;
+
+    private boolean isRequireEnableFingerprint = false;
+
+    public static Intent createIntent(Context context, boolean isRequireEnableFingerprint) {
+        Intent intent = new Intent(context, UserInfoActivity.class);
+        intent.putExtra(ASK_FINGERPRINT, isRequireEnableFingerprint);
+        return intent;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_userinfo);
 
-        this.oktaProgressDialog = new OktaProgressDialog(this);
-        this.mOktaAppAuth = getInstance(this);
+        this.oktaProgressDialog = ServiceLocator.provideOktaProgressDialog(this);
+        this.mSmartLockHelper = ServiceLocator.provideSmartLockHelper();
+        mWebAuth = ServiceLocator.provideWebAuthClient(this);
+        mSessionClient = mWebAuth.getSessionClient();
 
+        mPreferenceRepository = ServiceLocator.providePreferenceRepository(this);
 
-
-        if (!mOktaAppAuth.isUserLoggedIn()) {
+        if (!mSessionClient.isAuthenticated()) {
             showMessage(getString(R.string.not_authorized));
             clearData();
             finish();
@@ -85,51 +111,38 @@ public class UserInfoActivity extends AppCompatActivity {
                 clearData()
         );
 
+        findViewById(R.id.revoke_tokens_btn).setOnClickListener(v ->
+                revokeTokens()
+        );
+
         findViewById(R.id.logout_btn).setOnClickListener(v ->
                 logOut()
         );
 
-        if(mOktaAppAuth.hasRefreshToken()) {
-            findViewById(R.id.refresh_token).setVisibility(View.VISIBLE);
-            findViewById(R.id.refreshtoken_title).setVisibility(View.VISIBLE);
-            findViewById(R.id.refreshtoken_textview).setVisibility(View.VISIBLE);
-            findViewById(R.id.refresh_token).setOnClickListener(v ->
-                    refreshToken()
-            );
-        } else {
-            findViewById(R.id.refreshtoken_textview).setVisibility(View.GONE);
-            findViewById(R.id.refreshtoken_title).setVisibility(View.GONE);
-            findViewById(R.id.refresh_token).setVisibility(View.GONE);
-        }
+        findViewById(R.id.refresh_token).setVisibility(View.VISIBLE);
+        findViewById(R.id.refreshtoken_title).setVisibility(View.VISIBLE);
+        findViewById(R.id.refreshtoken_textview).setVisibility(View.VISIBLE);
+        findViewById(R.id.refresh_token).setOnClickListener(v ->
+                refreshToken()
+        );
 
-        if (savedInstanceState != null) {
+        isRequireEnableFingerprint = getIntent().getBooleanExtra(ASK_FINGERPRINT, false);
+
+        if (savedInstanceState != null && savedInstanceState.getString(KEY_USER_INFO) != null) {
             try {
-                mUserInfoJson.set(new JSONObject(savedInstanceState.getString(KEY_USER_INFO)));
+                mUserInfoJson.set(new UserInfo(new JSONObject(savedInstanceState.getString(KEY_USER_INFO))));
             } catch (JSONException ex) {
                 showMessage("JSONException: " + ex);
                 Log.e(TAG, Log.getStackTraceString(ex));
             }
         }
-    }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if(mUserInfoJson.get() == null) {
-            fetchUserInfo();
-        }
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-        if (mOktaAppAuth.isUserLoggedIn()) {
-            displayAuthorizationInfo();
+        mEncryptionManager = ServiceLocator.provideEncryptionManager(this);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && isRequireEnableFingerprint &&
+                !mPreferenceRepository.isEnabledSmartLock()) {
+            showDialogWithAllowToProtectDataByFingerprint();
         } else {
-            showMessage("No authorization state retained - reauthorization required");
-            navigateToStartActivity();
-            finish();
+            continuePresentationData();
         }
     }
 
@@ -137,62 +150,146 @@ public class UserInfoActivity extends AppCompatActivity {
     protected void onSaveInstanceState(Bundle state) {
         super.onSaveInstanceState(state);
         if (mUserInfoJson.get() != null) {
-            state.putString(KEY_USER_INFO, mUserInfoJson.toString());
+            state.putString(KEY_USER_INFO, mUserInfoJson.get().toString());
         }
+    }
+
+    private void continuePresentationData() {
+        if (mSessionClient.isAuthenticated()) {
+            if (mEncryptionManager.isAuthenticateUser()) {
+                displayAuthorizationInfo();
+                if (mUserInfoJson.get() == null) {
+                    fetchUserInfo();
+                }
+            } else {
+                mSmartLockHelper.showSmartLockChooseDialog(this, new FingerprintDialog.FingerPrintCallback(this, mEncryptionManager) {
+                    @Override
+                    protected void onSuccess() {
+                        continuePresentationData();
+                    }
+                });
+            }
+        } else {
+            showMessage("No authorization state retained - re-authorization required");
+            navigateToStartActivity();
+            finish();
+        }
+
+    }
+
+    private void showDialogWithAllowToProtectDataByFingerprint() {
+        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
+        alertBuilder.setCancelable(false);
+        alertBuilder.setTitle(R.string.protect_by_smartlock);
+        alertBuilder.setMessage(R.string.ask_to_protect_by_smartlock);
+        alertBuilder.setPositiveButton(R.string.yes, (dialog, which) -> {
+            dialog.dismiss();
+            try {
+                FingerprintUtils.SensorState sensorState = FingerprintUtils.checkSensorState(this);
+                switch (sensorState) {
+                    case READY:
+                        mSmartLockHelper.showSmartLockChooseDialog(this, new FingerprintDialog.FingerPrintCallback(this, mEncryptionManager) {
+                            @Override
+                            protected void onSuccess() {
+                                try {
+                                    SmartLockBaseEncryptionManager smartLockBaseEncryptionManager = ServiceLocator.createSmartLockEncryptionManager(UserInfoActivity.this);
+                                    smartLockBaseEncryptionManager.recreateCipher();
+                                    mWebAuth.migrateTo(smartLockBaseEncryptionManager);
+                                    mPreferenceRepository.enableSmartLock(true);
+                                    mEncryptionManager = smartLockBaseEncryptionManager;
+                                } catch (AuthorizationException exception) {
+                                    mSessionClient.clear();
+                                    finish();
+                                }
+                                continuePresentationData();
+                            }
+                        });
+                        break;
+                    case NOT_BLOCKED:
+                        showMessage(getString(R.string.setup_lockscreen_info_msg));
+                        break;
+                    case NOT_SUPPORTED:
+                        showMessage(getString(R.string.hardware_not_support_fingerprint));
+                        break;
+                    case NO_FINGERPRINTS:
+                        showMessage(getString(R.string.fingerprint_not_enrolled));
+                        break;
+                }
+            } catch (Exception e) {
+                showMessage(e.getMessage());
+            }
+        });
+        alertBuilder.setNegativeButton(R.string.no, (dialog, which) -> {
+            continuePresentationData();
+            dialog.dismiss();
+        });
+        alertBuilder.show();
     }
 
     private void fetchUserInfo() {
         oktaProgressDialog.show(getString(R.string.user_info_loading));
-        mOktaAppAuth.getUserInfo(new OktaAppAuth.OktaAuthActionCallback<JSONObject>() {
+
+        mSessionClient.getUserProfile(new RequestCallback<UserInfo, AuthorizationException>() {
             @Override
-            public void onSuccess(JSONObject jsonObject) {
-                runOnUiThread(() -> {
-                    oktaProgressDialog.hide();
-                    mUserInfoJson.set(jsonObject);
-                    displayAuthorizationInfo();
-                });
+            public void onSuccess(UserInfo userInfo) {
+                oktaProgressDialog.hide();
+                mUserInfoJson.set(userInfo);
+                displayAuthorizationInfo();
             }
 
             @Override
-            public void onTokenFailure(@NonNull AuthorizationException e) {
-                runOnUiThread(() -> {
-                    oktaProgressDialog.hide();
-                    mUserInfoJson.set(null);
-                    displayAuthorizationInfo();
-                    showMessage("TokenFailure: "+e.errorDescription);
-                });
-            }
-
-            @Override
-            public void onFailure(int i, Exception e) {
-                runOnUiThread(() -> {
-                    oktaProgressDialog.hide();
-                    mUserInfoJson.set(null);
-                    displayAuthorizationInfo();
-                    showMessage("Failure: "+e.getMessage());
-                });
+            public void onError(String s, AuthorizationException e) {
+                oktaProgressDialog.hide();
+                mUserInfoJson.set(null);
+                showMessage("Failure fetch user profile: " + e.error + ":" + e.errorDescription);
+                switch (e.code) {
+                    case EncryptionErrors.DECRYPT_ERROR:
+                    case EncryptionErrors.ENCRYPT_ERROR:
+                        mSmartLockHelper.showSmartLockChooseDialog(UserInfoActivity.this, new FingerprintDialog.FingerPrintCallback(UserInfoActivity.this, mEncryptionManager) {
+                            @Override
+                            protected void onSuccess() {
+                                fetchUserInfo();
+                            }
+                        });
+                        break;
+                    case EncryptionErrors.INVALID_KEYS_ERROR:
+                        showMessage(getString(R.string.invalid_keys)+": "+e.error);
+                        clearData();
+                        break;
+                }
             }
         });
     }
 
     private void refreshToken() {
         oktaProgressDialog.show(getString(R.string.access_token_loading));
-        mOktaAppAuth.refreshAccessToken(new OktaAppAuth.OktaAuthListener() {
+        mSessionClient.refreshToken(new RequestCallback<Tokens, AuthorizationException>() {
             @Override
-            public void onSuccess() {
-                runOnUiThread(() -> {
-                    oktaProgressDialog.hide();
-                    showMessage(getString(R.string.token_refreshed_successfully));
-                    displayAuthorizationInfo();
-                });
+            public void onSuccess(Tokens tokens) {
+                oktaProgressDialog.hide();
+                showMessage(getString(R.string.token_refreshed_successfully));
+                displayAuthorizationInfo();
             }
 
             @Override
-            public void onTokenFailure(@NonNull AuthorizationException e) {
-                runOnUiThread(() -> {
-                    oktaProgressDialog.hide();
-                    showMessage(getString(R.string.error_message)+" "+e.errorDescription);
-                });
+            public void onError(String s, AuthorizationException e) {
+                oktaProgressDialog.hide();
+                showMessage(getString(R.string.error_message) + " : " + e.errorDescription + " : " + e.error);
+                switch (e.code) {
+                    case EncryptionErrors.DECRYPT_ERROR:
+                    case EncryptionErrors.ENCRYPT_ERROR:
+                        mSmartLockHelper.showSmartLockChooseDialog(UserInfoActivity.this, new FingerprintDialog.FingerPrintCallback(UserInfoActivity.this, mEncryptionManager) {
+                            @Override
+                            protected void onSuccess() {
+                                refreshToken();
+                            }
+                        });
+                        break;
+                    case EncryptionErrors.INVALID_KEYS_ERROR:
+                        showMessage(getString(R.string.invalid_keys)+": "+e.error);
+                        clearData();
+                        break;
+                }
             }
         });
     }
@@ -207,79 +304,116 @@ public class UserInfoActivity extends AppCompatActivity {
         tokensContainer.setVisibility(View.VISIBLE);
     }
 
-    @MainThread
     private void logOut() {
-        Intent completionIntent = new Intent(this, BrowserSignInActivity.class);
-        Intent cancelIntent = new Intent(this, UserInfoActivity.class);
-        cancelIntent.putExtra(EXTRA_FAILED, true);
-        cancelIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        completionIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-
-        mOktaAppAuth.signOutFromOkta(this,
-                PendingIntent.getActivity(this, 0, completionIntent, 0),
-                PendingIntent.getActivity(this, 0, cancelIntent, 0)
-        );
+        mWebAuth.signOutOfOkta(this);
     }
 
-    @MainThread
-    private void clearData() {
+    private void revokeTokens() {
+        Tokens tokens;
+        try {
+            tokens = mSessionClient.getTokens();
+        } catch (RuntimeException exception) {
+            oktaProgressDialog.hide();
+            mSmartLockHelper.showSmartLockChooseDialog(this, new FingerprintDialog.FingerPrintCallback(this, mEncryptionManager) {
+                @Override
+                protected void onSuccess() {
+                    revokeTokens();
+                }
+            });
+            return;
+        }
+
         oktaProgressDialog.show();
-        mOktaAppAuth.revoke(new OktaAppAuth.OktaRevokeListener() {
+        final int requestCount = (tokens.getRefreshToken() != null) ? 3 : 2;
+
+        RequestCallback<Boolean, AuthorizationException> requestCallback = new RequestCallback<Boolean, AuthorizationException>() {
+            volatile int localRequestCount = requestCount;
+
             @Override
-            public void onSuccess() {
-                runOnUiThread(() -> {
-                    oktaProgressDialog.hide();
-                    mOktaAppAuth.clearSession();
-                    navigateToStartActivity();
-                    finish();
-                });
+            public synchronized void onSuccess(Boolean aBoolean) {
+                localRequestCount--;
+                if (localRequestCount == 0) {
+                    onComplete();
+                }
             }
 
             @Override
-            public void onError(AuthorizationException ex) {
-                runOnUiThread(() -> {
-                    oktaProgressDialog.hide();
-                    showMessage(getString(R.string.unable_to_clean_data));
-                });
+            public synchronized void onError(String s, AuthorizationException e) {
+                localRequestCount = -1;
 
+                oktaProgressDialog.hide();
+                showMessage(getString(R.string.unable_to_revoke_tokens));
             }
-        });
+
+            private void onComplete() {
+                oktaProgressDialog.hide();
+                showMessage(getString(R.string.tokens_revoke_success));
+            }
+        };
+
+        mSessionClient.revokeToken(tokens.getAccessToken(), requestCallback);
+        mSessionClient.revokeToken(tokens.getIdToken(), requestCallback);
+
+        if (tokens.getRefreshToken() != null)
+            mSessionClient.revokeToken(tokens.getRefreshToken(), requestCallback);
     }
 
-    @MainThread
+    private void clearData() {
+        mSessionClient.clear();
+        navigateToStartActivity();
+    }
+
     private void displayAuthorizationInfo() {
-        JSONObject user = mUserInfoJson.get();
+        UserInfo user = mUserInfoJson.get();
+        Tokens tokens;
+        try {
+            tokens = mSessionClient.getTokens();
+        } catch (RuntimeException exception) {
+            mSmartLockHelper.showSmartLockChooseDialog(this, new FingerprintDialog.FingerPrintCallback(this, mEncryptionManager) {
+                @Override
+                protected void onSuccess() {
+                    displayAuthorizationInfo();
+                }
+            });
+            return;
+        }
 
-        ((TextView) findViewById(R.id.accesstoken_textview)).setText(mOktaAppAuth.getTokens().getAccessToken());
-        ((TextView) findViewById(R.id.idtoken_textview)).setText(mOktaAppAuth.getTokens().getIdToken());
-        ((TextView) findViewById(R.id.refreshtoken_textview)).setText(mOktaAppAuth.getTokens().getRefreshToken());
+        ((TextView) findViewById(R.id.accesstoken_textview)).setText(tokens.getAccessToken());
+        ((TextView) findViewById(R.id.idtoken_textview)).setText(tokens.getIdToken());
+        ((TextView) findViewById(R.id.refreshtoken_textview)).setText(tokens.getRefreshToken());
 
-        if(user == null) {
+        if (tokens.getRefreshToken() == null) {
+            findViewById(R.id.refreshtoken_textview).setVisibility(View.GONE);
+            findViewById(R.id.refreshtoken_title).setVisibility(View.GONE);
+            findViewById(R.id.refresh_token).setVisibility(View.GONE);
+        }
+
+        if (user == null) {
             return;
         }
         try {
-            if(user.has("name")) {
-                ((TextView) findViewById(R.id.name_textview)).setText(user.getString("name"));
+            if (user.get("name") != null) {
+                ((TextView) findViewById(R.id.name_textview)).setText((String) user.get("name"));
             }
-            if(user.has("given_name")) {
-                ((TextView) findViewById(R.id.welcome_title)).setText(String.format(getString(R.string.welcome_title), user.getString("given_name")));
-            }
-
-            if(user.has("preferred_username")) {
-                ((TextView) findViewById(R.id.username_textview)).setText(user.getString("preferred_username"));
-                ((TextView) findViewById(R.id.email_title)).setText(user.getString("preferred_username"));
+            if (user.get("given_name") != null) {
+                ((TextView) findViewById(R.id.welcome_title)).setText(String.format(getString(R.string.welcome_title), (String) user.get("given_name")));
             }
 
-            if(user.has("locale")) {
-                ((TextView) findViewById(R.id.locale_textview)).setText(user.getString("locale"));
+            if (user.get("preferred_username") != null) {
+                ((TextView) findViewById(R.id.username_textview)).setText((String) user.get("preferred_username"));
+                ((TextView) findViewById(R.id.email_title)).setText((String) user.get("preferred_username"));
             }
 
-            if(user.has("zoneinfo")) {
-                ((TextView) findViewById(R.id.zoneinfo_textview)).setText(user.getString("zoneinfo"));
-                ((TextView) findViewById(R.id.timezone_value)).setText(user.getString("zoneinfo"));
+            if (user.get("locale") != null) {
+                ((TextView) findViewById(R.id.locale_textview)).setText((String) user.get("locale"));
             }
-            if(user.has("updated_at")) {
-                long time = Long.parseLong(user.getString("updated_at"));
+
+            if (user.get("zoneinfo") != null) {
+                ((TextView) findViewById(R.id.zoneinfo_textview)).setText((String) user.get("zoneinfo"));
+                ((TextView) findViewById(R.id.timezone_value)).setText((String) user.get("zoneinfo"));
+            }
+            if (user.get("updated_at") != null) {
+                long time = Long.parseLong(user.getRaw().getString("updated_at"));
                 ((TextView) findViewById(R.id.last_update_value)).setText(getLastUpdateString(time));
             }
         } catch (Exception e) {
@@ -290,23 +424,21 @@ public class UserInfoActivity extends AppCompatActivity {
 
     private void navigateToStartActivity() {
         startActivity(new Intent(UserInfoActivity.this, BrowserSignInActivity.class));
+        finish();
     }
 
     private String getLastUpdateString(long lastUpdate) {
-        return DateUtils.getRelativeTimeSpanString(lastUpdate*1000, System.currentTimeMillis(), DateUtils.WEEK_IN_MILLIS, DateUtils.FORMAT_ABBREV_ALL).toString();
+        return DateUtils.getRelativeTimeSpanString(lastUpdate * 1000, System.currentTimeMillis(), DateUtils.WEEK_IN_MILLIS, DateUtils.FORMAT_ABBREV_ALL).toString();
     }
 
-    @MainThread
     private void showMessage(String message) {
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 
     @Override
-    protected void onDestroy() {
-        if (mOktaAppAuth != null) {
-            mOktaAppAuth.dispose();
-            mOktaAppAuth = null;
-        }
-        super.onDestroy();
+    protected void onActivityResult(int requestCode,
+                                    int resultCode, Intent data) {
+        mSmartLockHelper.onActivityResult(requestCode, resultCode, data);
+        super.onActivityResult(requestCode, resultCode, data);
     }
 }

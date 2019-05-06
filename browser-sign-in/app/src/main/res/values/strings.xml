@@ -15,6 +15,7 @@
     <string name="browser_sample">Browser Sample</string>
     <string name="have_account">Have an account?</string>
     <string name="sign_in_btn">Sign In</string>
+    <string name="fingerprint_sign_in_btn">Fingerprint Sign In</string>
     <string name="username_hint">Enter username (Optional)</string>
     <string name="init_error">Error during init</string>
     <string name="auth_canceled">Authorization Canceled</string>
@@ -27,6 +28,7 @@
     <string name="access_token_btn">Access token</string>
     <string name="id_token_btn">IdToken</string>
     <string name="clear_data">Clear data</string>
+    <string name="revoke_tokens">Revoke tokens</string>
     <string name="sign_out_btn">Sign out</string>
     <string name="token_refreshed_successfully">Token refreshed successfully</string>
     <string name="error_message">Error</string>
@@ -36,9 +38,32 @@
     <string name="ending_current_session">Ending current session</string>
     <string name="progress_dialog_message">Please wait! This may take a moment.</string>
     <string name="unable_to_clean_data">Unable to clean data</string>
+    <string name="unable_to_revoke_tokens">Unable to revoke tokens</string>
+    <string name="tokens_revoke_success">Tokens revoke successfully</string>
     <string name="welcome_title">Welcome, %s</string>
     <string name="timezone_title">Timezone</string>
     <string name="last_update_title">Last Updated</string>
     <string name="view_tokens_title">View Tokens</string>
     <string name="view_details_title">View Details</string>
+    <string name="protect_by_smartlock">Protect by SmartLock</string>
+    <string name="ask_to_protect_by_smartlock">Do you want to protect data by SmartLock</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+
+    <string name="fingerprint_title">Authenticate</string>
+    <string name="fingerprint_failed">Authentication failed.</string>
+    <string name="fingerprint_success">Authentication successful!</string>
+    <string name="setup_lockscreen_info_msg">Secure lock screen isn\'t set up.\nGo to \'Settings -> Security -> Screenlock\' to set up a lock screen</string>
+    <string name="hardware_not_support_fingerprint">Your device does not have a supported fingerprint</string>
+    <string name="fingerprint_not_enrolled">You haven\'t enrolled any fingerprints yet.\nGo to \'Settings -> Security to enroll at least one finger</string>
+    <string name="fingerprint_alert_title">Confirm fingerprint to continue</string>
+    <string name="cancel">Cancel</string>
+    <string name="fingerprint_status">Touch sensor</string>
+
+    <string name="select_smartlock_type_title">Select smartlock type</string>
+    <string name="select_smartlock_type_message">Please select a way to authenticate</string>
+    <string name="fingerprint_type">Fingerprint</string>
+    <string name="unlock_screen_type">Unlock Screen</string>
+    <string name="unlock_screen_title">Confirm credentials</string>
+    <string name="invalid_keys">Invalid keys</string>
 </resources>

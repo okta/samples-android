@@ -84,4 +84,7 @@
     <string name="last_update_title">Last Updated</string>
     <string name="view_tokens_title">View Tokens</string>
     <string name="view_details_title">View Details</string>
+    <string name="revoke_tokens">Revoke tokens</string>
+    <string name="unable_to_revoke_tokens">Unable to revoke tokens</string>
+    <string name="tokens_revoke_success">Tokens revoke successfully</string>
 </resources>

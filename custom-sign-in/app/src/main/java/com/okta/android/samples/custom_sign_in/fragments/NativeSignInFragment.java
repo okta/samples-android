@@ -17,9 +17,6 @@ package com.okta.android.samples.custom_sign_in.fragments;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.MainThread;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -27,16 +24,22 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
+import androidx.annotation.MainThread;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.okta.android.samples.custom_sign_in.R;
 import com.okta.android.samples.custom_sign_in.UserInfoActivity;
 import com.okta.android.samples.custom_sign_in.base.BaseFragment;
 import com.okta.android.samples.custom_sign_in.base.IOktaAppAuthClientProvider;
 import com.okta.android.samples.custom_sign_in.util.KeyboardUtil;
-import com.okta.appauth.android.AuthenticationError;
-import com.okta.appauth.android.OktaAppAuth;
 import com.okta.authn.sdk.AuthenticationException;
 import com.okta.authn.sdk.AuthenticationStateHandlerAdapter;
 import com.okta.authn.sdk.resource.AuthenticationResponse;
+import com.okta.oidc.RequestCallback;
+import com.okta.oidc.clients.AuthClient;
+import com.okta.oidc.results.Result;
+import com.okta.oidc.util.AuthorizationException;
 
 public class NativeSignInFragment extends BaseFragment {
     private String TAG = "NativeSignIn";
@@ -44,14 +47,14 @@ public class NativeSignInFragment extends BaseFragment {
     private EditText loginEditText;
     private EditText passwordEditText;
 
-    private OktaAppAuth oktaAppAuth;
+    private AuthClient mAuthClient;
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
 
-        if (context instanceof IOktaAppAuthClientProvider){
-            oktaAppAuth = ((IOktaAppAuthClientProvider)context).provideOktaAppAuthClient();
+        if (context instanceof IOktaAppAuthClientProvider) {
+            mAuthClient = ((IOktaAppAuthClientProvider) context).provideOktaAppAuthClient();
         }
     }
 
@@ -83,7 +86,7 @@ public class NativeSignInFragment extends BaseFragment {
         if (TextUtils.isEmpty(login)) {
             loginEditText.setError(getString(R.string.empty_field_error));
             return;
-        } else if(TextUtils.isEmpty(password)) {
+        } else if (TextUtils.isEmpty(password)) {
             passwordEditText.setError(getString(R.string.empty_field_error));
             return;
         }
@@ -127,22 +130,18 @@ public class NativeSignInFragment extends BaseFragment {
     }
 
     private void authenticateViaOktaAndroidSDK(String sessionToken) {
-        this.oktaAppAuth.authenticate(sessionToken, new OktaAppAuth.OktaNativeAuthListener() {
+        this.mAuthClient.signIn(sessionToken, null, new RequestCallback<Result, AuthorizationException>() {
             @Override
-            public void onSuccess() {
-                runOnUIThread(() -> {
-                    hideLoading();
-                    showUserInfo();
-                });
+            public void onSuccess(@NonNull Result result) {
+                hideLoading();
+                showUserInfo();
             }
 
             @Override
-            public void onTokenFailure(@NonNull AuthenticationError authenticationError) {
-                runOnUIThread(() -> {
-                    hideLoading();
-                    showMessage(authenticationError.getLocalizedMessage());
-                    navigation.close();
-                });
+            public void onError(String s, AuthorizationException e) {
+                hideLoading();
+                showMessage(e.getLocalizedMessage());
+                navigation.close();
             }
         });
     }

@@ -15,9 +15,10 @@
 package com.okta.android.samples.custom_sign_in.base;
 
 import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
-import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
 
 import com.okta.android.samples.custom_sign_in.BuildConfig;
 import com.okta.android.samples.custom_sign_in.R;

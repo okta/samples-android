@@ -17,8 +17,9 @@ package com.okta.android.samples.custom_sign_in;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.text.TextUtils;
+
+import androidx.fragment.app.Fragment;
 
 import com.okta.android.samples.custom_sign_in.base.ContainerActivity;
 import com.okta.android.samples.custom_sign_in.fragments.PasswordRecoveryFragment;
