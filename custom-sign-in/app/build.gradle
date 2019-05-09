@@ -1,11 +1,11 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 27
     defaultConfig {
         applicationId "com.okta.android.samples.custom_sign_in"
         minSdkVersion 21
-        targetSdkVersion 28
+        targetSdkVersion 27
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -41,7 +41,7 @@ dependencies {
     runtimeOnly 'com.okta.sdk:okta-sdk-okhttp:1.5.2'
     runtimeOnly 'com.squareup.okhttp3:okhttp:3.14.1'
 
-    implementation 'com.okta.android:appauth-android:0.2.2'
+    implementation 'com.okta.android:appauth-android:0.2.3'
 
     implementation 'de.hdodenhof:circleimageview:3.0.0'
 
