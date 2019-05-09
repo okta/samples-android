@@ -19,7 +19,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -38,11 +40,15 @@ import java.util.concurrent.atomic.AtomicReference;
 import static com.okta.appauth.android.OktaAppAuth.getInstance;
 
 public class UserInfoActivity extends AppCompatActivity {
-    private String TAG = "UserInfo";
+    private final String TAG = "UserInfo";
     private OktaAppAuth mOktaAppAuth;
     private OktaProgressDialog oktaProgressDialog;
     private final AtomicReference<JSONObject> mUserInfoJson = new AtomicReference<>();
 
+    private ConstraintLayout userinfoContainer;
+    private ConstraintLayout tokensContainer;
+
+    private static final String EXTRA_FAILED = "failed";
     private static final String KEY_USER_INFO = "userInfo";
 
     public static Intent createIntent(Context context) {
@@ -56,8 +62,10 @@ public class UserInfoActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_userinfo);
+
         this.oktaProgressDialog = new OktaProgressDialog(this);
         this.mOktaAppAuth = getInstance(getApplicationContext());
+
 
         if (!mOktaAppAuth.isUserLoggedIn()) {
             showMessage(getString(R.string.not_authorized));
@@ -65,20 +73,33 @@ public class UserInfoActivity extends AppCompatActivity {
             finish();
         }
 
-        findViewById(R.id.userinfo_btn).setOnClickListener(v ->
-            fetchUserInfo()
+        userinfoContainer = findViewById(R.id.userinfo_container);
+        tokensContainer = findViewById(R.id.tokens_container);
+        userinfoContainer.setVisibility(View.GONE);
+        tokensContainer.setVisibility(View.GONE);
+
+        findViewById(R.id.view_detail_btn).setOnClickListener(v ->
+                showDetailsView()
+        );
+
+        findViewById(R.id.view_token_btn).setOnClickListener(v ->
+                showTokensView()
         );
 
         findViewById(R.id.clear_data_btn).setOnClickListener(v ->
                 clearData()
         );
 
-        if(mOktaAppAuth.hasRefreshToken()) {
+        if (mOktaAppAuth.hasRefreshToken()) {
             findViewById(R.id.refresh_token).setVisibility(View.VISIBLE);
+            findViewById(R.id.refreshtoken_title).setVisibility(View.VISIBLE);
+            findViewById(R.id.refreshtoken_textview).setVisibility(View.VISIBLE);
             findViewById(R.id.refresh_token).setOnClickListener(v ->
                     refreshToken()
             );
         } else {
+            findViewById(R.id.refreshtoken_textview).setVisibility(View.GONE);
+            findViewById(R.id.refreshtoken_title).setVisibility(View.GONE);
             findViewById(R.id.refresh_token).setVisibility(View.GONE);
         }
 
@@ -89,6 +110,14 @@ public class UserInfoActivity extends AppCompatActivity {
                 showMessage("JSONException: " + ex);
                 Log.e(TAG, Log.getStackTraceString(ex));
             }
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (mUserInfoJson.get() == null) {
+            fetchUserInfo();
         }
     }
 
@@ -131,7 +160,7 @@ public class UserInfoActivity extends AppCompatActivity {
                     oktaProgressDialog.hide();
                     mUserInfoJson.set(null);
                     displayAuthorizationInfo();
-                    showMessage("TokenFailure: "+e.errorDescription);
+                    showMessage("TokenFailure: " + e.errorDescription);
                 });
             }
 
@@ -141,7 +170,7 @@ public class UserInfoActivity extends AppCompatActivity {
                     oktaProgressDialog.hide();
                     mUserInfoJson.set(null);
                     displayAuthorizationInfo();
-                    showMessage("Failure: "+e.getMessage());
+                    showMessage("Failure: " + e.getMessage());
                 });
             }
         });
@@ -163,10 +192,20 @@ public class UserInfoActivity extends AppCompatActivity {
             public void onTokenFailure(@NonNull AuthorizationException e) {
                 runOnUiThread(() -> {
                     oktaProgressDialog.hide();
-                    showMessage(getString(R.string.error_message)+" "+e.errorDescription);
+                    showMessage(getString(R.string.error_message) + " " + e.errorDescription);
                 });
             }
         });
+    }
+
+    private void showDetailsView() {
+        userinfoContainer.setVisibility(View.VISIBLE);
+        tokensContainer.setVisibility(View.GONE);
+    }
+
+    private void showTokensView() {
+        userinfoContainer.setVisibility(View.GONE);
+        tokensContainer.setVisibility(View.VISIBLE);
     }
 
     @MainThread
@@ -202,25 +241,33 @@ public class UserInfoActivity extends AppCompatActivity {
         ((TextView) findViewById(R.id.idtoken_textview)).setText(mOktaAppAuth.getTokens().getIdToken());
         ((TextView) findViewById(R.id.refreshtoken_textview)).setText(mOktaAppAuth.getTokens().getRefreshToken());
 
-        if(user == null) {
+        if (user == null) {
             return;
         }
-        findViewById(R.id.userinfo_container).setVisibility(View.VISIBLE);
         try {
-            if(user.has("name")) {
+            if (user.has("name")) {
                 ((TextView) findViewById(R.id.name_textview)).setText(user.getString("name"));
             }
-
-            if(user.has("preferred_username")) {
-                ((TextView) findViewById(R.id.username_textview)).setText(user.getString("preferred_username"));
+            if (user.has("given_name")) {
+                ((TextView) findViewById(R.id.welcome_title)).setText(String.format(getString(R.string.welcome_title), user.getString("given_name")));
             }
 
-            if(user.has("locale")) {
+            if (user.has("preferred_username")) {
+                ((TextView) findViewById(R.id.username_textview)).setText(user.getString("preferred_username"));
+                ((TextView) findViewById(R.id.email_title)).setText(user.getString("preferred_username"));
+            }
+
+            if (user.has("locale")) {
                 ((TextView) findViewById(R.id.locale_textview)).setText(user.getString("locale"));
             }
 
-            if(user.has("zoneinfo")) {
+            if (user.has("zoneinfo")) {
                 ((TextView) findViewById(R.id.zoneinfo_textview)).setText(user.getString("zoneinfo"));
+                ((TextView) findViewById(R.id.timezone_value)).setText(user.getString("zoneinfo"));
+            }
+            if (user.has("updated_at")) {
+                long time = Long.parseLong(user.getString("updated_at"));
+                ((TextView) findViewById(R.id.last_update_value)).setText(getLastUpdateString(time));
             }
         } catch (Exception e) {
             Log.e(TAG, Log.getStackTraceString(e));
@@ -232,8 +279,21 @@ public class UserInfoActivity extends AppCompatActivity {
         startActivity(StartActivity.createIntent(this));
     }
 
+    private String getLastUpdateString(long lastUpdate) {
+        return DateUtils.getRelativeTimeSpanString(lastUpdate * 1000, System.currentTimeMillis(), DateUtils.WEEK_IN_MILLIS, DateUtils.FORMAT_ABBREV_ALL).toString();
+    }
+
     @MainThread
     private void showMessage(String message) {
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (mOktaAppAuth != null) {
+            mOktaAppAuth.dispose();
+            mOktaAppAuth = null;
+        }
+        super.onDestroy();
     }
 }

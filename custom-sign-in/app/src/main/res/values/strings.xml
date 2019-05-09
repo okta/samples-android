@@ -31,6 +31,7 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="sign_in">Sign In</string>
+    <string name="sign_out_btn">Sign out</string>
     <string name="init_error">Error during init</string>
     <string name="not_authorized">You aren\'t authorized</string>
     <string name="user_info_loading">Fetching user info</string>
@@ -77,4 +78,10 @@
     <string name="send_sms">Send SMS</string>
     <string name="email_or_username">Email or Username</string>
     <string name="mfa_require">This action requires MFA. To test this action you can disable MFA in admin panel or implemented MFA verify.</string>
+    <string name="have_account">Have an account?</string>
+    <string name="welcome_title">Welcome, %s</string>
+    <string name="timezone_title">Timezone</string>
+    <string name="last_update_title">Last Updated</string>
+    <string name="view_tokens_title">View Tokens</string>
+    <string name="view_details_title">View Details</string>
 </resources>

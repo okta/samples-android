@@ -12,7 +12,8 @@
 -->
 <resources>
     <string name="app_name">Okta Android Samples</string>
-    <string name="browser_sign_in">Browser Sign In</string>
+    <string name="browser_sample">Browser Sample</string>
+    <string name="have_account">Have an account?</string>
     <string name="sign_in_btn">Sign In</string>
     <string name="username_hint">Enter username (Optional)</string>
     <string name="init_error">Error during init</string>
@@ -26,7 +27,7 @@
     <string name="access_token_btn">Access token</string>
     <string name="id_token_btn">IdToken</string>
     <string name="clear_data">Clear data</string>
-    <string name="logout_btn">Logout</string>
+    <string name="sign_out_btn">Sign out</string>
     <string name="token_refreshed_successfully">Token refreshed successfully</string>
     <string name="error_message">Error</string>
     <string name="not_authorized">You aren\'t authorized</string>
@@ -35,4 +36,9 @@
     <string name="ending_current_session">Ending current session</string>
     <string name="progress_dialog_message">Please wait! This may take a moment.</string>
     <string name="unable_to_clean_data">Unable to clean data</string>
+    <string name="welcome_title">Welcome, %s</string>
+    <string name="timezone_title">Timezone</string>
+    <string name="last_update_title">Last Updated</string>
+    <string name="view_tokens_title">View Tokens</string>
+    <string name="view_details_title">View Details</string>
 </resources>

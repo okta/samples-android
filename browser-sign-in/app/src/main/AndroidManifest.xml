@@ -22,14 +22,14 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".BrowserSignInActivity" android:launchMode="singleTop">
+        <activity android:name=".BrowserSignInActivity" android:label="@string/browser_sample" android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".UserInfoActivity"/>
+        <activity android:name=".UserInfoActivity" android:label="@string/browser_sample"/>
     </application>
 
 </manifest>

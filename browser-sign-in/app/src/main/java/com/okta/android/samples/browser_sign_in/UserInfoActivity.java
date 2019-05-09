@@ -19,7 +19,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -33,6 +35,7 @@ import net.openid.appauth.AuthorizationException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Calendar;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.okta.appauth.android.OktaAppAuth.getInstance;
@@ -43,6 +46,9 @@ public class UserInfoActivity extends AppCompatActivity {
     private OktaProgressDialog oktaProgressDialog;
     private final AtomicReference<JSONObject> mUserInfoJson = new AtomicReference<>();
 
+    private ConstraintLayout userinfoContainer;
+    private ConstraintLayout tokensContainer;
+
     private static final String EXTRA_FAILED = "failed";
     private static final String KEY_USER_INFO = "userInfo";
 
@@ -50,8 +56,11 @@ public class UserInfoActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_userinfo);
+
         this.oktaProgressDialog = new OktaProgressDialog(this);
         this.mOktaAppAuth = getInstance(this);
+
+
 
         if (!mOktaAppAuth.isUserLoggedIn()) {
             showMessage(getString(R.string.not_authorized));
@@ -59,8 +68,17 @@ public class UserInfoActivity extends AppCompatActivity {
             finish();
         }
 
-        findViewById(R.id.userinfo_btn).setOnClickListener(v ->
-            fetchUserInfo()
+        userinfoContainer = findViewById(R.id.userinfo_container);
+        tokensContainer = findViewById(R.id.tokens_container);
+        userinfoContainer.setVisibility(View.GONE);
+        tokensContainer.setVisibility(View.GONE);
+
+        findViewById(R.id.view_detail_btn).setOnClickListener(v ->
+                showDetailsView()
+        );
+
+        findViewById(R.id.view_token_btn).setOnClickListener(v ->
+                showTokensView()
         );
 
         findViewById(R.id.clear_data_btn).setOnClickListener(v ->
@@ -73,10 +91,14 @@ public class UserInfoActivity extends AppCompatActivity {
 
         if(mOktaAppAuth.hasRefreshToken()) {
             findViewById(R.id.refresh_token).setVisibility(View.VISIBLE);
+            findViewById(R.id.refreshtoken_title).setVisibility(View.VISIBLE);
+            findViewById(R.id.refreshtoken_textview).setVisibility(View.VISIBLE);
             findViewById(R.id.refresh_token).setOnClickListener(v ->
                     refreshToken()
             );
         } else {
+            findViewById(R.id.refreshtoken_textview).setVisibility(View.GONE);
+            findViewById(R.id.refreshtoken_title).setVisibility(View.GONE);
             findViewById(R.id.refresh_token).setVisibility(View.GONE);
         }
 
@@ -87,6 +109,14 @@ public class UserInfoActivity extends AppCompatActivity {
                 showMessage("JSONException: " + ex);
                 Log.e(TAG, Log.getStackTraceString(ex));
             }
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(mUserInfoJson.get() == null) {
+            fetchUserInfo();
         }
     }
 
@@ -167,6 +197,16 @@ public class UserInfoActivity extends AppCompatActivity {
         });
     }
 
+    private void showDetailsView() {
+        userinfoContainer.setVisibility(View.VISIBLE);
+        tokensContainer.setVisibility(View.GONE);
+    }
+
+    private void showTokensView() {
+        userinfoContainer.setVisibility(View.GONE);
+        tokensContainer.setVisibility(View.VISIBLE);
+    }
+
     @MainThread
     private void logOut() {
         Intent completionIntent = new Intent(this, BrowserSignInActivity.class);
@@ -217,14 +257,17 @@ public class UserInfoActivity extends AppCompatActivity {
         if(user == null) {
             return;
         }
-        findViewById(R.id.userinfo_container).setVisibility(View.VISIBLE);
         try {
             if(user.has("name")) {
                 ((TextView) findViewById(R.id.name_textview)).setText(user.getString("name"));
             }
+            if(user.has("given_name")) {
+                ((TextView) findViewById(R.id.welcome_title)).setText(String.format(getString(R.string.welcome_title), user.getString("given_name")));
+            }
 
             if(user.has("preferred_username")) {
                 ((TextView) findViewById(R.id.username_textview)).setText(user.getString("preferred_username"));
+                ((TextView) findViewById(R.id.email_title)).setText(user.getString("preferred_username"));
             }
 
             if(user.has("locale")) {
@@ -233,6 +276,11 @@ public class UserInfoActivity extends AppCompatActivity {
 
             if(user.has("zoneinfo")) {
                 ((TextView) findViewById(R.id.zoneinfo_textview)).setText(user.getString("zoneinfo"));
+                ((TextView) findViewById(R.id.timezone_value)).setText(user.getString("zoneinfo"));
+            }
+            if(user.has("updated_at")) {
+                long time = Long.parseLong(user.getString("updated_at"));
+                ((TextView) findViewById(R.id.last_update_value)).setText(getLastUpdateString(time));
             }
         } catch (Exception e) {
             Log.e(TAG, Log.getStackTraceString(e));
@@ -242,6 +290,10 @@ public class UserInfoActivity extends AppCompatActivity {
 
     private void navigateToStartActivity() {
         startActivity(new Intent(UserInfoActivity.this, BrowserSignInActivity.class));
+    }
+
+    private String getLastUpdateString(long lastUpdate) {
+        return DateUtils.getRelativeTimeSpanString(lastUpdate*1000, System.currentTimeMillis(), DateUtils.WEEK_IN_MILLIS, DateUtils.FORMAT_ABBREV_ALL).toString();
     }
 
     @MainThread

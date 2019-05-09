@@ -44,7 +44,7 @@ public class BrowserSignInActivity extends AppCompatActivity {
 
         oktaProgressDialog = new OktaProgressDialog(this);
 
-        ((Button) findViewById(R.id.browser_sign_in_btn)).setOnClickListener(v -> signIn());
+        ((Button) findViewById(R.id.browser_sing_in)).setOnClickListener(v -> signIn());
 
         init();
     }
