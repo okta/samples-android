@@ -16,6 +16,7 @@
 package com.okta.android.samples.browser_sign_in.rxClient;
 
 import android.app.Activity;
+import android.content.Context;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
@@ -30,6 +31,8 @@ import com.okta.oidc.clients.web.SyncWebAuthClient;
 import com.okta.oidc.clients.web.SyncWebAuthClientFactory;
 import com.okta.oidc.net.HttpConnectionFactory;
 import com.okta.oidc.results.Result;
+import com.okta.oidc.storage.OktaStorage;
+import com.okta.oidc.storage.security.EncryptionManager;
 
 import java.lang.ref.WeakReference;
 import java.util.concurrent.Executors;
@@ -46,9 +49,9 @@ class RxWebAuthClientImpl implements RxWebAuthClient {
     private PublishSubject<RxResult> submitResults;
     private RxSessionClient rxSessionClient;
 
-    RxWebAuthClientImpl(OIDCConfig oidcConfig, OktaState oktaState, HttpConnectionFactory connectionFactory, @ColorInt
+    RxWebAuthClientImpl(OIDCConfig oidcConfig, Context context, OktaStorage oktaStorage, EncryptionManager encryptionManager, HttpConnectionFactory connectionFactory, @ColorInt
             int customTabColor, @Nullable String[] supportedBrowsers) {
-        mSyncAuthClient = new SyncWebAuthClientFactory(customTabColor, supportedBrowsers).createClient(oidcConfig, oktaState,
+        mSyncAuthClient = new SyncWebAuthClientFactory(customTabColor, supportedBrowsers).createClient(oidcConfig, context, oktaStorage, encryptionManager,
                 connectionFactory);
         rxSessionClient = new RxSessionClientImpl(mSyncAuthClient.getSessionClient());
     }

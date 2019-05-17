@@ -15,6 +15,8 @@
 
 package com.okta.android.samples.custom_sign_in.rx_client;
 
+import android.content.Context;
+
 import com.okta.oidc.AuthenticationPayload;
 import com.okta.oidc.OIDCConfig;
 import com.okta.oidc.OktaState;
@@ -22,6 +24,8 @@ import com.okta.oidc.clients.SyncAuthClient;
 import com.okta.oidc.clients.SyncAuthClientFactory;
 import com.okta.oidc.net.HttpConnectionFactory;
 import com.okta.oidc.results.Result;
+import com.okta.oidc.storage.OktaStorage;
+import com.okta.oidc.storage.security.EncryptionManager;
 
 import io.reactivex.Single;
 
@@ -29,8 +33,8 @@ class RxAuthClientImpl implements RxAuthClient {
     private SyncAuthClient mSyncAuthClient;
     private RxSessionClientImpl rxSessionClientImpl;
 
-    RxAuthClientImpl(OIDCConfig oidcConfig, OktaState oktaState, HttpConnectionFactory connectionFactory) {
-        mSyncAuthClient = new SyncAuthClientFactory().createClient(oidcConfig, oktaState, connectionFactory);
+    RxAuthClientImpl(OIDCConfig oidcConfig, Context context, OktaStorage oktaStorage, EncryptionManager encryptionManager, HttpConnectionFactory connectionFactory) {
+        mSyncAuthClient = new SyncAuthClientFactory().createClient(oidcConfig, context, oktaStorage, encryptionManager, connectionFactory);
         rxSessionClientImpl = new RxSessionClientImpl(mSyncAuthClient.getSessionClient());
     }
 

@@ -15,9 +15,16 @@
 
 package com.okta.android.samples.browser_sign_in.rxClient;
 
+import android.content.Context;
+
 import androidx.annotation.ColorInt;
 
+import com.okta.oidc.OIDCConfig;
 import com.okta.oidc.OktaBuilder;
+import com.okta.oidc.clients.ClientFactory;
+import com.okta.oidc.net.HttpConnectionFactory;
+import com.okta.oidc.storage.OktaStorage;
+import com.okta.oidc.storage.security.EncryptionManager;
 
 /**
  * A collection of builders for creating different type of authentication clients.
@@ -54,7 +61,7 @@ public class RxOkta {
          */
         @Override
         public RxWebAuthClient create() {
-            super.withAuthenticationClientFactory((oidcConfig, oktaState, connectionFactory) -> new RxWebAuthClientImpl(oidcConfig, oktaState, connectionFactory, mCustomTabColor, mSupportedBrowsers));
+            super.withAuthenticationClientFactory((oidcConfig, context, oktaStorage, encryptionManager, connectionFactory) -> new RxWebAuthClientImpl(oidcConfig, context, oktaStorage, encryptionManager, connectionFactory, mCustomTabColor, mSupportedBrowsers));
             return createAuthClient();
         }
     }
