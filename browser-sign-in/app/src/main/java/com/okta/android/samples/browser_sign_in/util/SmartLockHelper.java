@@ -5,6 +5,9 @@ import android.app.Activity;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.hardware.biometrics.BiometricPrompt;
+import android.hardware.fingerprint.FingerprintManager;
+import android.os.Build;
 
 import androidx.appcompat.app.AlertDialog;
 
@@ -71,7 +74,11 @@ public class SmartLockHelper {
 
     private void showFingerprint(Activity activity, FingerprintDialog.FingerprintDialogCallbacks callback) {
         if (mFingerprintDialog != null && activity.getFragmentManager().findFragmentByTag(FINGERPRINT_DIALOG_TAG) == null) {
-            mFingerprintDialog.init(Cipher.DECRYPT_MODE, null, callback);
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+//                mFingerprintDialog.init(Cipher.DECRYPT_MODE, new FingerprintManager.CryptoObject(cipher), callback);
+//            } else {
+                mFingerprintDialog.init(Cipher.DECRYPT_MODE, null, callback);
+//            }
             mFingerprintDialog.show(activity.getFragmentManager(), FINGERPRINT_DIALOG_TAG);
         }
     }

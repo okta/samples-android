@@ -45,7 +45,7 @@ public class ServiceLocator {
                             .withTabColor(context.getResources().getColor(R.color.colorPrimary))
                             .supportedBrowsers(ANDROID_BROWSER, FIRE_FOX)
                             .setCacheMode(false)
-                            .setRequireHardwareBackedKeyStore(true)
+                            .setRequireHardwareBackedKeyStore(false)
                             .withEncryptionManager(mEncryptionManager);
 
                     mWebAuth = localWebAuth = builder.create();

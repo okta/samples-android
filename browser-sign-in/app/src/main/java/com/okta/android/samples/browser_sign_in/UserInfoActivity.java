@@ -39,6 +39,7 @@ import com.okta.oidc.clients.web.WebAuthClient;
 import com.okta.oidc.net.response.UserInfo;
 import com.okta.oidc.storage.security.EncryptionManager;
 import com.okta.oidc.storage.security.FingerprintUtils;
+import com.okta.oidc.storage.security.SimpleBaseEncryptionManager;
 import com.okta.oidc.storage.security.SmartLockBaseEncryptionManager;
 import com.okta.oidc.util.AuthorizationException;
 
@@ -156,19 +157,19 @@ public class UserInfoActivity extends AppCompatActivity {
 
     private void continuePresentationData() {
         if (mSessionClient.isAuthenticated()) {
-            if (mEncryptionManager.isAuthenticateUser()) {
+//            if (mEncryptionManager.isAuthenticateUser()) {
                 displayAuthorizationInfo();
                 if (mUserInfoJson.get() == null) {
                     fetchUserInfo();
                 }
-            } else {
-                mSmartLockHelper.showSmartLockChooseDialog(this, new FingerprintDialog.FingerPrintCallback(this, mEncryptionManager) {
-                    @Override
-                    protected void onSuccess() {
-                        continuePresentationData();
-                    }
-                });
-            }
+//            } else {
+//                mSmartLockHelper.showSmartLockChooseDialog(this, new FingerprintDialog.FingerPrintCallback(this, mEncryptionManager) {
+//                    @Override
+//                    protected void onSuccess() {
+//                        continuePresentationData();
+//                    }
+//                });
+//            }
         } else {
             showMessage("No authorization state retained - re-authorization required");
             navigateToStartActivity();
@@ -253,8 +254,7 @@ public class UserInfoActivity extends AppCompatActivity {
                         });
                         break;
                     case EncryptionErrors.INVALID_KEYS_ERROR:
-                        showMessage(getString(R.string.invalid_keys)+": "+e.error);
-                        clearData();
+                        handleInvalidKeys();
                         break;
                 }
             }
@@ -286,8 +286,7 @@ public class UserInfoActivity extends AppCompatActivity {
                         });
                         break;
                     case EncryptionErrors.INVALID_KEYS_ERROR:
-                        showMessage(getString(R.string.invalid_keys)+": "+e.error);
-                        clearData();
+                        handleInvalidKeys();
                         break;
                 }
             }
@@ -309,53 +308,20 @@ public class UserInfoActivity extends AppCompatActivity {
     }
 
     private void revokeTokens() {
-        Tokens tokens;
+        mEncryptionManager.removeKeys();
+    }
+
+    private void handleInvalidKeys() {
+        mSessionClient.clear();
+        ServiceLocator.provideEncryptionManager(this).removeKeys();
         try {
-            tokens = mSessionClient.getTokens();
-        } catch (RuntimeException exception) {
-            oktaProgressDialog.hide();
-            mSmartLockHelper.showSmartLockChooseDialog(this, new FingerprintDialog.FingerPrintCallback(this, mEncryptionManager) {
-                @Override
-                protected void onSuccess() {
-                    revokeTokens();
-                }
-            });
-            return;
+            SimpleBaseEncryptionManager simpleEncryptionManager = ServiceLocator.createSimpleEncryptionManager(this);
+            ServiceLocator.setEncryptionManager(simpleEncryptionManager);
+            mWebAuth.migrateTo(simpleEncryptionManager);
+        } catch (Exception e){
+            showMessage(e.getMessage());
         }
-
-        oktaProgressDialog.show();
-        final int requestCount = (tokens.getRefreshToken() != null) ? 3 : 2;
-
-        RequestCallback<Boolean, AuthorizationException> requestCallback = new RequestCallback<Boolean, AuthorizationException>() {
-            volatile int localRequestCount = requestCount;
-
-            @Override
-            public synchronized void onSuccess(Boolean aBoolean) {
-                localRequestCount--;
-                if (localRequestCount == 0) {
-                    onComplete();
-                }
-            }
-
-            @Override
-            public synchronized void onError(String s, AuthorizationException e) {
-                localRequestCount = -1;
-
-                oktaProgressDialog.hide();
-                showMessage(getString(R.string.unable_to_revoke_tokens));
-            }
-
-            private void onComplete() {
-                oktaProgressDialog.hide();
-                showMessage(getString(R.string.tokens_revoke_success));
-            }
-        };
-
-        mSessionClient.revokeToken(tokens.getAccessToken(), requestCallback);
-        mSessionClient.revokeToken(tokens.getIdToken(), requestCallback);
-
-        if (tokens.getRefreshToken() != null)
-            mSessionClient.revokeToken(tokens.getRefreshToken(), requestCallback);
+        navigateToStartActivity();
     }
 
     private void clearData() {
