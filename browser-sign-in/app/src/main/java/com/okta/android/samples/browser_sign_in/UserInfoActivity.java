@@ -22,9 +22,14 @@ import android.support.constraint.ConstraintLayout;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -32,14 +37,16 @@ import com.okta.android.samples.browser_sign_in.util.FingerprintDialog;
 import com.okta.android.samples.browser_sign_in.util.OktaProgressDialog;
 import com.okta.android.samples.browser_sign_in.util.PreferenceRepository;
 import com.okta.android.samples.browser_sign_in.util.SmartLockHelper;
+import com.okta.oidc.AuthorizationStatus;
 import com.okta.oidc.RequestCallback;
+import com.okta.oidc.ResultCallback;
 import com.okta.oidc.Tokens;
 import com.okta.oidc.clients.sessions.SessionClient;
 import com.okta.oidc.clients.web.WebAuthClient;
 import com.okta.oidc.net.response.UserInfo;
 import com.okta.oidc.storage.security.EncryptionManager;
 import com.okta.oidc.storage.security.FingerprintUtils;
-import com.okta.oidc.storage.security.SimpleBaseEncryptionManager;
+import com.okta.oidc.storage.security.DefaultEncryptionManager;
 import com.okta.oidc.storage.security.SmartLockBaseEncryptionManager;
 import com.okta.oidc.util.AuthorizationException;
 
@@ -52,7 +59,6 @@ import static com.okta.oidc.util.AuthorizationException.*;
 
 public class UserInfoActivity extends AppCompatActivity {
     private final String TAG = "UserInfo";
-    private static final String ASK_FINGERPRINT = "ASK_FINGERPRINT";
     private WebAuthClient mWebAuth;
     private SessionClient mSessionClient;
 
@@ -62,6 +68,7 @@ public class UserInfoActivity extends AppCompatActivity {
 
     private ConstraintLayout userinfoContainer;
     private ConstraintLayout tokensContainer;
+    private Switch smartLockChecker;
 
     private static final String EXTRA_FAILED = "failed";
     private static final String KEY_USER_INFO = "userInfo";
@@ -69,12 +76,8 @@ public class UserInfoActivity extends AppCompatActivity {
     private EncryptionManager mEncryptionManager;
     private PreferenceRepository mPreferenceRepository;
 
-    private boolean isRequireEnableFingerprint = false;
-
-    public static Intent createIntent(Context context, boolean isRequireEnableFingerprint) {
-        Intent intent = new Intent(context, UserInfoActivity.class);
-        intent.putExtra(ASK_FINGERPRINT, isRequireEnableFingerprint);
-        return intent;
+    public static Intent createIntent(Context context) {
+        return new Intent(context, UserInfoActivity.class);
     }
 
     @Override
@@ -95,8 +98,46 @@ public class UserInfoActivity extends AppCompatActivity {
             finish();
         }
 
+        mWebAuth.registerCallback(new ResultCallback<AuthorizationStatus, AuthorizationException>() {
+            @Override
+            public void onSuccess(@NonNull AuthorizationStatus authorizationStatus) {
+                showMessage(getString(R.string.sign_out_success));
+            }
+
+            @Override
+            public void onCancel() {
+                showMessage(getString(R.string.sign_out_canceled));
+            }
+
+            @Override
+            public void onError(@Nullable String s, @Nullable AuthorizationException e) {
+                showMessage(getString(R.string.error_message) + " : " + e.errorDescription + " : " + e.error);
+                switch (e.code) {
+                    case EncryptionErrors.KEYGUARD_AUTHENTICATION_ERROR:
+                    case EncryptionErrors.ENCRYPT_ERROR:
+                    case EncryptionErrors.DECRYPT_ERROR:
+                        mSmartLockHelper.showSmartLockChooseDialog(UserInfoActivity.this, new FingerprintDialog.FingerPrintCallback(UserInfoActivity.this, mEncryptionManager) {
+                            @Override
+                            protected void onSuccess() {
+                                logOut();
+                            }
+                        });
+                        break;
+                    case EncryptionErrors.INVALID_KEYS_ERROR:
+                        handleInvalidKeys();
+                        break;
+                }
+            }
+        }, this);
+
         userinfoContainer = findViewById(R.id.userinfo_container);
         tokensContainer = findViewById(R.id.tokens_container);
+        smartLockChecker = findViewById(R.id.smartlock_ebable);
+        smartLockChecker.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if(isChecked && smartLockChecker.isEnabled()) {
+                showDialogWithAllowToProtectDataByFingerprint();
+            }
+        });
         userinfoContainer.setVisibility(View.GONE);
         tokensContainer.setVisibility(View.GONE);
 
@@ -126,9 +167,6 @@ public class UserInfoActivity extends AppCompatActivity {
         findViewById(R.id.refresh_token).setOnClickListener(v ->
                 refreshToken()
         );
-
-        isRequireEnableFingerprint = getIntent().getBooleanExtra(ASK_FINGERPRINT, false);
-
         if (savedInstanceState != null && savedInstanceState.getString(KEY_USER_INFO) != null) {
             try {
                 mUserInfoJson.set(new UserInfo(new JSONObject(savedInstanceState.getString(KEY_USER_INFO))));
@@ -139,11 +177,17 @@ public class UserInfoActivity extends AppCompatActivity {
         }
 
         mEncryptionManager = ServiceLocator.provideEncryptionManager(this);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && isRequireEnableFingerprint &&
-                !mPreferenceRepository.isEnabledSmartLock()) {
-            showDialogWithAllowToProtectDataByFingerprint();
+        showSmartLockInfo();
+        continuePresentationData();
+    }
+
+    private void showSmartLockInfo() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M || mPreferenceRepository.isEnabledSmartLock()) {
+            smartLockChecker.setEnabled(false);
+            smartLockChecker.setChecked(mPreferenceRepository.isEnabledSmartLock());
         } else {
-            continuePresentationData();
+            smartLockChecker.setEnabled(true);
+            smartLockChecker.setChecked(false);
         }
     }
 
@@ -157,19 +201,19 @@ public class UserInfoActivity extends AppCompatActivity {
 
     private void continuePresentationData() {
         if (mSessionClient.isAuthenticated()) {
-//            if (mEncryptionManager.isAuthenticateUser()) {
+            if (mEncryptionManager.isUserAuthenticatedOnDevice()) {
                 displayAuthorizationInfo();
                 if (mUserInfoJson.get() == null) {
                     fetchUserInfo();
                 }
-//            } else {
-//                mSmartLockHelper.showSmartLockChooseDialog(this, new FingerprintDialog.FingerPrintCallback(this, mEncryptionManager) {
-//                    @Override
-//                    protected void onSuccess() {
-//                        continuePresentationData();
-//                    }
-//                });
-//            }
+            } else {
+                mSmartLockHelper.showSmartLockChooseDialog(this, new FingerprintDialog.FingerPrintCallback(this, mEncryptionManager) {
+                    @Override
+                    protected void onSuccess() {
+                        continuePresentationData();
+                    }
+                });
+            }
         } else {
             showMessage("No authorization state retained - re-authorization required");
             navigateToStartActivity();
@@ -179,49 +223,51 @@ public class UserInfoActivity extends AppCompatActivity {
     }
 
     private void showDialogWithAllowToProtectDataByFingerprint() {
+        FingerprintUtils.SensorState sensorState = FingerprintUtils.checkSensorState(this);
+        switch (sensorState) {
+            case READY:
+                break;
+            case NOT_BLOCKED:
+                showMessage(getString(R.string.setup_lockscreen_info_msg));
+                showSmartLockInfo();
+                return;
+            case NOT_SUPPORTED:
+                showMessage(getString(R.string.hardware_not_support_fingerprint));
+                showSmartLockInfo();
+                return;
+            case NO_FINGERPRINTS:
+                showMessage(getString(R.string.fingerprint_not_enrolled));
+                showSmartLockInfo();
+                return;
+        }
+
         AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
         alertBuilder.setCancelable(false);
         alertBuilder.setTitle(R.string.protect_by_smartlock);
         alertBuilder.setMessage(R.string.ask_to_protect_by_smartlock);
         alertBuilder.setPositiveButton(R.string.yes, (dialog, which) -> {
             dialog.dismiss();
-            try {
-                FingerprintUtils.SensorState sensorState = FingerprintUtils.checkSensorState(this);
-                switch (sensorState) {
-                    case READY:
-                        mSmartLockHelper.showSmartLockChooseDialog(this, new FingerprintDialog.FingerPrintCallback(this, mEncryptionManager) {
-                            @Override
-                            protected void onSuccess() {
-                                try {
-                                    SmartLockBaseEncryptionManager smartLockBaseEncryptionManager = ServiceLocator.createSmartLockEncryptionManager(UserInfoActivity.this);
-                                    smartLockBaseEncryptionManager.recreateCipher();
-                                    mWebAuth.migrateTo(smartLockBaseEncryptionManager);
-                                    mPreferenceRepository.enableSmartLock(true);
-                                    mEncryptionManager = smartLockBaseEncryptionManager;
-                                } catch (AuthorizationException exception) {
-                                    mSessionClient.clear();
-                                    finish();
-                                }
-                                continuePresentationData();
-                            }
-                        });
-                        break;
-                    case NOT_BLOCKED:
-                        showMessage(getString(R.string.setup_lockscreen_info_msg));
-                        break;
-                    case NOT_SUPPORTED:
-                        showMessage(getString(R.string.hardware_not_support_fingerprint));
-                        break;
-                    case NO_FINGERPRINTS:
-                        showMessage(getString(R.string.fingerprint_not_enrolled));
-                        break;
+
+            mSmartLockHelper.showSmartLockChooseDialog(this, new FingerprintDialog.FingerPrintCallback(this, mEncryptionManager) {
+                @Override
+                protected void onSuccess() {
+                    try {
+                        SmartLockBaseEncryptionManager smartLockBaseEncryptionManager = ServiceLocator.createSmartLockEncryptionManager(UserInfoActivity.this);
+                        smartLockBaseEncryptionManager.recreateCipher();
+                        mWebAuth.migrateTo(smartLockBaseEncryptionManager);
+                        mPreferenceRepository.enableSmartLock(true);
+                        mEncryptionManager = smartLockBaseEncryptionManager;
+                    } catch (AuthorizationException exception) {
+                        mSessionClient.clear();
+                        finish();
+                    }
+                    showSmartLockInfo();
+                    continuePresentationData();
                 }
-            } catch (Exception e) {
-                showMessage(e.getMessage());
-            }
+            });
         });
         alertBuilder.setNegativeButton(R.string.no, (dialog, which) -> {
-            continuePresentationData();
+            showSmartLockInfo();
             dialog.dismiss();
         });
         alertBuilder.show();
@@ -235,7 +281,7 @@ public class UserInfoActivity extends AppCompatActivity {
             public void onSuccess(UserInfo userInfo) {
                 oktaProgressDialog.hide();
                 mUserInfoJson.set(userInfo);
-                displayAuthorizationInfo();
+                updateUserInfo(userInfo);
             }
 
             @Override
@@ -244,8 +290,9 @@ public class UserInfoActivity extends AppCompatActivity {
                 mUserInfoJson.set(null);
                 showMessage("Failure fetch user profile: " + e.error + ":" + e.errorDescription);
                 switch (e.code) {
-                    case EncryptionErrors.DECRYPT_ERROR:
+                    case EncryptionErrors.KEYGUARD_AUTHENTICATION_ERROR:
                     case EncryptionErrors.ENCRYPT_ERROR:
+                    case EncryptionErrors.DECRYPT_ERROR:
                         mSmartLockHelper.showSmartLockChooseDialog(UserInfoActivity.this, new FingerprintDialog.FingerPrintCallback(UserInfoActivity.this, mEncryptionManager) {
                             @Override
                             protected void onSuccess() {
@@ -268,7 +315,7 @@ public class UserInfoActivity extends AppCompatActivity {
             public void onSuccess(Tokens tokens) {
                 oktaProgressDialog.hide();
                 showMessage(getString(R.string.token_refreshed_successfully));
-                displayAuthorizationInfo();
+                updateTokens(tokens);
             }
 
             @Override
@@ -276,8 +323,9 @@ public class UserInfoActivity extends AppCompatActivity {
                 oktaProgressDialog.hide();
                 showMessage(getString(R.string.error_message) + " : " + e.errorDescription + " : " + e.error);
                 switch (e.code) {
-                    case EncryptionErrors.DECRYPT_ERROR:
+                    case EncryptionErrors.KEYGUARD_AUTHENTICATION_ERROR:
                     case EncryptionErrors.ENCRYPT_ERROR:
+                    case EncryptionErrors.DECRYPT_ERROR:
                         mSmartLockHelper.showSmartLockChooseDialog(UserInfoActivity.this, new FingerprintDialog.FingerPrintCallback(UserInfoActivity.this, mEncryptionManager) {
                             @Override
                             protected void onSuccess() {
@@ -308,17 +356,62 @@ public class UserInfoActivity extends AppCompatActivity {
     }
 
     private void revokeTokens() {
-        mEncryptionManager.removeKeys();
+        Tokens tokens;
+        try {
+            tokens = mSessionClient.getTokens();
+        } catch (AuthorizationException exception) {
+            mSmartLockHelper.showSmartLockChooseDialog(this, new FingerprintDialog.FingerPrintCallback(this, mEncryptionManager) {
+                @Override
+                protected void onSuccess() {
+                    revokeTokens();
+                }
+            });
+            return;
+        }
+        oktaProgressDialog.show();
+        final int requestCount = (tokens.getRefreshToken() != null) ? 3 : 2;
+
+        RequestCallback<Boolean, AuthorizationException> requestCallback = new RequestCallback<Boolean, AuthorizationException>() {
+            volatile int localRequestCount = requestCount;
+
+            @Override
+            public synchronized void onSuccess(Boolean aBoolean) {
+                localRequestCount--;
+                if (localRequestCount == 0) {
+                    onComplete();
+                }
+            }
+
+            @Override
+            public synchronized void onError(String s, AuthorizationException e) {
+                localRequestCount = -1;
+
+                oktaProgressDialog.hide();
+                showMessage(getString(R.string.unable_to_revoke_tokens));
+            }
+
+            private void onComplete() {
+                oktaProgressDialog.hide();
+                showMessage(getString(R.string.tokens_revoke_success));
+            }
+        };
+
+        mSessionClient.revokeToken(tokens.getAccessToken(), requestCallback);
+        mSessionClient.revokeToken(tokens.getIdToken(), requestCallback);
+
+        if (tokens.getRefreshToken() != null)
+            mSessionClient.revokeToken(tokens.getRefreshToken(), requestCallback);
+        navigateToStartActivity();
     }
 
     private void handleInvalidKeys() {
         mSessionClient.clear();
         ServiceLocator.provideEncryptionManager(this).removeKeys();
         try {
-            SimpleBaseEncryptionManager simpleEncryptionManager = ServiceLocator.createSimpleEncryptionManager(this);
+            DefaultEncryptionManager simpleEncryptionManager = ServiceLocator.createSimpleEncryptionManager(this);
             ServiceLocator.setEncryptionManager(simpleEncryptionManager);
             mWebAuth.migrateTo(simpleEncryptionManager);
-        } catch (Exception e){
+        } catch (Exception e) {
             showMessage(e.getMessage());
         }
         navigateToStartActivity();
@@ -329,21 +422,7 @@ public class UserInfoActivity extends AppCompatActivity {
         navigateToStartActivity();
     }
 
-    private void displayAuthorizationInfo() {
-        UserInfo user = mUserInfoJson.get();
-        Tokens tokens;
-        try {
-            tokens = mSessionClient.getTokens();
-        } catch (RuntimeException exception) {
-            mSmartLockHelper.showSmartLockChooseDialog(this, new FingerprintDialog.FingerPrintCallback(this, mEncryptionManager) {
-                @Override
-                protected void onSuccess() {
-                    displayAuthorizationInfo();
-                }
-            });
-            return;
-        }
-
+    private void updateTokens(Tokens tokens) {
         ((TextView) findViewById(R.id.accesstoken_textview)).setText(tokens.getAccessToken());
         ((TextView) findViewById(R.id.idtoken_textview)).setText(tokens.getIdToken());
         ((TextView) findViewById(R.id.refreshtoken_textview)).setText(tokens.getRefreshToken());
@@ -353,7 +432,9 @@ public class UserInfoActivity extends AppCompatActivity {
             findViewById(R.id.refreshtoken_title).setVisibility(View.GONE);
             findViewById(R.id.refresh_token).setVisibility(View.GONE);
         }
+    }
 
+    private void updateUserInfo(UserInfo user) {
         if (user == null) {
             return;
         }
@@ -386,6 +467,25 @@ public class UserInfoActivity extends AppCompatActivity {
             Log.e(TAG, Log.getStackTraceString(e));
             showMessage(e.getMessage());
         }
+    }
+
+    private void displayAuthorizationInfo() {
+        UserInfo user = mUserInfoJson.get();
+        Tokens tokens;
+        try {
+            tokens = mSessionClient.getTokens();
+        } catch (AuthorizationException exception) {
+            mSmartLockHelper.showSmartLockChooseDialog(this, new FingerprintDialog.FingerPrintCallback(this, mEncryptionManager) {
+                @Override
+                protected void onSuccess() {
+                    displayAuthorizationInfo();
+                }
+            });
+            return;
+        }
+
+        updateTokens(tokens);
+        updateUserInfo(user);
     }
 
     private void navigateToStartActivity() {

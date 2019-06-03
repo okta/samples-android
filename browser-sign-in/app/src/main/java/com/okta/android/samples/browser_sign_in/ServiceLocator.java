@@ -10,9 +10,9 @@ import com.okta.android.samples.browser_sign_in.util.SmartLockHelper;
 import com.okta.oidc.OIDCConfig;
 import com.okta.oidc.Okta;
 import com.okta.oidc.clients.web.WebAuthClient;
-import com.okta.oidc.storage.SimpleOktaStorage;
+import com.okta.oidc.storage.SharedPreferenceStorage;
 import com.okta.oidc.storage.security.EncryptionManager;
-import com.okta.oidc.storage.security.SimpleBaseEncryptionManager;
+import com.okta.oidc.storage.security.DefaultEncryptionManager;
 import com.okta.oidc.storage.security.SmartLockBaseEncryptionManager;
 
 public class ServiceLocator {
@@ -41,7 +41,7 @@ public class ServiceLocator {
                     Okta.WebAuthBuilder builder = new Okta.WebAuthBuilder()
                             .withConfig(mOidcConfig)
                             .withContext(context.getApplicationContext())
-                            .withStorage(new SimpleOktaStorage(context))
+                            .withStorage(new SharedPreferenceStorage(context))
                             .withTabColor(context.getResources().getColor(R.color.colorPrimary))
                             .supportedBrowsers(ANDROID_BROWSER, FIRE_FOX)
                             .setCacheMode(false)
@@ -67,8 +67,8 @@ public class ServiceLocator {
         return new SmartLockBaseEncryptionManager(context, 2);
     }
 
-    public static SimpleBaseEncryptionManager createSimpleEncryptionManager(Context context) {
-        return new SimpleBaseEncryptionManager(context);
+    public static DefaultEncryptionManager createSimpleEncryptionManager(Context context) {
+        return new DefaultEncryptionManager(context);
     }
 
     public static EncryptionManager provideEncryptionManager(Context context) {
@@ -101,7 +101,7 @@ public class ServiceLocator {
                     mRxWebAuth = localWebAuth = new RxOkta.WebAuthBuilder()
                             .withConfig(mOidcConfig)
                             .withContext(context.getApplicationContext())
-                            .withStorage(new SimpleOktaStorage(context))
+                            .withStorage(new SharedPreferenceStorage(context))
                             .withTabColor(context.getResources().getColor(R.color.colorPrimary))
                             .supportedBrowsers(ANDROID_BROWSER, FIRE_FOX)
                             .create();

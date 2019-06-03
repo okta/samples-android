@@ -32,7 +32,7 @@ public class SmartLockHelper {
         if (requestCode == REQUEST_CODE_CREDENTIALS) {
             // Challenge completed, proceed with using cipher
             if (resultCode == RESULT_OK) {
-                if(credentialsCallback != null) {
+                if (credentialsCallback != null) {
                     credentialsCallback.onFingerprintSuccess(0, null);
                 }
             } else {
@@ -47,10 +47,10 @@ public class SmartLockHelper {
         AlertDialog alertDialog = new AlertDialog.Builder(activity)
                 .setTitle(R.string.select_smartlock_type_message)
                 .setSingleChoiceItems(types, -1, (dialog, which) -> {
-                    if(activity.getString(R.string.fingerprint_type).equalsIgnoreCase(types[which])) {
+                    if (activity.getString(R.string.fingerprint_type).equalsIgnoreCase(types[which])) {
                         showFingerprint(activity, callback);
                         dialog.dismiss();
-                    } else if(activity.getString(R.string.unlock_screen_type).equalsIgnoreCase(types[which])) {
+                    } else if (activity.getString(R.string.unlock_screen_type).equalsIgnoreCase(types[which])) {
                         credentialsCallback = callback;
                         showConfirmCredentials(activity);
                         dialog.dismiss();
@@ -64,7 +64,7 @@ public class SmartLockHelper {
 
     @TargetApi(21)
     private void showConfirmCredentials(Activity activity) {
-        KeyguardManager keyguardManager = (KeyguardManager)activity.getSystemService(Context.KEYGUARD_SERVICE);
+        KeyguardManager keyguardManager = (KeyguardManager) activity.getSystemService(Context.KEYGUARD_SERVICE);
         Intent intent = keyguardManager.createConfirmDeviceCredentialIntent(
                 activity.getString(R.string.unlock_screen_title), "");
         if (intent != null) {
@@ -74,11 +74,7 @@ public class SmartLockHelper {
 
     private void showFingerprint(Activity activity, FingerprintDialog.FingerprintDialogCallbacks callback) {
         if (mFingerprintDialog != null && activity.getFragmentManager().findFragmentByTag(FINGERPRINT_DIALOG_TAG) == null) {
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-//                mFingerprintDialog.init(Cipher.DECRYPT_MODE, new FingerprintManager.CryptoObject(cipher), callback);
-//            } else {
-                mFingerprintDialog.init(Cipher.DECRYPT_MODE, null, callback);
-//            }
+            mFingerprintDialog.init(Cipher.DECRYPT_MODE, null, callback);
             mFingerprintDialog.show(activity.getFragmentManager(), FINGERPRINT_DIALOG_TAG);
         }
     }

@@ -19,6 +19,9 @@
     <string name="username_hint">Enter username (Optional)</string>
     <string name="init_error">Error during init</string>
     <string name="auth_canceled">Authorization Canceled</string>
+    <string name="sign_out_canceled">SignOut Canceled</string>
+    <string name="sign_out_success">SignOut Success</string>
+    <string name="sign_out_error">SignOut Error</string>
     <string name="user_name_title">Username:</string>
     <string name="name_title">Name:</string>
     <string name="locale_title">Locale:</string>
@@ -66,4 +69,5 @@
     <string name="unlock_screen_type">Unlock Screen</string>
     <string name="unlock_screen_title">Confirm credentials</string>
     <string name="invalid_keys">Invalid keys</string>
+    <string name="enable_smart_lock">Enable Smart Lock</string>
 </resources>

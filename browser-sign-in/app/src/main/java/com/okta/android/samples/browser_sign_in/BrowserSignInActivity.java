@@ -41,9 +41,8 @@ import com.okta.oidc.ResultCallback;
 import com.okta.oidc.clients.sessions.SessionClient;
 import com.okta.oidc.clients.web.WebAuthClient;
 import com.okta.oidc.storage.security.FingerprintUtils;
-import com.okta.oidc.storage.security.SimpleBaseEncryptionManager;
+import com.okta.oidc.storage.security.DefaultEncryptionManager;
 import com.okta.oidc.util.AuthorizationException;
-
 
 
 public class BrowserSignInActivity extends AppCompatActivity {
@@ -55,7 +54,6 @@ public class BrowserSignInActivity extends AppCompatActivity {
     private SessionClient mSessionClient;
     private PreferenceRepository mPreferenceRepository;
     private SmartLockHelper mSmartLockHelper;
-    private boolean signInWithFingerprintMode = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,21 +68,13 @@ public class BrowserSignInActivity extends AppCompatActivity {
 
         init();
 
-        Button signInWithFingerprint = findViewById(R.id.fingerprint_browser_sign_in);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            signInWithFingerprint.setEnabled(true);
-            signInWithFingerprint.setOnClickListener(v -> signInWithFingerprint());
-        } else {
-            signInWithFingerprint.setEnabled(false);
-        }
-
         if (mSessionClient.isAuthenticated()) {
             if (mPreferenceRepository.isEnabledSmartLock()) {
                 mSmartLockHelper.showSmartLockChooseDialog(this, new FingerprintDialog.FingerprintDialogCallbacks() {
                     @Override
                     public void onFingerprintSuccess(int purpose, FingerprintManager.CryptoObject cryptoObject) {
                         ServiceLocator.provideEncryptionManager(BrowserSignInActivity.this).recreateCipher();
-                        showUserInfo(true);
+                        showUserInfo();
                     }
 
                     @Override
@@ -94,7 +84,7 @@ public class BrowserSignInActivity extends AppCompatActivity {
                     }
                 });
             } else {
-                showUserInfo(false);
+                showUserInfo();
             }
         } else {
             if (mPreferenceRepository.isEnabledSmartLock()) {
@@ -106,7 +96,8 @@ public class BrowserSignInActivity extends AppCompatActivity {
     private void clearStorage() {
         try {
             mSessionClient.clear();
-            SimpleBaseEncryptionManager simpleEncryptionManager = ServiceLocator.createSimpleEncryptionManager(this);
+            DefaultEncryptionManager simpleEncryptionManager = ServiceLocator.
+                    createSimpleEncryptionManager(this);
             ServiceLocator.setEncryptionManager(simpleEncryptionManager);
             mWebAuth.migrateTo(simpleEncryptionManager);
             mPreferenceRepository.enableSmartLock(false);
@@ -150,7 +141,7 @@ public class BrowserSignInActivity extends AppCompatActivity {
 
                             Log.i(TAG, "User is already authenticated, proceeding " +
                                     "to token activity");
-                            showUserInfo(signInWithFingerprintMode);
+                            showUserInfo();
                         } else if (status == AuthorizationStatus.SIGNED_OUT) {
                             displayAuth();
                         }
@@ -171,35 +162,46 @@ public class BrowserSignInActivity extends AppCompatActivity {
                                 + error.error
                                 + ":"
                                 + error.errorDescription);
+                        switch (error.code) {
+                            case AuthorizationException.EncryptionErrors.KEYGUARD_AUTHENTICATION_ERROR:
+                            case AuthorizationException.EncryptionErrors.ENCRYPT_ERROR:
+                            case AuthorizationException.EncryptionErrors.DECRYPT_ERROR:
+                                mSmartLockHelper.showSmartLockChooseDialog(
+                                        BrowserSignInActivity.this,
+                                        new FingerprintDialog.FingerPrintCallback(
+                                                BrowserSignInActivity.this,
+                                                ServiceLocator.provideEncryptionManager(
+                                                        BrowserSignInActivity.this)) {
+                                            @Override
+                                            protected void onSuccess() {
+                                                signIn();
+                                            }
+                                        });
+                                break;
+                            case AuthorizationException.EncryptionErrors.INVALID_KEYS_ERROR:
+                                handleInvalidKeys();
+                                break;
+                        }
                     }
                 };
 
         mWebAuth.registerCallback(callback, this);
     }
 
-    @TargetApi(23)
-    private void signInWithFingerprint() {
-        FingerprintUtils.SensorState sensorState = FingerprintUtils.checkSensorState(this);
-        switch (sensorState) {
-            case READY:
-                signInWithFingerprintMode = true;
-                signIn();
-                break;
-            case NOT_BLOCKED:
-                showMessage(getString(R.string.setup_lockscreen_info_msg));
-                break;
-            case NOT_SUPPORTED:
-                showMessage(getString(R.string.hardware_not_support_fingerprint));
-                break;
-            case NO_FINGERPRINTS:
-                showMessage(getString(R.string.fingerprint_not_enrolled));
-                break;
-        }
-    }
-
-
     private void signIn() {
         mWebAuth.signIn(this, null);
+    }
+
+    private void handleInvalidKeys() {
+        mSessionClient.clear();
+        ServiceLocator.provideEncryptionManager(this).removeKeys();
+        try {
+            DefaultEncryptionManager simpleEncryptionManager = ServiceLocator.createSimpleEncryptionManager(this);
+            ServiceLocator.setEncryptionManager(simpleEncryptionManager);
+            mWebAuth.migrateTo(simpleEncryptionManager);
+        } catch (Exception e) {
+            showMessage(e.getMessage());
+        }
     }
 
     private void displayAuth() {
@@ -210,8 +212,8 @@ public class BrowserSignInActivity extends AppCompatActivity {
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 
-    private void showUserInfo(boolean isRequireEnableFingerprint) {
-        startActivity(UserInfoActivity.createIntent(this, isRequireEnableFingerprint));
+    private void showUserInfo() {
+        startActivity(UserInfoActivity.createIntent(this));
         finish();
     }
 }

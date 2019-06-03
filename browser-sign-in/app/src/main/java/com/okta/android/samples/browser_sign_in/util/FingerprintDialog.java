@@ -74,24 +74,31 @@ public class FingerprintDialog extends DialogFragment {
     @Override
     public void onResume() {
         super.onResume();
-        mCancellationSignal = new CancellationSignal();
+        if(mCancellationSignal == null) {
+            mCancellationSignal = new CancellationSignal();
+        }
 
-            try {
-                // Start listening for fingerprint events
-                mFingerprintManager.authenticate(mCryptoObject, mCancellationSignal,
-                        0, new AuthCallbacks(), null);
-            } catch (IllegalArgumentException | IllegalStateException | SecurityException e) {
-                // Should never be thrown since we have declared the USE_FINGERPRINT permission
-                // in the manifest
-            }
+        try {
+            // Start listening for fingerprint events
+            mFingerprintManager.authenticate(mCryptoObject, mCancellationSignal,
+                    0, new AuthCallbacks(), null);
+        } catch (IllegalArgumentException | IllegalStateException | SecurityException e) {
+            // Should never be thrown since we have declared the USE_FINGERPRINT permission
+            // in the manifest
+        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
+        cancel();
+    }
 
-        // If the fingerprint authentication process is running, cancel it.
-        mCancellationSignal.cancel();
+    private void cancel() {
+        if(mCancellationSignal != null) {
+            mCancellationSignal.cancel();
+            mCancellationSignal = null;
+        }
     }
 
     @Override
@@ -100,14 +107,11 @@ public class FingerprintDialog extends DialogFragment {
         View content = inflater.inflate(R.layout.fragment_fingerprint, container);
         mTextViewStatus = content.findViewById(R.id.textViewFingerprintStatus);
         mImageViewStatus = content.findViewById(R.id.imageViewFingerprintStatus);
-        content.findViewById(R.id.buttonFingerprintCancel).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mFingerprintDialogCallbacks != null && mFingerprintDialogCallbacks.get() != null) {
-                    mFingerprintDialogCallbacks.get().onFingerprintCancel();
-                }
-                dismiss();
+        content.findViewById(R.id.buttonFingerprintCancel).setOnClickListener(v -> {
+            if (mFingerprintDialogCallbacks != null && mFingerprintDialogCallbacks.get() != null) {
+                mFingerprintDialogCallbacks.get().onFingerprintCancel();
             }
+            dismiss();
         });
 
         getDialog().setTitle(R.string.fingerprint_title);
@@ -150,7 +154,6 @@ public class FingerprintDialog extends DialogFragment {
         mImageViewStatus.setImageResource(R.drawable.ic_fingerprint_done);
         mTextViewStatus.setText(getString(R.string.fingerprint_success));
         mTextViewStatus.setTextColor(Color.GREEN);
-
 
 
         mImageViewStatus.setRotation(60);
