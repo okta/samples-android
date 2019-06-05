@@ -1,4 +1,4 @@
-package com.okta.android.samples.browser_sign_in.util;
+package com.okta.android.samples.custom_sign_in.util;
 
 import android.Manifest;
 import android.annotation.TargetApi;
@@ -7,19 +7,16 @@ import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Build;
-import android.os.CancellationSignal;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
-import androidx.core.hardware.fingerprint.FingerprintManagerCompat;
 import androidx.fragment.app.FragmentActivity;
 
-import com.okta.android.samples.browser_sign_in.R;
+import com.okta.android.samples.custom_sign_in.R;
 import com.okta.oidc.storage.security.EncryptionManager;
 
 import java.lang.ref.WeakReference;
@@ -30,19 +27,13 @@ import javax.crypto.Cipher;
 import static android.app.Activity.RESULT_OK;
 import static android.os.Build.VERSION_CODES.LOLLIPOP;
 import static android.os.Build.VERSION_CODES.M;
-import static android.os.Build.VERSION_CODES.P;
 
 @TargetApi(M)
 public class SmartLockHelper {
     private static final int REQUEST_CODE_CREDENTIALS = 100;
     private static final String FINGERPRINT_DIALOG_TAG = "FINGERPRINT_DIALOG_TAG";
 
-    private FingerprintDialog mFingerprintDialog;
     private FingerprintDialogCallbacks credentialsCallback;
-
-    public SmartLockHelper() {
-        mFingerprintDialog = FingerprintDialog.newInstance();
-    }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_CODE_CREDENTIALS) {
@@ -60,7 +51,6 @@ public class SmartLockHelper {
 
     public void showSmartLockChooseDialog(FragmentActivity activity, FingerprintDialogCallbacks callback, Cipher cipher) {
         String[] types = new String[]{activity.getString(R.string.fingerprint_type), activity.getString(R.string.unlock_screen_type)};
-
 
         AlertDialog alertDialog = new AlertDialog.Builder(activity)
                 .setTitle(R.string.select_smartlock_type_message)
@@ -121,76 +111,6 @@ public class SmartLockHelper {
                 activity.getString(R.string.unlock_screen_title), "");
         if (intent != null) {
             activity.startActivityForResult(intent, REQUEST_CODE_CREDENTIALS);
-        }
-    }
-
-    @TargetApi(P)
-    @Deprecated
-    private void showBiometricPrompt(FragmentActivity activity, FingerprintDialogCallbacks callback, Cipher cipher) {
-        CancellationSignal mCancellationSignal = new CancellationSignal();
-        BiometricPrompt biometricPrompt = new BiometricPrompt.Builder(activity)
-                .setTitle(activity.getString(R.string.fingerprint_alert_title))
-                .setNegativeButton(activity.getString(R.string.cancel), activity.getMainExecutor(), (dialogInterface, i) -> {
-                    callback.onFingerprintCancel();
-                })
-                .build();
-
-        BiometricPrompt.AuthenticationCallback authenticationCallback = new BiometricPrompt.AuthenticationCallback() {
-            @Override
-            public void onAuthenticationError(int errorCode, CharSequence errString) {
-                super.onAuthenticationError(errorCode, errString);
-                callback.onFingerprintCancel();
-            }
-
-            @Override
-            public void onAuthenticationHelp(int helpCode, CharSequence helpString) {
-                super.onAuthenticationHelp(helpCode, helpString);
-                callback.onFingerprintCancel();
-            }
-
-            @Override
-            public void onAuthenticationSucceeded(BiometricPrompt.AuthenticationResult result) {
-                super.onAuthenticationSucceeded(result);
-
-                if (result.getCryptoObject() != null) {
-                    callback.onFingerprintSuccess(result.getCryptoObject().getCipher());
-                } else {
-                    callback.onFingerprintSuccess(null);
-                }
-            }
-
-            @Override
-            public void onAuthenticationFailed() {
-                super.onAuthenticationFailed();
-                callback.onFingerprintCancel();
-            }
-        };
-
-        biometricPrompt.authenticate(mCancellationSignal, activity.getMainExecutor(), authenticationCallback);
-    }
-
-    @Deprecated
-    @TargetApi(M)
-    private void showFingerprint(Activity activity, FingerprintDialogCallbacks callback, Cipher cipher) {
-        if (mFingerprintDialog != null && activity.getFragmentManager().findFragmentByTag(FINGERPRINT_DIALOG_TAG) == null) {
-            FingerprintManagerCompat.CryptoObject cryptoObject = new FingerprintManagerCompat.CryptoObject(cipher);
-            mFingerprintDialog.init(cryptoObject, new FingerprintDialog.FingerprintDialogCallbacks() {
-                @Override
-                public void onFingerprintSuccess() {
-                    callback.onFingerprintSuccess(null);
-                }
-
-                @Override
-                public void onFingerprintError(String error) {
-                    callback.onFingerprintError(error);
-                }
-
-                @Override
-                public void onFingerprintCancel() {
-                    callback.onFingerprintCancel();
-                }
-            });
-            mFingerprintDialog.show(activity.getFragmentManager(), FINGERPRINT_DIALOG_TAG);
         }
     }
 

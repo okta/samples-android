@@ -64,7 +64,7 @@ public class ServiceLocator {
     }
 
     public static SmartLockBaseEncryptionManager createSmartLockEncryptionManager(Context context) {
-        return new SmartLockBaseEncryptionManager(context, 2);
+        return new SmartLockBaseEncryptionManager(context, 10);
     }
 
     public static DefaultEncryptionManager createSimpleEncryptionManager(Context context) {

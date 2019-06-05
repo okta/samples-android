@@ -22,10 +22,8 @@ import android.app.DialogFragment;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.graphics.Color;
-import android.hardware.fingerprint.FingerprintManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.CancellationSignal;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,25 +31,27 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import androidx.core.hardware.fingerprint.FingerprintManagerCompat;
+import androidx.core.os.CancellationSignal;
 
 import com.okta.android.samples.browser_sign_in.R;
-import com.okta.oidc.storage.security.EncryptionManager;
 
 import java.lang.ref.WeakReference;
 
+
 @TargetApi(23)
+@Deprecated
 public class FingerprintDialog extends DialogFragment {
     public static final int ANIMATION_DURATION = 500;
 
     protected TextView mTextViewStatus;
     protected ImageView mImageViewStatus;
 
-    private FingerprintManager mFingerprintManager;
+    private FingerprintManagerCompat mFingerprintManagerCompat;
     private CancellationSignal mCancellationSignal;
-    private FingerprintManager.CryptoObject mCryptoObject;
+    private FingerprintManagerCompat.CryptoObject mCryptoObject;
     private Context mContext;
-    private int mPurpose;
     private WeakReference<FingerprintDialogCallbacks> mFingerprintDialogCallbacks;
 
     public static FingerprintDialog newInstance() {
@@ -66,22 +66,44 @@ public class FingerprintDialog extends DialogFragment {
         setRetainInstance(true);
 
         mContext = getActivity().getApplicationContext();
-        mFingerprintManager = (FingerprintManager)
-                mContext.getSystemService(Context.FINGERPRINT_SERVICE);
+        mFingerprintManagerCompat = FingerprintManagerCompat.from(mContext);
         this.setCancelable(false);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if(mCancellationSignal == null) {
+        if (mCancellationSignal == null) {
             mCancellationSignal = new CancellationSignal();
         }
 
         try {
-            // Start listening for fingerprint events
-            mFingerprintManager.authenticate(mCryptoObject, mCancellationSignal,
-                    0, new AuthCallbacks(), null);
+            FingerprintManagerCompat.CryptoObject cryptoObject = new FingerprintManagerCompat.CryptoObject(mCryptoObject != null ? mCryptoObject.getCipher() : null);
+            mFingerprintManagerCompat.authenticate(cryptoObject, 0, mCancellationSignal, new FingerprintManagerCompat.AuthenticationCallback() {
+                @Override
+                public void onAuthenticationError(int errorCode, CharSequence errString) {
+                    super.onAuthenticationError(errorCode, errString);
+                    showErrorText(errString);
+                }
+
+                @Override
+                public void onAuthenticationHelp(int helpCode, CharSequence helpString) {
+                    super.onAuthenticationHelp(helpCode, helpString);
+                    showErrorText(helpString);
+                }
+
+                @Override
+                public void onAuthenticationSucceeded(FingerprintManagerCompat.AuthenticationResult result) {
+                    super.onAuthenticationSucceeded(result);
+                    showSuccessText();
+                }
+
+                @Override
+                public void onAuthenticationFailed() {
+                    super.onAuthenticationFailed();
+                    showErrorText(getString(R.string.fingerprint_failed));
+                }
+            }, null);
         } catch (IllegalArgumentException | IllegalStateException | SecurityException e) {
             // Should never be thrown since we have declared the USE_FINGERPRINT permission
             // in the manifest
@@ -95,7 +117,7 @@ public class FingerprintDialog extends DialogFragment {
     }
 
     private void cancel() {
-        if(mCancellationSignal != null) {
+        if (mCancellationSignal != null) {
             mCancellationSignal.cancel();
             mCancellationSignal = null;
         }
@@ -119,23 +141,11 @@ public class FingerprintDialog extends DialogFragment {
         return content;
     }
 
-    /**
-     * Should be called before the dialog is shown in order to provide a valid CryptoObject.
-     *
-     * @param purpose The purpose for which you want to use the CryptoObject
-     * @param object  The CryptoObject we want to authenticate for
-     */
-    public void init(int purpose, FingerprintManager.CryptoObject object, FingerprintDialogCallbacks fingerprintDialogCallbacks) {
+    public void init(FingerprintManagerCompat.CryptoObject object, FingerprintDialogCallbacks fingerprintDialogCallbacks) {
         mCryptoObject = object;
-        mPurpose = purpose;
         mFingerprintDialogCallbacks = new WeakReference<>(fingerprintDialogCallbacks);
     }
 
-    /**
-     * Updates the status text in the dialog with the provided error message.
-     *
-     * @param text represents the error message which will be shown
-     */
     private void showErrorText(CharSequence text) {
         mImageViewStatus.setImageResource(R.drawable.ic_fingerprint_error);
         mTextViewStatus.setText(text);
@@ -147,14 +157,10 @@ public class FingerprintDialog extends DialogFragment {
                 .setDuration(ANIMATION_DURATION);
     }
 
-    /**
-     * Updates the status text in the dialog with a success text.
-     */
     private void showSuccessText() {
         mImageViewStatus.setImageResource(R.drawable.ic_fingerprint_done);
         mTextViewStatus.setText(getString(R.string.fingerprint_success));
         mTextViewStatus.setTextColor(Color.GREEN);
-
 
         mImageViewStatus.setRotation(60);
         mImageViewStatus.animate()
@@ -177,7 +183,7 @@ public class FingerprintDialog extends DialogFragment {
                             transaction.commit();
                         }
                         if (mFingerprintDialogCallbacks != null && mFingerprintDialogCallbacks.get() != null) {
-                            mFingerprintDialogCallbacks.get().onFingerprintSuccess(mPurpose, mCryptoObject);
+                            mFingerprintDialogCallbacks.get().onFingerprintSuccess();
                         }
                     }
 
@@ -193,67 +199,11 @@ public class FingerprintDialog extends DialogFragment {
                 });
     }
 
-    /**
-     * The interface which the calling activity needs to implement.
-     */
     public interface FingerprintDialogCallbacks {
-        void onFingerprintSuccess(int purpose, FingerprintManager.CryptoObject cryptoObject);
+        void onFingerprintSuccess();
+
+        void onFingerprintError(String error);
 
         void onFingerprintCancel();
-    }
-
-    /**
-     * This class represents the callbacks invoked by the FingerprintManager class.
-     */
-    class AuthCallbacks extends FingerprintManager.AuthenticationCallback {
-
-        @Override
-        public void onAuthenticationFailed() {
-            super.onAuthenticationFailed();
-            showErrorText(getString(R.string.fingerprint_failed));
-        }
-
-        @Override
-        public void onAuthenticationError(int errorCode, CharSequence errString) {
-            super.onAuthenticationError(errorCode, errString);
-            showErrorText(errString);
-        }
-
-        @Override
-        public void onAuthenticationHelp(int helpCode, CharSequence helpString) {
-            super.onAuthenticationHelp(helpCode, helpString);
-            showErrorText(helpString);
-        }
-
-        @Override
-        public void onAuthenticationSucceeded(FingerprintManager.AuthenticationResult result) {
-            super.onAuthenticationSucceeded(result);
-            showSuccessText();
-        }
-    }
-
-    public static abstract class FingerPrintCallback implements FingerprintDialog.FingerprintDialogCallbacks {
-        private EncryptionManager encryptionManager;
-        private WeakReference<Context> mContext;
-
-        public FingerPrintCallback(Context context, EncryptionManager encryptionManager) {
-            this.mContext = new WeakReference<>(context);
-            this.encryptionManager = encryptionManager;
-        }
-
-        protected abstract void onSuccess();
-
-        @Override
-        public void onFingerprintSuccess(int purpose, FingerprintManager.CryptoObject cryptoObject) {
-            this.encryptionManager.recreateCipher();
-            onSuccess();
-        }
-
-        @Override
-        public void onFingerprintCancel() {
-            if (mContext.get() != null) {
-                Toast.makeText(mContext.get(), "Fingerprint Authentication failed", Toast.LENGTH_SHORT).show();
-            }
-        }
     }
 }

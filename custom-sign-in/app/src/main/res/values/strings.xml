@@ -87,4 +87,25 @@
     <string name="revoke_tokens">Revoke tokens</string>
     <string name="unable_to_revoke_tokens">Unable to revoke tokens</string>
     <string name="tokens_revoke_success">Tokens revoke successfully</string>
+
+    <string name="select_smartlock_type_title">Select smartlock type</string>
+    <string name="select_smartlock_type_message">Please select a way to authenticate</string>
+    <string name="fingerprint_type">Fingerprint</string>
+    <string name="unlock_screen_type">Unlock Screen</string>
+    <string name="unlock_screen_title">Confirm credentials</string>
+    <string name="invalid_keys">Invalid keys</string>
+    <string name="enable_smart_lock">Enable Smart Lock</string>
+
+    <string name="fingerprint_title">Authenticate</string>
+    <string name="fingerprint_failed">Authentication failed.</string>
+    <string name="fingerprint_success">Authentication successful!</string>
+    <string name="setup_lockscreen_info_msg">Secure lock screen isn\'t set up.\nGo to \'Settings -> Security -> Screenlock\' to set up a lock screen</string>
+    <string name="hardware_not_support_fingerprint">Your device does not have a supported fingerprint</string>
+    <string name="fingerprint_not_enrolled">You haven\'t enrolled any fingerprints yet.\nGo to \'Settings -> Security to enroll at least one finger</string>
+    <string name="fingerprint_alert_title">Confirm fingerprint to continue</string>
+    <string name="fingerprint_status">Touch sensor</string>
+
+    <string name="protect_by_smartlock">Protect by SmartLock</string>
+    <string name="ask_to_protect_by_smartlock">Do you want to protect data by SmartLock</string>
+    <string name="operation_cancel">Operation canceled</string>
 </resources>

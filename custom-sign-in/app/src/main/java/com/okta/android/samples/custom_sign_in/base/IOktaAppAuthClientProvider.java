@@ -18,4 +18,5 @@ import com.okta.oidc.clients.AuthClient;
 
 public interface IOktaAppAuthClientProvider {
     AuthClient provideOktaAppAuthClient();
+    void clearStorage();
 }

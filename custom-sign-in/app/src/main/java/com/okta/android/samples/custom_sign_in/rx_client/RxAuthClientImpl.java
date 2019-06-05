@@ -33,8 +33,8 @@ class RxAuthClientImpl implements RxAuthClient {
     private SyncAuthClient mSyncAuthClient;
     private RxSessionClientImpl rxSessionClientImpl;
 
-    RxAuthClientImpl(OIDCConfig oidcConfig, Context context, OktaStorage oktaStorage, EncryptionManager encryptionManager, HttpConnectionFactory connectionFactory) {
-        mSyncAuthClient = new SyncAuthClientFactory().createClient(oidcConfig, context, oktaStorage, encryptionManager, connectionFactory);
+    RxAuthClientImpl(OIDCConfig oidcConfig, Context context, OktaStorage oktaStorage, EncryptionManager encryptionManager, HttpConnectionFactory connectionFactory, boolean isRequireHardwareBackedKeyStore, boolean isCacheMode) {
+        mSyncAuthClient = new SyncAuthClientFactory().createClient(oidcConfig, context, oktaStorage, encryptionManager, connectionFactory, isRequireHardwareBackedKeyStore, isCacheMode);
         rxSessionClientImpl = new RxSessionClientImpl(mSyncAuthClient.getSessionClient());
     }
 
