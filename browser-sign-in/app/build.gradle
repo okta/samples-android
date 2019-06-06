@@ -1,5 +1,11 @@
 apply plugin: 'com.android.application'
 
+Properties properties = new Properties()
+properties.load(project.rootProject.file('testing.properties').newDataInputStream())
+def username = properties.getProperty('test.username')
+def password = properties.getProperty('test.password')
+def pincode = properties.getProperty('test.pincode')
+
 android {
     compileSdkVersion 28
     defaultConfig {
@@ -14,11 +20,6 @@ android {
                 "appAuthRedirectScheme": "com.oktapreview.samples-test"
         ]
 
-        Properties properties = new Properties()
-        properties.load(project.rootProject.file('local.properties').newDataInputStream())
-        def username = properties.getProperty('test.username')
-        def password = properties.getProperty('test.password')
-        def pincode = properties.getProperty('test.pincode')
         if (username != null && password != null) {
             buildConfigField "String", "USERNAME", username
             buildConfigField "String", "PASSWORD", password
@@ -78,8 +79,15 @@ task prepareDeviceForUITesting(type: Exec) {
     commandLine adb, 'shell', 'settings', 'put', 'global', 'animator_duration_scale', '0'
     //always finish activity
     commandLine adb, 'shell', 'settings', 'put', 'global', 'always_finish_activities', '1'
+    //enable smartlock
+    commandLine adb, 'shell', 'locksettings', 'set-pin', pincode
     // push keystore file to sdcard
 //    commandLine adb, 'push', 'src/androidTest/assets/mock.keystore.bks', '/sdcard/Download/'
+}
+
+//Disables smartlock (we need to keep it in separate task because of ordering of commandLine)
+task disableSmartLock(type: Exec) {
+    commandLine adb, 'shell', 'locksettings', 'clear', '--old', pincode
 }
 
 task clearData(type: Exec) {

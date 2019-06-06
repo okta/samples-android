@@ -14,6 +14,7 @@
  */
 package com.okta.android.samples.browser_sign_in;
 
+import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -223,22 +224,31 @@ public class UserInfoActivity extends AppCompatActivity {
     }
 
     private void showDialogWithAllowToProtectDataByFingerprint() {
-        FingerprintUtils.SensorState sensorState = FingerprintUtils.checkSensorState(this);
-        switch (sensorState) {
-            case READY:
-                break;
-            case NOT_BLOCKED:
-                showMessage(getString(R.string.setup_lockscreen_info_msg));
-                showSmartLockInfo();
-                return;
-            case NOT_SUPPORTED:
-                showMessage(getString(R.string.hardware_not_support_fingerprint));
-                showSmartLockInfo();
-                return;
-            case NO_FINGERPRINTS:
-                showMessage(getString(R.string.fingerprint_not_enrolled));
-                showSmartLockInfo();
-                return;
+        //We need to redesign check in FingerprintUtils to check for smartlock feature
+        //not only for fingerprints
+//        FingerprintUtils.SensorState sensorState = FingerprintUtils.checkSensorState(this);
+//        switch (sensorState) {
+//            case READY:
+//                break;
+//            case NOT_BLOCKED:
+//                showMessage(getString(R.string.setup_lockscreen_info_msg));
+//                showSmartLockInfo();
+//                return;
+//            case NOT_SUPPORTED:
+//                showMessage(getString(R.string.hardware_not_support_fingerprint));
+//                showSmartLockInfo();
+//                return;
+//            case NO_FINGERPRINTS:
+//                showMessage(getString(R.string.fingerprint_not_enrolled));
+//                showSmartLockInfo();
+//                return;
+//        }
+
+        KeyguardManager keyguardManager = (KeyguardManager)this.getSystemService(KEYGUARD_SERVICE);
+        if (!keyguardManager.isKeyguardSecure()) {
+            showMessage(getString(R.string.setup_lockscreen_info_msg));
+            showSmartLockInfo();
+            return;
         }
 
         AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
