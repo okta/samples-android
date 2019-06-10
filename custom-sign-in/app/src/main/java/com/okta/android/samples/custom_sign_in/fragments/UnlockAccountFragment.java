@@ -15,8 +15,6 @@
 package com.okta.android.samples.custom_sign_in.fragments;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -24,6 +22,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.okta.android.samples.custom_sign_in.R;
 import com.okta.android.samples.custom_sign_in.StartActivity;

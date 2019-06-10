@@ -14,8 +14,8 @@
  */
 package com.okta.android.samples.custom_sign_in.base;
 
-import com.okta.appauth.android.OktaAppAuth;
+import com.okta.oidc.clients.AuthClient;
 
 public interface IOktaAppAuthClientProvider {
-    OktaAppAuth provideOktaAppAuthClient();
+    AuthClient provideOktaAppAuthClient();
 }

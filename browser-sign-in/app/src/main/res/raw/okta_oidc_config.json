@@ -1,0 +1,11 @@
+{
+  "client_id": "0oajqehiy6p81NVzA0h7",
+  "redirect_uri": "com.oktapreview.samples-test:/callback",
+  "end_session_redirect_uri": "com.oktapreview.samples-test:/logout",
+  "scopes": [
+    "openid",
+    "profile",
+    "offline_access"
+  ],
+  "discovery_uri": "https://samples-test.oktapreview.com"
+}

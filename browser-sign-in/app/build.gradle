@@ -1,18 +1,30 @@
 apply plugin: 'com.android.application'
 
+Properties properties = new Properties()
+properties.load(project.rootProject.file('testing.properties').newDataInputStream())
+def username = properties.getProperty('test.username')
+def password = properties.getProperty('test.password')
+def pincode = properties.getProperty('test.pincode')
+
 android {
-    compileSdkVersion 27
+    compileSdkVersion 28
     defaultConfig {
         applicationId "com.okta.android.samples.browser_sign_in"
-        minSdkVersion 21
-        targetSdkVersion 27
+        minSdkVersion 19
+        targetSdkVersion 28
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         manifestPlaceholders = [
-                "appAuthRedirectScheme": "{redirect_uri_schema}"
+                "appAuthRedirectScheme": "com.oktapreview.samples-test"
         ]
+
+        if (username != null && password != null) {
+            buildConfigField "String", "USERNAME", username
+            buildConfigField "String", "PASSWORD", password
+            buildConfigField "String", "PINCODE", pincode
+        }
     }
     buildTypes {
         release {
@@ -27,14 +39,70 @@ android {
 }
 
 dependencies {
-    implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'com.android.support:appcompat-v7:27.1.1'
+    implementation fileTree(include: ['*.aar'], dir: 'libs')
+
+    implementation 'com.google.code.gson:gson:2.8.5'
+    implementation "androidx.browser:browser:1.0.0"
+    implementation "androidx.fragment:fragment:1.0.0"
+
+
+    implementation 'androidx.appcompat:appcompat:1.0.2'
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'
 
     implementation 'de.hdodenhof:circleimageview:3.0.0'
-    implementation 'com.okta.android:appauth-android:0.2.2'
+
+    implementation "io.reactivex.rxjava2:rxjava:2.2.8"
+    implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
 
     testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'com.android.support.test:runner:1.0.2'
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    androidTestImplementation 'androidx.test:runner:1.1.1'
+    androidTestImplementation 'androidx.test:rules:1.1.1'
+
+    // Espresso dependencies
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-contrib:3.1.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-intents:3.1.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-accessibility:3.1.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-web:3.1.1'
+    androidTestImplementation 'androidx.test.espresso.idling:idling-concurrent:3.1.1'
+
+    androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.2.0'
+    androidTestImplementation 'org.hamcrest:hamcrest-integration:1.3'
+
+}
+
+def adb = System.getenv("ANDROID_HOME") + "/platform-tools/adb"
+task prepareDeviceForUITesting(type: Exec) {
+    //disable animations for testing
+    commandLine adb, 'shell', 'settings', 'put', 'global', 'window_animation_scale', '0'
+    commandLine adb, 'shell', 'settings', 'put', 'global', 'transition_animation_scale', '0'
+    commandLine adb, 'shell', 'settings', 'put', 'global', 'animator_duration_scale', '0'
+    //always finish activity
+    commandLine adb, 'shell', 'settings', 'put', 'global', 'always_finish_activities', '1'
+    //enable smartlock
+    commandLine adb, 'shell', 'locksettings', 'set-pin', pincode
+    // push keystore file to sdcard
+//    commandLine adb, 'push', 'src/androidTest/assets/mock.keystore.bks', '/sdcard/Download/'
+}
+
+//Disables smartlock (we need to keep it in separate task because of ordering of commandLine)
+task disableSmartLock(type: Exec) {
+    commandLine adb, 'shell', 'locksettings', 'clear', '--old', pincode
+}
+
+task clearData(type: Exec) {
+    commandLine adb, 'shell', 'pm', 'clear', 'com.okta.android.samples.browser_sign_in'
+    commandLine adb, 'shell', 'pm', 'clear', 'com.okta.android.samples.browser_sign_in.test'
+    commandLine adb, 'shell', 'pm', 'clear', 'com.android.chrome'
+}
+
+task restoreDeviceSettings(type: Exec) {
+    //enable animations for testing
+    commandLine adb, 'shell', 'settings', 'put', 'global', 'window_animation_scale', '1'
+    commandLine adb, 'shell', 'settings', 'put', 'global', 'transition_animation_scale', '1'
+    commandLine adb, 'shell', 'settings', 'put', 'global', 'animator_duration_scale', '1'
+    //disable finish activity
+    commandLine adb, 'shell', 'settings', 'put', 'global', 'always_finish_activities', '0'
+    // remove keystore file to sdcard
+    commandLine adb, 'shell', 'rm', '/sdcard/Download/mock.keystore.bks'
 }

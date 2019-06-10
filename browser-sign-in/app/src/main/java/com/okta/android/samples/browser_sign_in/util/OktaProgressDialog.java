@@ -16,6 +16,7 @@ package com.okta.android.samples.browser_sign_in.util;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
@@ -60,7 +61,7 @@ public class OktaProgressDialog {
             View view = mInflater.inflate(R.layout.layout_progress_dialog, null, false);
             String textViewMessage = (message == null) ? mContext.get().getString(R.string.progress_dialog_message) : message;
             ((TextView)view.findViewById(R.id.message_textview)).setText(textViewMessage);
-            builder.setView(R.layout.layout_progress_dialog);
+            builder.setView(view);
             return builder.create();
         }
         return null;

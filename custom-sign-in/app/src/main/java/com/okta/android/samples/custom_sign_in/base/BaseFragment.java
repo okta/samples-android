@@ -16,8 +16,8 @@ package com.okta.android.samples.custom_sign_in.base;
 
 import android.app.Activity;
 import android.content.Context;
-import android.support.v4.app.Fragment;
-import android.util.Log;
+
+import androidx.fragment.app.Fragment;
 
 import com.okta.android.samples.custom_sign_in.util.INavigation;
 import com.okta.authn.sdk.client.AuthenticationClient;
