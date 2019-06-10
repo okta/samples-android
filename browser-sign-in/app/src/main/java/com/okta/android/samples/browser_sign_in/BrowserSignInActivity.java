@@ -15,17 +15,20 @@
 package com.okta.android.samples.browser_sign_in;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.okta.android.samples.browser_sign_in.util.OktaProgressDialog;
 import com.okta.android.samples.browser_sign_in.util.PreferenceRepository;
 import com.okta.android.samples.browser_sign_in.util.SmartLockHelper;
+import com.okta.oidc.AuthenticationPayload;
 import com.okta.oidc.AuthorizationStatus;
 import com.okta.oidc.ResultCallback;
 import com.okta.oidc.clients.sessions.SessionClient;
@@ -43,6 +46,8 @@ public class BrowserSignInActivity extends AppCompatActivity {
     private SessionClient mSessionClient;
     private PreferenceRepository mPreferenceRepository;
     private SmartLockHelper mSmartLockHelper;
+    @VisibleForTesting
+    public AuthenticationPayload mPayload;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,11 +58,11 @@ public class BrowserSignInActivity extends AppCompatActivity {
 
         mPreferenceRepository = ServiceLocator.providePreferenceRepository(this);
         mSmartLockHelper = ServiceLocator.provideSmartLockHelper();
-        findViewById(R.id.browser_sign_in).setOnClickListener(v -> signIn());
+        findViewById(R.id.browser_sign_in_btn).setOnClickListener(v -> signIn());
 
         init();
 
-        if (mSessionClient.isAuthenticated()) {
+        if (getSessionClient().isAuthenticated()) {
             if (mPreferenceRepository.isEnabledSmartLock()) {
                 if (!SmartLockHelper.isKeyguardSecure(this)) {
                     clearStorage();
@@ -98,7 +103,7 @@ public class BrowserSignInActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (mWebAuth.isInProgress()) {
+        if (getWebAuth().isInProgress()) {
             oktaProgressDialog.show();
         }
     }
@@ -114,10 +119,18 @@ public class BrowserSignInActivity extends AppCompatActivity {
         mWebAuth = ServiceLocator.provideWebAuthClient(this);
         mSessionClient = mWebAuth.getSessionClient();
 
-        setupCallback();
+        setupCallback(mWebAuth);
     }
 
-    void setupCallback() {
+    private WebAuthClient getWebAuth() {
+        return  mWebAuth;
+    }
+
+    private SessionClient getSessionClient() {
+        return mSessionClient;
+    }
+
+    void setupCallback(WebAuthClient client) {
         ResultCallback<AuthorizationStatus, AuthorizationException> callback =
                 new ResultCallback<AuthorizationStatus, AuthorizationException>() {
                     @Override
@@ -168,20 +181,20 @@ public class BrowserSignInActivity extends AppCompatActivity {
                     }
                 };
 
-        mWebAuth.registerCallback(callback, this);
+        client.registerCallback(callback, this);
     }
 
     private void signIn() {
-        mWebAuth.signIn(this, null);
+        getWebAuth().signIn(this, mPayload);
     }
 
     private void clearStorage() {
-        mSessionClient.clear();
+        getSessionClient().clear();
         ServiceLocator.provideEncryptionManager(this).removeKeys();
         try {
             DefaultEncryptionManager simpleEncryptionManager = ServiceLocator.createSimpleEncryptionManager(this);
             ServiceLocator.setEncryptionManager(simpleEncryptionManager);
-            mWebAuth.migrateTo(simpleEncryptionManager);
+            getWebAuth().migrateTo(simpleEncryptionManager);
             mPreferenceRepository.enableSmartLock(false);
         } catch (Exception e) {
             showMessage(e.getMessage());
@@ -199,5 +212,21 @@ public class BrowserSignInActivity extends AppCompatActivity {
     private void showUserInfo() {
         startActivity(UserInfoActivity.createIntent(this));
         finish();
+    }
+
+    /**
+     * Check if the device is a emulator.
+     *
+     * @return true if it is emulator
+     */
+    public static boolean isEmulator() {
+        return Build.FINGERPRINT.startsWith("generic")
+                || Build.FINGERPRINT.startsWith("unknown")
+                || Build.MODEL.contains("google_sdk")
+                || Build.MODEL.contains("Emulator")
+                || Build.MODEL.contains("Android SDK built for x86")
+                || Build.MANUFACTURER.contains("Google")
+                || Build.PRODUCT.contains("sdk_gphone")
+                || Build.DEVICE.contains("generic");
     }
 }

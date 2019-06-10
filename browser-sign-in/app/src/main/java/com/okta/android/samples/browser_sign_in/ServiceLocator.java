@@ -16,6 +16,8 @@ package com.okta.android.samples.browser_sign_in;
 
 import android.content.Context;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.okta.android.samples.browser_sign_in.rxClient.RxOkta;
 import com.okta.android.samples.browser_sign_in.rxClient.RxWebAuthClient;
 import com.okta.android.samples.browser_sign_in.util.OktaProgressDialog;
@@ -62,7 +64,7 @@ public class ServiceLocator {
                             .setRequireHardwareBackedKeyStore(false)
                             .withEncryptionManager(mEncryptionManager);
 
-                    mWebAuth = localWebAuth = builder.create();
+                    localWebAuth = mWebAuth = builder.create();
                 }
             }
         }

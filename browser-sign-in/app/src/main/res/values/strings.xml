@@ -18,8 +18,9 @@
     <string name="init_error">Error during init</string>
     <string name="auth_canceled">Authorization Canceled</string>
     <string name="operation_cancel">Operation canceled</string>
-    <string name="sign_out_canceled">SignOut Canceled</string>
-    <string name="sign_out_success">SignOut Success</string>
+    <string name="sign_out_canceled">Sign Out Canceled</string>
+    <string name="sign_out_success">Sign Out Success</string>
+    <string name="sign_out_error">Sign Out Error</string>
     <string name="user_name_title">Username:</string>
     <string name="name_title">Name:</string>
     <string name="locale_title">Locale:</string>
@@ -37,7 +38,7 @@
     <string name="access_token_loading">Refreshing access token</string>
     <string name="progress_dialog_message">Please wait! This may take a moment.</string>
     <string name="unable_to_revoke_tokens">Unable to revoke tokens</string>
-    <string name="tokens_revoke_success">Tokens revoke successfully</string>
+    <string name="tokens_revoke_success">Tokens revoked successfully</string>
     <string name="welcome_title">Welcome, %s</string>
     <string name="timezone_title">Timezone</string>
     <string name="last_update_title">Last Updated</string>
