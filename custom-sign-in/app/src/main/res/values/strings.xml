@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under the License.
 -->
 <resources>
-    <string name="app_name">Okta Android Samples</string>
+    <string name="app_name">Okta Custom Sign In</string>
     <string name="native_sign_in_btn">Native sign-in</string>
     <string name="password_reset">Reset Password</string>
     <string name="password_recover">Recover Password</string>

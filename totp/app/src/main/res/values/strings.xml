@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">TOTP</string>
+    <string name="action_settings">Settings</string>
+    <string name="totp_generator">TOTP Generator</string>
+    <string name="scan_qr_code">Scan QR Code</string>
+    <string name="input_manually">Input Manually</string>
+    <string name="done">Done</string>
+    <string name="name">Name</string>
+    <string name="issuer">Issuer</string>
+    <string name="key">Key</string>
+    <string name="encryption_error">Error during encryption secret key</string>
+
+    <string name="ok">OK</string>
+    <string name="permission_camera_rationale">Access to the camera is needed for detection</string>
+    <string name="no_camera_permission">This application cannot run because it does not have the camera permission. The application will now exit.</string>
+    <string name="low_storage_error">Face detector dependencies cannot be downloaded due to low device storage</string>
+</resources>
