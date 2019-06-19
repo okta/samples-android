@@ -22,7 +22,6 @@ import androidx.annotation.ColorInt;
 import com.okta.oidc.OIDCConfig;
 import com.okta.oidc.OktaBuilder;
 import com.okta.oidc.clients.ClientFactory;
-import com.okta.oidc.net.HttpConnectionFactory;
 import com.okta.oidc.storage.OktaStorage;
 import com.okta.oidc.storage.security.EncryptionManager;
 

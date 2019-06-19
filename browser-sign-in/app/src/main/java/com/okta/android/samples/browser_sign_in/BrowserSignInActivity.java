@@ -14,25 +14,15 @@
  */
 package com.okta.android.samples.browser_sign_in;
 
-import android.annotation.TargetApi;
-import android.app.KeyguardManager;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.hardware.fingerprint.FingerprintManager;
-import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.okta.android.samples.browser_sign_in.util.FingerprintDialog;
 import com.okta.android.samples.browser_sign_in.util.OktaProgressDialog;
 import com.okta.android.samples.browser_sign_in.util.PreferenceRepository;
 import com.okta.android.samples.browser_sign_in.util.SmartLockHelper;
@@ -40,14 +30,13 @@ import com.okta.oidc.AuthorizationStatus;
 import com.okta.oidc.ResultCallback;
 import com.okta.oidc.clients.sessions.SessionClient;
 import com.okta.oidc.clients.web.WebAuthClient;
-import com.okta.oidc.storage.security.FingerprintUtils;
 import com.okta.oidc.storage.security.DefaultEncryptionManager;
+import com.okta.oidc.storage.security.EncryptionManager;
 import com.okta.oidc.util.AuthorizationException;
 
 
 public class BrowserSignInActivity extends AppCompatActivity {
     private String TAG = "BrowserSignIn";
-    private static final String EXTRA_FAILED = "failed";
     private OktaProgressDialog oktaProgressDialog;
 
     private WebAuthClient mWebAuth;
@@ -64,46 +53,45 @@ public class BrowserSignInActivity extends AppCompatActivity {
 
         mPreferenceRepository = ServiceLocator.providePreferenceRepository(this);
         mSmartLockHelper = ServiceLocator.provideSmartLockHelper();
-        ((Button) findViewById(R.id.browser_sign_in)).setOnClickListener(v -> signIn());
+        findViewById(R.id.browser_sign_in).setOnClickListener(v -> signIn());
 
         init();
 
         if (mSessionClient.isAuthenticated()) {
             if (mPreferenceRepository.isEnabledSmartLock()) {
-                mSmartLockHelper.showSmartLockChooseDialog(this, new FingerprintDialog.FingerprintDialogCallbacks() {
-                    @Override
-                    public void onFingerprintSuccess(int purpose, FingerprintManager.CryptoObject cryptoObject) {
-                        ServiceLocator.provideEncryptionManager(BrowserSignInActivity.this).recreateCipher();
-                        showUserInfo();
-                    }
+                if (!SmartLockHelper.isKeyguardSecure(this)) {
+                    clearStorage();
+                } else {
+                    EncryptionManager encryptionManager = ServiceLocator.provideEncryptionManager(BrowserSignInActivity.this);
+                    mSmartLockHelper.showSmartLockChooseDialog(this, new SmartLockHelper.FingerprintCallback(this, encryptionManager) {
+                        @Override
+                        protected void onSuccess() {
+                            if (encryptionManager.isValidKeys()) {
+                                showUserInfo();
+                            } else {
+                                clearStorage();
+                            }
+                        }
 
-                    @Override
-                    public void onFingerprintCancel() {
-                        showMessage("Failed to fingerprint");
-                        clearStorage();
-                    }
-                });
+                        @Override
+                        public void onFingerprintError(String error) {
+                            super.onFingerprintError(error);
+                            showMessage(error);
+                            clearStorage();
+                        }
+
+                        @Override
+                        public void onFingerprintCancel() {
+                            super.onFingerprintCancel();
+                            showMessage(getString(R.string.cancel));
+                        }
+                    }, encryptionManager.getCipher());
+                }
             } else {
                 showUserInfo();
             }
         } else {
-            if (mPreferenceRepository.isEnabledSmartLock()) {
-                clearStorage();
-            }
-        }
-    }
-
-    private void clearStorage() {
-        try {
-            mSessionClient.clear();
-            DefaultEncryptionManager simpleEncryptionManager = ServiceLocator.
-                    createSimpleEncryptionManager(this);
-            ServiceLocator.setEncryptionManager(simpleEncryptionManager);
-            mWebAuth.migrateTo(simpleEncryptionManager);
-            mPreferenceRepository.enableSmartLock(false);
-        } catch (AuthorizationException exception) {
-            // Should recreate
-            throw new RuntimeException("Need restart the app");
+            clearStorage();
         }
     }
 
@@ -134,13 +122,8 @@ public class BrowserSignInActivity extends AppCompatActivity {
                 new ResultCallback<AuthorizationStatus, AuthorizationException>() {
                     @Override
                     public void onSuccess(@NonNull AuthorizationStatus status) {
-                        Log.d(TAG, "AUTHORIZED");
-
                         if (status == AuthorizationStatus.AUTHORIZED) {
                             oktaProgressDialog.hide();
-
-                            Log.i(TAG, "User is already authenticated, proceeding " +
-                                    "to token activity");
                             showUserInfo();
                         } else if (status == AuthorizationStatus.SIGNED_OUT) {
                             displayAuth();
@@ -149,7 +132,6 @@ public class BrowserSignInActivity extends AppCompatActivity {
 
                     @Override
                     public void onCancel() {
-                        Log.d(TAG, "CANCELED!");
                         oktaProgressDialog.hide();
                         showMessage(getString(R.string.auth_canceled));
                     }
@@ -166,20 +148,21 @@ public class BrowserSignInActivity extends AppCompatActivity {
                             case AuthorizationException.EncryptionErrors.KEYGUARD_AUTHENTICATION_ERROR:
                             case AuthorizationException.EncryptionErrors.ENCRYPT_ERROR:
                             case AuthorizationException.EncryptionErrors.DECRYPT_ERROR:
+                                EncryptionManager encryptionManager = ServiceLocator.provideEncryptionManager(
+                                        BrowserSignInActivity.this);
                                 mSmartLockHelper.showSmartLockChooseDialog(
                                         BrowserSignInActivity.this,
-                                        new FingerprintDialog.FingerPrintCallback(
+                                        new SmartLockHelper.FingerprintCallback(
                                                 BrowserSignInActivity.this,
-                                                ServiceLocator.provideEncryptionManager(
-                                                        BrowserSignInActivity.this)) {
+                                                encryptionManager) {
                                             @Override
                                             protected void onSuccess() {
                                                 signIn();
                                             }
-                                        });
+                                        }, encryptionManager.getCipher());
                                 break;
                             case AuthorizationException.EncryptionErrors.INVALID_KEYS_ERROR:
-                                handleInvalidKeys();
+                                clearStorage();
                                 break;
                         }
                     }
@@ -192,13 +175,14 @@ public class BrowserSignInActivity extends AppCompatActivity {
         mWebAuth.signIn(this, null);
     }
 
-    private void handleInvalidKeys() {
+    private void clearStorage() {
         mSessionClient.clear();
         ServiceLocator.provideEncryptionManager(this).removeKeys();
         try {
             DefaultEncryptionManager simpleEncryptionManager = ServiceLocator.createSimpleEncryptionManager(this);
             ServiceLocator.setEncryptionManager(simpleEncryptionManager);
             mWebAuth.migrateTo(simpleEncryptionManager);
+            mPreferenceRepository.enableSmartLock(false);
         } catch (Exception e) {
             showMessage(e.getMessage());
         }

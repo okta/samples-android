@@ -22,7 +22,7 @@ import androidx.annotation.Nullable;
 
 import com.okta.oidc.Tokens;
 import com.okta.oidc.clients.sessions.SyncSessionClient;
-import com.okta.oidc.net.HttpConnection;
+import com.okta.oidc.net.ConnectionParameters;
 import com.okta.oidc.net.response.IntrospectInfo;
 import com.okta.oidc.net.response.UserInfo;
 import com.okta.oidc.storage.security.EncryptionManager;
@@ -41,7 +41,7 @@ class RxSessionClientImpl implements RxSessionClient {
         mSyncSessionClient = syncSessionClient;
     }
     @Override
-    public Single<JSONObject> authorizedRequest(@NonNull Uri uri, @Nullable Map<String, String> properties, @Nullable Map<String, String> postParameters, @NonNull HttpConnection.RequestMethod method) {
+    public Single<JSONObject> authorizedRequest(@NonNull Uri uri, @Nullable Map<String, String> properties, @Nullable Map<String, String> postParameters, @NonNull ConnectionParameters.RequestMethod method) {
         return null;
     }
 

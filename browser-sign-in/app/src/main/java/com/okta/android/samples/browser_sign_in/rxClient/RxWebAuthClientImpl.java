@@ -29,7 +29,7 @@ import com.okta.oidc.OIDCConfig;
 import com.okta.oidc.OktaState;
 import com.okta.oidc.clients.web.SyncWebAuthClient;
 import com.okta.oidc.clients.web.SyncWebAuthClientFactory;
-import com.okta.oidc.net.HttpConnectionFactory;
+import com.okta.oidc.net.OktaHttpClient;
 import com.okta.oidc.results.Result;
 import com.okta.oidc.storage.OktaStorage;
 import com.okta.oidc.storage.security.EncryptionManager;
@@ -49,10 +49,10 @@ class RxWebAuthClientImpl implements RxWebAuthClient {
     private PublishSubject<RxResult> submitResults;
     private RxSessionClient rxSessionClient;
 
-    RxWebAuthClientImpl(OIDCConfig oidcConfig, Context context, OktaStorage oktaStorage, EncryptionManager encryptionManager, HttpConnectionFactory connectionFactory, boolean requireHardwareBackedKeyStore, boolean cacheMode, @ColorInt
+    RxWebAuthClientImpl(OIDCConfig oidcConfig, Context context, OktaStorage oktaStorage, EncryptionManager encryptionManager, OktaHttpClient httpClient, boolean requireHardwareBackedKeyStore, boolean cacheMode, @ColorInt
             int customTabColor, @Nullable String[] supportedBrowsers) {
         mSyncAuthClient = new SyncWebAuthClientFactory(customTabColor, supportedBrowsers).createClient(oidcConfig, context, oktaStorage, encryptionManager,
-                connectionFactory, requireHardwareBackedKeyStore, cacheMode);
+                httpClient, requireHardwareBackedKeyStore, cacheMode);
         rxSessionClient = new RxSessionClientImpl(mSyncAuthClient.getSessionClient());
     }
 
@@ -136,7 +136,7 @@ class RxWebAuthClientImpl implements RxWebAuthClient {
     private void stop() {
         submitResults.onComplete();
         if (mActivity.get() != null) {
-            mSyncAuthClient.unregisterCallback(mActivity.get());
+            mSyncAuthClient.unregisterCallback();
         }
     }
 

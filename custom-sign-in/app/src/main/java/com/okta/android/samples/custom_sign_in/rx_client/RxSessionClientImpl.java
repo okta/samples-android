@@ -20,12 +20,9 @@ import android.net.Uri;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.okta.oidc.OIDCConfig;
-import com.okta.oidc.OktaState;
 import com.okta.oidc.Tokens;
 import com.okta.oidc.clients.sessions.SyncSessionClient;
-import com.okta.oidc.net.HttpConnection;
-import com.okta.oidc.net.HttpConnectionFactory;
+import com.okta.oidc.net.ConnectionParameters;
 import com.okta.oidc.net.response.IntrospectInfo;
 import com.okta.oidc.net.response.UserInfo;
 
@@ -43,7 +40,7 @@ class RxSessionClientImpl implements RxSessionClient {
         mSyncSessionClientImpl = syncSessionClient;
     }
     @Override
-    public Single<JSONObject> authorizedRequest(@NonNull Uri uri, @Nullable Map<String, String> properties, @Nullable Map<String, String> postParameters, @NonNull HttpConnection.RequestMethod method) {
+    public Single<JSONObject> authorizedRequest(@NonNull Uri uri, @Nullable Map<String, String> properties, @Nullable Map<String, String> postParameters, @NonNull ConnectionParameters.RequestMethod method) {
         return null;
     }
 

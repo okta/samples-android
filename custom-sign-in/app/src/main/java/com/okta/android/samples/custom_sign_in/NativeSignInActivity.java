@@ -25,8 +25,12 @@ import com.okta.android.samples.custom_sign_in.base.ContainerActivity;
 import com.okta.android.samples.custom_sign_in.base.IOktaAppAuthClientProvider;
 import com.okta.android.samples.custom_sign_in.fragments.NativeSignInFragment;
 import com.okta.android.samples.custom_sign_in.fragments.NativeSignInWithMFAFragment;
+import com.okta.android.samples.custom_sign_in.util.PreferenceRepository;
+import com.okta.android.samples.custom_sign_in.util.SmartLockHelper;
 import com.okta.oidc.clients.AuthClient;
 import com.okta.oidc.clients.sessions.SessionClient;
+import com.okta.oidc.storage.security.DefaultEncryptionManager;
+import com.okta.oidc.storage.security.EncryptionManager;
 
 public class NativeSignInActivity extends ContainerActivity implements IOktaAppAuthClientProvider {
     private String TAG = "NativeSignInActivity";
@@ -35,6 +39,8 @@ public class NativeSignInActivity extends ContainerActivity implements IOktaAppA
 
     private AuthClient mAuth;
     private SessionClient mSessionClient;
+    private PreferenceRepository mPreferenceRepository;
+    private SmartLockHelper mSmartLockHelper;
 
 
     enum MODE {
@@ -70,16 +76,51 @@ public class NativeSignInActivity extends ContainerActivity implements IOktaAppA
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mPreferenceRepository = ServiceLocator.providePreferenceRepository(this);
+        mSmartLockHelper = ServiceLocator.provideSmartLockHelper();
+
         init();
     }
 
     private void init() {
-        mAuth = ServiceLocator.provideWebAuthClient(this);
+        mAuth = ServiceLocator.provideAuthClient(this);
         mSessionClient = mAuth.getSessionClient();
 
         if (mSessionClient.isAuthenticated()) {
-            showUserInfo();
+            if (mPreferenceRepository.isEnabledSmartLock()) {
+                if (!SmartLockHelper.isKeyguardSecure(this)) {
+                    clearStorage();
+                } else {
+                    EncryptionManager encryptionManager = ServiceLocator.provideEncryptionManager(NativeSignInActivity.this);
+                    mSmartLockHelper.showSmartLockChooseDialog(this, new SmartLockHelper.FingerprintCallback(this, encryptionManager) {
+                        @Override
+                        protected void onSuccess() {
+                            if (encryptionManager.isValidKeys()) {
+                                showUserInfo();
+                            } else {
+                                clearStorage();
+                            }
+                        }
+
+                        @Override
+                        public void onFingerprintError(String error) {
+                            super.onFingerprintError(error);
+                            showMessage(error);
+                            clearStorage();
+                        }
+
+                        @Override
+                        public void onFingerprintCancel() {
+                            super.onFingerprintCancel();
+                            showMessage(getString(R.string.cancel));
+                        }
+                    }, encryptionManager.getCipher());
+                }
+            } else {
+                showUserInfo();
+            }
         } else {
+            clearStorage();
             showLoginForm();
         }
     }
@@ -94,6 +135,20 @@ public class NativeSignInActivity extends ContainerActivity implements IOktaAppA
         Fragment fragment = getFragmentByModeId(getIntent().getIntExtra(MODE_KEY, -1), getIntent());
         if(fragment != null) {
             this.navigation.present(fragment);
+        }
+    }
+
+    @Override
+    public void clearStorage() {
+        mSessionClient.clear();
+        ServiceLocator.provideEncryptionManager(this).removeKeys();
+        try {
+            DefaultEncryptionManager simpleEncryptionManager = ServiceLocator.createSimpleEncryptionManager(this);
+            ServiceLocator.setEncryptionManager(simpleEncryptionManager);
+            mAuth.migrateTo(simpleEncryptionManager);
+            mPreferenceRepository.enableSmartLock(false);
+        } catch (Exception e) {
+            showMessage(e.getMessage());
         }
     }
 
