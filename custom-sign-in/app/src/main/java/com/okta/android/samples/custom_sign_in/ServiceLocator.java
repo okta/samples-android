@@ -14,7 +14,7 @@ import com.okta.android.samples.custom_sign_in.rx_client.RxOkta;
 import com.okta.android.samples.custom_sign_in.rx_client.RxAuthClient;
 import com.okta.oidc.storage.security.DefaultEncryptionManager;
 import com.okta.oidc.storage.security.EncryptionManager;
-import com.okta.oidc.storage.security.SmartLockBaseEncryptionManager;
+import com.okta.oidc.storage.security.GuardedEncryptionManager;
 
 public class ServiceLocator {
     private static volatile AuthClient mAuth;
@@ -35,7 +35,7 @@ public class ServiceLocator {
                     boolean isSmartLockEncryptionManager = providePreferenceRepository(context).isEnabledSmartLock();
 
                     mEncryptionManager = (isSmartLockEncryptionManager) ?
-                            createSmartLockEncryptionManager(context) : createSimpleEncryptionManager(context);
+                            createGuardedEncryptionManager(context) : createSimpleEncryptionManager(context);
 
                     mAuth = localAuth = new Okta.AuthBuilder()
                             .withConfig(mOidcConfig)
@@ -59,8 +59,8 @@ public class ServiceLocator {
         return mPreferenceRepository;
     }
 
-    public static SmartLockBaseEncryptionManager createSmartLockEncryptionManager(Context context) {
-        return new SmartLockBaseEncryptionManager(context, 10);
+    public static GuardedEncryptionManager createGuardedEncryptionManager(Context context) {
+        return new GuardedEncryptionManager(context, 10);
     }
 
     public static DefaultEncryptionManager createSimpleEncryptionManager(Context context) {

@@ -19,10 +19,9 @@ import android.content.Context;
 
 import com.okta.oidc.AuthenticationPayload;
 import com.okta.oidc.OIDCConfig;
-import com.okta.oidc.OktaState;
 import com.okta.oidc.clients.SyncAuthClient;
 import com.okta.oidc.clients.SyncAuthClientFactory;
-import com.okta.oidc.net.HttpConnectionFactory;
+import com.okta.oidc.net.OktaHttpClient;
 import com.okta.oidc.results.Result;
 import com.okta.oidc.storage.OktaStorage;
 import com.okta.oidc.storage.security.EncryptionManager;
@@ -33,8 +32,8 @@ class RxAuthClientImpl implements RxAuthClient {
     private SyncAuthClient mSyncAuthClient;
     private RxSessionClientImpl rxSessionClientImpl;
 
-    RxAuthClientImpl(OIDCConfig oidcConfig, Context context, OktaStorage oktaStorage, EncryptionManager encryptionManager, HttpConnectionFactory connectionFactory, boolean isRequireHardwareBackedKeyStore, boolean isCacheMode) {
-        mSyncAuthClient = new SyncAuthClientFactory().createClient(oidcConfig, context, oktaStorage, encryptionManager, connectionFactory, isRequireHardwareBackedKeyStore, isCacheMode);
+    RxAuthClientImpl(OIDCConfig oidcConfig, Context context, OktaStorage oktaStorage, EncryptionManager encryptionManager, OktaHttpClient httpClient, boolean isRequireHardwareBackedKeyStore, boolean isCacheMode) {
+        mSyncAuthClient = new SyncAuthClientFactory().createClient(oidcConfig, context, oktaStorage, encryptionManager, httpClient, isRequireHardwareBackedKeyStore, isCacheMode);
         rxSessionClientImpl = new RxSessionClientImpl(mSyncAuthClient.getSessionClient());
     }
 

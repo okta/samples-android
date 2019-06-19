@@ -41,7 +41,7 @@ import com.okta.oidc.clients.sessions.SessionClient;
 import com.okta.oidc.net.response.UserInfo;
 import com.okta.oidc.storage.security.DefaultEncryptionManager;
 import com.okta.oidc.storage.security.EncryptionManager;
-import com.okta.oidc.storage.security.SmartLockBaseEncryptionManager;
+import com.okta.oidc.storage.security.GuardedEncryptionManager;
 import com.okta.oidc.util.AuthorizationException;
 
 import org.json.JSONException;
@@ -177,10 +177,6 @@ public class UserInfoActivity extends AppCompatActivity {
 
     private void showUserData() {
         if (mSessionClient.isAuthenticated()) {
-            if (!mEncryptionManager.isValidKeys()) {
-                handleInvalidKeys();
-                return;
-            }
             if (mEncryptionManager.isUserAuthenticatedOnDevice()) {
                 displayAuthorizationInfo();
                 if (mUserInfoJson.get() == null) {
@@ -220,11 +216,11 @@ public class UserInfoActivity extends AppCompatActivity {
                 @Override
                 protected void onSuccess() {
                     try {
-                        SmartLockBaseEncryptionManager smartLockBaseEncryptionManager = ServiceLocator.createSmartLockEncryptionManager(UserInfoActivity.this);
-                        smartLockBaseEncryptionManager.recreateCipher();
-                        mAuth.migrateTo(smartLockBaseEncryptionManager);
+                        GuardedEncryptionManager guardedEncryptionManager = ServiceLocator.createGuardedEncryptionManager(UserInfoActivity.this);
+                        guardedEncryptionManager.recreateCipher();
+                        mAuth.migrateTo(guardedEncryptionManager);
                         mPreferenceRepository.enableSmartLock(true);
-                        mEncryptionManager = smartLockBaseEncryptionManager;
+                        mEncryptionManager = guardedEncryptionManager;
                     } catch (AuthorizationException exception) {
                         mSessionClient.clear();
                         finish();

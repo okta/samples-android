@@ -13,7 +13,7 @@ import com.okta.oidc.clients.web.WebAuthClient;
 import com.okta.oidc.storage.SharedPreferenceStorage;
 import com.okta.oidc.storage.security.EncryptionManager;
 import com.okta.oidc.storage.security.DefaultEncryptionManager;
-import com.okta.oidc.storage.security.SmartLockBaseEncryptionManager;
+import com.okta.oidc.storage.security.GuardedEncryptionManager;
 
 public class ServiceLocator {
     private final static String FIRE_FOX = "org.mozilla.firefox";
@@ -36,7 +36,7 @@ public class ServiceLocator {
                     boolean isSmartLockEncryptionManager = providePreferenceRepository(context).isEnabledSmartLock();
 
                     mEncryptionManager = (isSmartLockEncryptionManager) ?
-                            createSmartLockEncryptionManager(context) : createSimpleEncryptionManager(context);
+                            createGuardedEncryptionManager(context) : createSimpleEncryptionManager(context);
 
                     Okta.WebAuthBuilder builder = new Okta.WebAuthBuilder()
                             .withConfig(mOidcConfig)
@@ -63,8 +63,8 @@ public class ServiceLocator {
         return mPreferenceRepository;
     }
 
-    public static SmartLockBaseEncryptionManager createSmartLockEncryptionManager(Context context) {
-        return new SmartLockBaseEncryptionManager(context, 10);
+    public static GuardedEncryptionManager createGuardedEncryptionManager(Context context) {
+        return new GuardedEncryptionManager(context, 10);
     }
 
     public static DefaultEncryptionManager createSimpleEncryptionManager(Context context) {
