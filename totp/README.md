@@ -23,6 +23,6 @@ cd totp-app/
 
 Now you can build and run the application.
 
-Clicking the **Add** button will allow you to setup TOTP generator for your account. You can do this either by scanning QR image or by entering seret key manually. Once you do this, TOTP will be refreshed automatically. 
+Clicking the **Add** button will allow you to setup TOTP generator for your account. You can do this either by scanning QR image or by entering secret key manually. Once you do this, TOTP will be refreshed automatically. 
 
 [OIDC Native Android Application Setup Instructions]: https://developer.okta.com/quickstart/#/android/nodejs/express
