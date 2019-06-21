@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under the License.
 -->
 <resources>
-    <string name="app_name">Okta Android Samples</string>
+    <string name="app_name">Okta Browser Sign In</string>
     <string name="browser_sample">Browser Sample</string>
     <string name="have_account">Have an account?</string>
     <string name="sign_in_btn">Sign In</string>
