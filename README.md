@@ -12,7 +12,7 @@ Please find the sample that fits your use-case from the table below.
 
 [Okta Authentication API]: https://developer.okta.com/docs/api/resources/authn.html
 [Okta Java Authentication SDK]: https://github.com/okta/okta-auth-java
-[Okta AppAuth Library]: https://github.com/okta/okta-sdk-appauth-android
+[Okta OIDC Library]: https://github.com/okta/okta-oidc-android
 [Chrome Custom Tabs]: https://developer.chrome.com/multidevice/android/customtabs
 [Authorization Code Flow with PKCE]: https://developer.okta.com/authentication-guide/implementing-authentication/auth-code-pkce
 [Google Authenticator]: https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2

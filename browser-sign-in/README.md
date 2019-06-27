@@ -1,6 +1,6 @@
 # Browser Sign In Example
 
-This example shows you how to use the [Okta AppAuth Library][] to authenticate a user. Authentication is done with the browser [Chrome Custom Tabs] [], which open Okta login web-page. After the user authenticates in browser, they are redirected back to the application and exchanging the received code for tokens and persist them.
+This example shows you how to use the [Okta OIDC Library][] to authenticate a user. Authentication is done with the browser [Chrome Custom Tabs] [], which open Okta login web-page. After the user authenticates in browser, they are redirected back to the application and exchanging the received code for tokens and persist them.
 
 ## Prerequisites
 
@@ -65,10 +65,10 @@ if your **Redirect URI** is `com.okta.example:/callback`, the **AppAuth Redirect
 
 ## Dependencies
 
-This sample use [Okta AppAuth Library] dependency in `build.gradle` file:
+This sample use [Okta OIDC Library] dependency in `build.gradle` file:
 
 ```bash
-implementation 'com.okta.android:appauth-android:0.2.1'
+implementation 'com.okta.android:oidc-androidx:1.0.1'
 ```
 
 ## Running This Example
@@ -84,7 +84,7 @@ cd browser-sign-in
 
 [Okta Authentication API]: https://developer.okta.com/docs/api/resources/authn.html
 [Okta Java Authentication SDK]: https://github.com/okta/okta-auth-java
-[Okta AppAuth Library]: https://github.com/okta/okta-sdk-appauth-android
+[Okta OIDC Library]: https://github.com/okta/okta-oidc-android
 [Chrome Custom Tabs]: https://developer.chrome.com/multidevice/android/customtabs
 [Authorization Code Flow with PKCE]: https://developer.okta.com/authentication-guide/implementing-authentication/auth-code-pkce
 [Google Authenticator]: https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2
