@@ -1,7 +1,7 @@
 # Custom Sign In Example
 
-This example shows you how to use the [Okta AppAuth Library][] with [Okta Java Authentication SDK] to authenticate a user within application and how to work with [Okta Authentication API] using [Okta Java Authentication SDK] library.
-Authentication is done by getting sessionToken by [Okta Java Authentication SDK] and process authenticate using [Okta AppAuth Library] within application without a browser ([Chrome Custom Tabs] []). 
+This example shows you how to use the [Okta OIDC Library][] with [Okta Java Authentication SDK] to authenticate a user within application and how to work with [Okta Authentication API] using [Okta Java Authentication SDK] library.
+Authentication is done by getting sessionToken by [Okta Java Authentication SDK] and process authenticate using [Okta OIDC Library] within application without a browser ([Chrome Custom Tabs] []).
 MFA (Multi Factor Authentication) and Recovery password are done by using [Okta Java Authentication SDK] library.
 
 ## Prerequisites
@@ -57,8 +57,14 @@ the following contents:
     "profile",
     "offline_access"
   ],
-  "issuer_uri": "https://{yourOktaDomain}/oauth2/default"
+  "discovery_uri": "https://{yourOktaDomain}"
 }
+```
+
+```java
+OIDCConfig config = new OIDCConfig.Builder()
+    .withJsonFile(this, R.id.okta_app_auth_config)
+    .create();
 ```
 
 **Note**: *To receive a **refresh_token**, you must include the `offline_access` scope.*
@@ -66,7 +72,7 @@ the following contents:
 
 #### Update the URI Scheme and Base Url
 
-You should set baseUrl of your Okta organization. Also [Okta AppAuth Library][] requires to specify a unique URI in order to redirect back to your application from a web browser. 
+You should set baseUrl of your Okta organization. Also [Okta OIDC Library][] requires to specify a unique URI in order to redirect back to your application from a web browser.
 To do this, you must define a gradle manifest placeholder in your app's `build.gradle`:
 
 ```java
@@ -76,11 +82,12 @@ android {
         buildConfigField("String", "BASE_URL", "\"https://{yourOktaDomain}\"")
         manifestPlaceholders = [
             hostName:"{yourOktaDomain}",
-            "appAuthRedirectScheme": "com.lohika.android.test"
+            "appAuthRedirectScheme": "com.okta.android.test"
         ]
     }
 }
 ```
+
 Make sure this is consistent with the redirect URI Okta domain used in `okta_app_auth_config.json` . For example,
 if your **Redirect URI** is `com.okta.example:/callback`, the **AppAuth Redirect Scheme** should be
 `com.okta.example`.
@@ -89,19 +96,24 @@ if your **Base URL** is `https://okta.okta.com/oauth2/default`, the **Okta Domai
 
 ## Dependencies
 
-Add the [Okta AppAuth Library][] dependency to your `build.gradle` file:
+Add the [Okta OIDC Library][] dependency to your `build.gradle` file:
 This library is responsible for exchange sessionToken on OpenID tokens(id, access, refresh) and persisting them
+
 ```bash
-implementation 'com.okta.android:appauth-android:0.2.1'
+implementation 'com.okta.android:oidc-androidx:1.0.1'
 ```
+
 Add the [Okta Java Authentication SDK][] dependency to your `build.gradle` file
 This library is a convenience wrapper around [Okta Authentication API][].
+
 ```bash
 implementation 'com.okta.authn.sdk:okta-authn-sdk-api:0.4.0'
 runtimeOnly 'com.okta.authn.sdk:okta-authn-sdk-impl:0.4.0'
 runtimeOnly 'com.okta.sdk:okta-sdk-okhttp:1.5.2'
 ```
+
 Add the okhttp library
+
 ```bash
 runtimeOnly 'com.squareup.okhttp3:okhttp:3.14.1'
 ```
@@ -109,6 +121,7 @@ runtimeOnly 'com.squareup.okhttp3:okhttp:3.14.1'
 ## Running This Example
 
 You can open this sample into Android Studio or build it using gradle.
+
 ```bash
 cd custom-sign-in
 ./gradlew app:assembleRelease
@@ -134,7 +147,7 @@ cd custom-sign-in
 
 [Okta Authentication API]: https://developer.okta.com/docs/api/resources/authn.html
 [Okta Java Authentication SDK]: https://github.com/okta/okta-auth-java
-[Okta AppAuth Library]: https://github.com/okta/okta-sdk-appauth-android
+[Okta OIDC Library]: https://github.com/okta/okta-oidc-android
 [Chrome Custom Tabs]: https://developer.chrome.com/multidevice/android/customtabs
 [Authorization Code Flow with PKCE]: https://developer.okta.com/authentication-guide/implementing-authentication/auth-code-pkce
 [Google Authenticator]: https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2
