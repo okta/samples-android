@@ -95,7 +95,7 @@ public class UserInfoActivity extends AppCompatActivity {
 
         userInfoContainer = findViewById(R.id.userinfo_container);
         tokensContainer = findViewById(R.id.tokens_container);
-        smartLockChecker = findViewById(R.id.smartlock_ebable);
+        smartLockChecker = findViewById(R.id.smartlock_enable);
         smartLockChecker.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked && smartLockChecker.isEnabled()) {
                 showDialogWithAllowToProtectDataByFingerprint();

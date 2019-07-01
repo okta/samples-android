@@ -1,10 +1,15 @@
 apply plugin: 'com.android.application'
 
-Properties properties = new Properties()
-properties.load(project.rootProject.file('local.properties').newDataInputStream())
-def username = properties.getProperty('test.username')
-def password = properties.getProperty('test.password')
-def pincode = properties.getProperty('test.pincode')
+def username = "\"\""
+def password = "\"\""
+def pincode = "\"\""
+if (project.rootProject.file('local.properties').exists()) {
+    Properties properties = new Properties()
+    properties.load(project.rootProject.file('local.properties').newDataInputStream())
+    username = properties.getProperty('test.username')
+    password = properties.getProperty('test.password')
+    pincode = properties.getProperty('test.pincode')
+}
 
 android {
     compileSdkVersion 28

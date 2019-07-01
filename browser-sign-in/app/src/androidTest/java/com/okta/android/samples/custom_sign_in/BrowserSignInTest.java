@@ -14,7 +14,6 @@ import androidx.test.uiautomator.Until;
 import com.okta.android.samples.browser_sign_in.BrowserSignInActivity;
 import com.okta.android.samples.browser_sign_in.BuildConfig;
 import com.okta.android.samples.browser_sign_in.R;
-import com.okta.android.samples.browser_sign_in.ServiceLocator;
 import com.okta.oidc.AuthenticationPayload;
 
 import org.junit.Before;
@@ -24,11 +23,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 
-import java.sql.Time;
-
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
-import static androidx.test.espresso.action.ViewActions.closeSoftKeyboard;
 import static androidx.test.espresso.action.ViewActions.swipeUp;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.RootMatchers.isDialog;
@@ -39,7 +35,6 @@ import static androidx.test.espresso.matcher.ViewMatchers.isNotChecked;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
-import static com.okta.android.samples.custom_sign_in.Utils.Ui.waitFor;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.not;
 
@@ -148,7 +143,7 @@ public class BrowserSignInTest {
         //wait for token exchange
         getProgressBar().waitUntilGone(NETWORK_TIMEOUT);
         onView(withId(R.id.clear_data_btn)).check(matches(isDisplayed()));
-        onView(withId(R.id.smartlock_ebable)).check(matches(isNotChecked()));
+        onView(withId(R.id.smartlock_enable)).check(matches(isNotChecked()));
 
     }
 
@@ -257,7 +252,7 @@ public class BrowserSignInTest {
 
         //check if get profile is visible
         onView(withId(R.id.clear_data_btn)).check(matches(isDisplayed()));
-        onView(withId(R.id.smartlock_ebable)).check(matches(isNotChecked()));
+        onView(withId(R.id.smartlock_enable)).check(matches(isNotChecked()));
     }
 
     @Test
@@ -276,8 +271,8 @@ public class BrowserSignInTest {
         getProgressBar().waitUntilGone(NETWORK_TIMEOUT);
 
         //check if get profile is visible
-        onView(withId(R.id.smartlock_ebable)).check(matches(isNotChecked()));
-        onView(withId(R.id.smartlock_ebable)).perform(click());
+        onView(withId(R.id.smartlock_enable)).check(matches(isNotChecked()));
+        onView(withId(R.id.smartlock_enable)).perform(click());
 
         onView(withText("Yes"))
                 .inRoot(isDialog())
@@ -286,8 +281,8 @@ public class BrowserSignInTest {
 
         unlockKeystore();
 
-        onView(withId(R.id.smartlock_ebable)).check(matches(isChecked()));
-        onView(withId(R.id.smartlock_ebable)).check(matches(not(isEnabled())));
+        onView(withId(R.id.smartlock_enable)).check(matches(isChecked()));
+        onView(withId(R.id.smartlock_enable)).check(matches(not(isEnabled())));
     }
 
     @Test
@@ -299,8 +294,8 @@ public class BrowserSignInTest {
         getProgressBar().waitUntilGone(NETWORK_TIMEOUT);
 
         //check if get profile is visible
-        onView(withId(R.id.smartlock_ebable)).check(matches(isChecked()));
-        onView(withId(R.id.smartlock_ebable)).check(matches(not(isEnabled())));
+        onView(withId(R.id.smartlock_enable)).check(matches(isChecked()));
+        onView(withId(R.id.smartlock_enable)).check(matches(not(isEnabled())));
 
         Thread.sleep(15000);
 
