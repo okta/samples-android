@@ -55,8 +55,6 @@ import static com.okta.oidc.util.AuthorizationException.EncryptionErrors;
 
 public class UserInfoActivity extends AppCompatActivity {
     private final String TAG = "UserInfo";
-    private WebAuthClient mWebAuth;
-    private SessionClient mSessionClient;
 
     private OktaProgressDialog oktaProgressDialog;
     private SmartLockHelper mSmartLockHelper;
@@ -65,6 +63,8 @@ public class UserInfoActivity extends AppCompatActivity {
     private ConstraintLayout userInfoContainer;
     private ConstraintLayout tokensContainer;
     private Switch smartLockChecker;
+    private WebAuthClient mWebAuthClient;
+    private SessionClient mSessionClient;
 
     private static final String KEY_USER_INFO = "userInfo";
 
@@ -82,38 +82,20 @@ public class UserInfoActivity extends AppCompatActivity {
 
         this.oktaProgressDialog = ServiceLocator.provideOktaProgressDialog(this);
         this.mSmartLockHelper = ServiceLocator.provideSmartLockHelper();
-        mWebAuth = ServiceLocator.provideWebAuthClient(this);
-        mSessionClient = mWebAuth.getSessionClient();
-
         mPreferenceRepository = ServiceLocator.providePreferenceRepository(this);
+        mWebAuthClient = ServiceLocator.provideWebAuthClient(this);
+        mSessionClient = mWebAuthClient.getSessionClient();
 
-        if (!mSessionClient.isAuthenticated()) {
+        if (!getSessionClient().isAuthenticated()) {
             showMessage(getString(R.string.not_authorized));
             clearData();
             finish();
+            return;
         }
-
-        mWebAuth.registerCallback(new ResultCallback<AuthorizationStatus, AuthorizationException>() {
-            @Override
-            public void onSuccess(@NonNull AuthorizationStatus authorizationStatus) {
-                showMessage(getString(R.string.sign_out_success));
-            }
-
-            @Override
-            public void onCancel() {
-                showMessage(getString(R.string.sign_out_canceled));
-            }
-
-            @Override
-            public void onError(@Nullable String s, @Nullable AuthorizationException e) {
-                showMessage(getString(R.string.error_message) + " : " + e.errorDescription + " : " + e.error);
-                handleEncryptionError(e, () -> logOut());
-            }
-        }, this);
 
         userInfoContainer = findViewById(R.id.userinfo_container);
         tokensContainer = findViewById(R.id.tokens_container);
-        smartLockChecker = findViewById(R.id.smartlock_ebable);
+        smartLockChecker = findViewById(R.id.smartlock_enable);
         smartLockChecker.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked && smartLockChecker.isEnabled()) {
                 showDialogWithAllowToProtectDataByFingerprint();
@@ -149,6 +131,24 @@ public class UserInfoActivity extends AppCompatActivity {
         findViewById(R.id.refreshtoken_title).setVisibility(View.VISIBLE);
         findViewById(R.id.refreshtoken_textview).setVisibility(View.VISIBLE);
 
+        mWebAuthClient.registerCallback(new ResultCallback<AuthorizationStatus, AuthorizationException>() {
+            @Override
+            public void onSuccess(@NonNull AuthorizationStatus authorizationStatus) {
+                showMessage(getString(R.string.sign_out_success));
+            }
+
+            @Override
+            public void onCancel() {
+                showMessage(getString(R.string.sign_out_canceled));
+            }
+
+            @Override
+            public void onError(@Nullable String s, @Nullable AuthorizationException e) {
+                showMessage(getString(R.string.error_message) + " : " + e.errorDescription + " : " + e.error);
+                handleEncryptionError(e, () -> logOut());
+            }
+        }, this);
+
         if (savedInstanceState != null && savedInstanceState.getString(KEY_USER_INFO) != null) {
             try {
                 mUserInfoJson.set(new UserInfo(new JSONObject(savedInstanceState.getString(KEY_USER_INFO))));
@@ -161,6 +161,14 @@ public class UserInfoActivity extends AppCompatActivity {
         mEncryptionManager = ServiceLocator.provideEncryptionManager(this);
         showSmartLockInfo();
         showUserData();
+    }
+
+    private SessionClient getSessionClient() {
+        return mSessionClient;
+    }
+
+    private WebAuthClient getWebAuthClient() {
+        return mWebAuthClient;
     }
 
     private void showSmartLockInfo() {
@@ -201,7 +209,7 @@ public class UserInfoActivity extends AppCompatActivity {
     }
 
     private void showUserData() {
-        if (mSessionClient.isAuthenticated()) {
+        if (getSessionClient().isAuthenticated()) {
             if (mEncryptionManager.isUserAuthenticatedOnDevice()) {
                 displayAuthorizationInfo();
                 if (mUserInfoJson.get() == null) {
@@ -243,11 +251,11 @@ public class UserInfoActivity extends AppCompatActivity {
                     try {
                         GuardedEncryptionManager guardedBaseEncryptionManager = ServiceLocator.createGuardedEncryptionManager(UserInfoActivity.this);
                         guardedBaseEncryptionManager.recreateCipher();
-                        mWebAuth.migrateTo(guardedBaseEncryptionManager);
+                        getWebAuthClient().migrateTo(guardedBaseEncryptionManager);
                         mPreferenceRepository.enableSmartLock(true);
                         mEncryptionManager = guardedBaseEncryptionManager;
                     } catch (AuthorizationException exception) {
-                        mSessionClient.clear();
+                        getSessionClient().clear();
                         finish();
                     }
                     oktaProgressDialog.hide();
@@ -282,7 +290,7 @@ public class UserInfoActivity extends AppCompatActivity {
     private void fetchUserInfo() {
         oktaProgressDialog.show(getString(R.string.user_info_loading));
 
-        mSessionClient.getUserProfile(new RequestCallback<UserInfo, AuthorizationException>() {
+        getSessionClient().getUserProfile(new RequestCallback<UserInfo, AuthorizationException>() {
             @Override
             public void onSuccess(UserInfo userInfo) {
                 oktaProgressDialog.hide();
@@ -303,7 +311,7 @@ public class UserInfoActivity extends AppCompatActivity {
     private void refreshToken() {
         oktaProgressDialog.show(getString(R.string.access_token_loading));
 
-        mSessionClient.refreshToken(new RequestCallback<Tokens, AuthorizationException>() {
+        getSessionClient().refreshToken(new RequestCallback<Tokens, AuthorizationException>() {
             @Override
             public void onSuccess(Tokens tokens) {
                 oktaProgressDialog.hide();
@@ -331,18 +339,19 @@ public class UserInfoActivity extends AppCompatActivity {
     }
 
     private void logOut() {
-        mWebAuth.signOutOfOkta(this);
+        getWebAuthClient().signOutOfOkta(this);
     }
 
     private void revokeTokens() {
         Tokens tokens;
         try {
-            tokens = mSessionClient.getTokens();
+            tokens = getSessionClient().getTokens();
         } catch (AuthorizationException exception) {
             handleEncryptionError(exception, () -> revokeTokens());
             return;
         }
         oktaProgressDialog.show();
+
         final int requestCount = (tokens.getRefreshToken() != null) ? 3 : 2;
 
         RequestCallback<Boolean, AuthorizationException> requestCallback = new RequestCallback<Boolean, AuthorizationException>() {
@@ -350,14 +359,21 @@ public class UserInfoActivity extends AppCompatActivity {
 
             @Override
             public synchronized void onSuccess(Boolean aBoolean) {
+                Log.d(TAG, "onSuccess: " + aBoolean);
                 localRequestCount--;
+
                 if (localRequestCount == 0) {
                     onComplete();
+                } else if (localRequestCount == 2 || (localRequestCount == 1 && requestCount != 3)) {
+                    getSessionClient().revokeToken(tokens.getIdToken(), this);
+                } else {
+                    getSessionClient().revokeToken(tokens.getRefreshToken(), this);
                 }
             }
 
             @Override
             public synchronized void onError(String s, AuthorizationException e) {
+                Log.d(TAG, "onError");
                 localRequestCount = -1;
 
                 oktaProgressDialog.hide();
@@ -365,26 +381,29 @@ public class UserInfoActivity extends AppCompatActivity {
             }
 
             private void onComplete() {
-                oktaProgressDialog.hide();
-                showMessage(getString(R.string.tokens_revoke_success));
+                Log.d(TAG, "onComplete");
+                if (localRequestCount == 0) {
+                    oktaProgressDialog.hide();
+                    clearData();
+                    showMessage(getString(R.string.tokens_revoke_success));
+                }
             }
         };
 
-        mSessionClient.revokeToken(tokens.getAccessToken(), requestCallback);
-        mSessionClient.revokeToken(tokens.getIdToken(), requestCallback);
-
-        if (tokens.getRefreshToken() != null)
-            mSessionClient.revokeToken(tokens.getRefreshToken(), requestCallback);
-        navigateToStartActivity();
+        getSessionClient().revokeToken(tokens.getAccessToken(), requestCallback);
+        getSessionClient().revokeToken(tokens.getIdToken(), requestCallback);
+        if (tokens.getRefreshToken() != null) {
+            getSessionClient().revokeToken(tokens.getRefreshToken(), requestCallback);
+        }
     }
 
     private void handleInvalidKeys() {
-        mSessionClient.clear();
+        getSessionClient().clear();
         ServiceLocator.provideEncryptionManager(this).removeKeys();
         try {
             DefaultEncryptionManager simpleEncryptionManager = ServiceLocator.createSimpleEncryptionManager(this);
             ServiceLocator.setEncryptionManager(simpleEncryptionManager);
-            mWebAuth.migrateTo(simpleEncryptionManager);
+            getWebAuthClient().migrateTo(simpleEncryptionManager);
             mPreferenceRepository.enableSmartLock(false);
         } catch (Exception e) {
             showMessage(e.getMessage());
@@ -393,7 +412,7 @@ public class UserInfoActivity extends AppCompatActivity {
     }
 
     private void clearData() {
-        mSessionClient.clear();
+        getSessionClient().clear();
         navigateToStartActivity();
     }
 
@@ -448,7 +467,7 @@ public class UserInfoActivity extends AppCompatActivity {
         UserInfo user = mUserInfoJson.get();
         Tokens tokens;
         try {
-            tokens = mSessionClient.getTokens();
+            tokens = getSessionClient().getTokens();
         } catch (AuthorizationException exception) {
             handleEncryptionError(exception, () -> displayAuthorizationInfo());
             return;
