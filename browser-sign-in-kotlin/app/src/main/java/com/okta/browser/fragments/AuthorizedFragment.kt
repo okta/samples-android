@@ -1,6 +1,20 @@
+/*
+ * Copyright (c) 2019, Okta, Inc. and/or its affiliates. All rights reserved.
+ * The Okta software accompanied by this notice is provided pursuant to the Apache License,
+ * Version 2.0 (the "License.")
+ *
+ * You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0.
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *
+ * See the License for the specific language governing permissions and limitations under the
+ * License.
+ */
+
 package com.okta.browser.fragments
 
-import android.nfc.Tag
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -19,18 +33,18 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.authorized_fragment.*
 
 class AuthorizedFragment : Fragment(), View.OnClickListener {
-    private val LOG_TAG: String = "AuthorizedFragment"
+    private val TAG: String = "AuthorizedFragment"
     private var sessionClient: SessionClient? = null
     private var customSignIn: Boolean = false
 
     companion object {
         private const val CUSTOM_SIGN_IN = "custom_sign_in"
+        @JvmStatic
         fun newInstance(customSignIn: Boolean) = AuthorizedFragment().apply {
             arguments = Bundle().apply {
                 putBoolean(CUSTOM_SIGN_IN, customSignIn)
             }
         }
-
     }
 
     override fun onCreateView(
@@ -42,7 +56,7 @@ class AuthorizedFragment : Fragment(), View.OnClickListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        savedInstanceState?.run { customSignIn = getBoolean(CUSTOM_SIGN_IN, false) }
+        arguments?.run { customSignIn = getBoolean(CUSTOM_SIGN_IN, false) }
 
         activity?.let {
             sessionClient = (it as MainActivity).getSession()
@@ -51,6 +65,7 @@ class AuthorizedFragment : Fragment(), View.OnClickListener {
                 check_expired.setOnClickListener(this)
                 sign_out_okta.setOnClickListener(this)
                 clear_data.setOnClickListener(this)
+                manage_tokens.setOnClickListener(this)
                 if (customSignIn) {
                     sign_out_okta.visibility = View.GONE
                 }
@@ -73,7 +88,14 @@ class AuthorizedFragment : Fragment(), View.OnClickListener {
             check_expired.id -> checkExpired()
             sign_out_okta.id -> signOutOfOkta()
             clear_data.id -> clearData()
+            manage_tokens.id -> manageTokens()
         }
+    }
+
+    private fun manageTokens() {
+        requireFragmentManager().beginTransaction().addToBackStack(null)
+            .replace(R.id.fragment, ManageTokensFragment.newInstance())
+            .commit()
     }
 
     private fun clearData() {
@@ -96,12 +118,14 @@ class AuthorizedFragment : Fragment(), View.OnClickListener {
             networkCallInProgress()
             getUserProfile(object : RequestCallback<UserInfo, AuthorizationException> {
                 override fun onSuccess(user: UserInfo) {
+                    activity?.network_progress?.hide()
                     info_view.text = user.toString()
                     Snackbar.make(info_view, getString(R.string.success), Snackbar.LENGTH_SHORT).show()
                 }
 
-                override fun onError(error: String, exception: AuthorizationException) {
-                    Log.d(LOG_TAG, error, exception)
+                override fun onError(error: String?, exception: AuthorizationException) {
+                    activity?.network_progress?.hide()
+                    Log.d(TAG, error, exception)
                     Snackbar.make(info_view, getString(R.string.error), Snackbar.LENGTH_SHORT).show()
                 }
             })
@@ -118,9 +142,8 @@ class AuthorizedFragment : Fragment(), View.OnClickListener {
         }
     }
 
-
     private fun networkCallInProgress() {
-        network_progress?.show()
+        activity?.network_progress?.show()
         Snackbar.make(info_view, getString(R.string.loading), Snackbar.LENGTH_INDEFINITE)
             .let { bar ->
                 bar.setAction(getString(R.string.cancel)) {

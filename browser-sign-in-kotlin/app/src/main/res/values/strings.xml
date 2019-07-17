@@ -33,5 +33,20 @@
     <string name="token_expired">Token expired:</string>
     <string name="success">Success</string>
     <string name="error">Error check logs</string>
+    <string name="manage_tokens">Manage tokens</string>
+
+    <string name="refresh_token">Refresh token</string>
+    <string name="revoke_token">Revoke token</string>
+    <string name="introspect_token">Introspect token</string>
+    <string name="display_token">Display token</string>
+    <string name="select_token">Select a token type</string>
+    <string name="active">%s is active: %b</string>
+    <string name="revoked">%s token has been revoked: %b</string>
+
+    <string-array name="tokens">
+        <item>Access token</item>
+        <item>Refresh token</item>
+        <item>ID token</item>
+    </string-array>
 
 </resources>
