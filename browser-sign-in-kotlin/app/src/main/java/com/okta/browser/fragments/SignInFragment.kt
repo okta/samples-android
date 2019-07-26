@@ -16,9 +16,12 @@
 package com.okta.browser.fragments
 
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import com.okta.browser.R
@@ -64,15 +67,36 @@ class SignInFragment : Fragment() {
         username.hint = activity?.getString(R.string.prompt_hint)
         pass_layout.visibility = View.GONE
         sign_in_button.setOnClickListener {
-            viewModel.hint.postValue(username.text?.toString())
+            viewModel.hint.postValue(username.text?.toString() ?: "")
         }
+        username.setOnEditorActionListener(TextView.OnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                sign_in_button.callOnClick()
+                return@OnEditorActionListener true
+            }
+            false
+        })
     }
 
     private fun initializeCustomAction() {
         username.hint = activity?.getString(R.string.prompt_username)
         pass_layout.visibility = View.VISIBLE
         sign_in_button.setOnClickListener {
-            viewModel.userAndPassword.postValue(Pair(username.text.toString(), password.text.toString()))
+            viewModel.userAndPassword.postValue(Pair(username.text?.toString() ?: "", password.text?.toString() ?: ""))
         }
+        username.setOnEditorActionListener(TextView.OnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                password.requestFocus()
+                return@OnEditorActionListener true
+            }
+            false
+        })
+        password.setOnEditorActionListener(TextView.OnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                sign_in_button.callOnClick()
+                return@OnEditorActionListener true
+            }
+            false
+        })
     }
 }

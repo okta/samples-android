@@ -26,6 +26,8 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.preference.PreferenceManager
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import com.google.android.material.snackbar.Snackbar
+import com.okta.authn.sdk.client.AuthenticationClient
+import com.okta.authn.sdk.client.AuthenticationClients
 import com.okta.browser.fragments.AuthorizedFragment
 import com.okta.browser.fragments.SettingsFragment
 import com.okta.browser.fragments.SharedViewModel
@@ -36,10 +38,16 @@ import com.okta.oidc.AuthorizationStatus.SIGNED_OUT
 import com.okta.oidc.clients.AuthClient
 import com.okta.oidc.clients.sessions.SessionClient
 import com.okta.oidc.clients.web.WebAuthClient
+import com.okta.oidc.results.Result
 import com.okta.oidc.storage.SharedPreferenceStorage
 import com.okta.oidc.util.AuthorizationException
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.properties.Delegates.notNull
+
 
 const val PREF_HARDWARE: String = "hardware_keystore"
 const val PREF_CUSTOM: String = "custom_sign_in"
@@ -52,6 +60,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
 
     private var webAuthClient: WebAuthClient? = null
     private var authClient: AuthClient? = null
+    private var authenticationClient: AuthenticationClient? = null
 
     private var config: OIDCConfig by notNull()
 
@@ -65,7 +74,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
         setSupportActionBar(toolbar)
 
         ViewModelProviders.of(this).get(SharedViewModel::class.java).run {
-            hint.observe(this@MainActivity, Observer { signIn(false, it) })
+            hint.observe(this@MainActivity, Observer { signIn(false, it, "") })
             userAndPassword.observe(this@MainActivity, Observer { signIn(true, it.first, it.second) })
         }
 
@@ -78,10 +87,10 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
 
         val authenticated = if (customSignIn) {
             createAuthClient()
-            authClient?.sessionClient?.isAuthenticated!!
+            authClient?.sessionClient?.isAuthenticated ?: false
         } else {
             createWebClient()
-            webAuthClient?.sessionClient?.isAuthenticated!!
+            webAuthClient?.sessionClient?.isAuthenticated ?: false
         }
 
         if (authenticated) {
@@ -128,6 +137,10 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
             .withStorage(SharedPreferenceStorage(this, PREF_STORAGE_AUTH))
             .setRequireHardwareBackedKeyStore(hardwareKeystore)
             .create()
+
+        authenticationClient = AuthenticationClients.builder()
+            .setOrgUrl(BuildConfig.ORG_URL)
+            .build()
     }
 
     private fun createWebClient() {
@@ -145,21 +158,13 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
             }
 
             override fun onError(msg: String?, exception: AuthorizationException?) {
-                network_progress.hide()
-                showMessage(msg ?: getString(R.string.unknown))
-                Log.d(tag, "onError: ", exception)
+                signInError(msg, exception)
             }
 
             override fun onSuccess(result: AuthorizationStatus) {
                 network_progress.hide()
                 when (result) {
-                    AUTHORIZED -> {
-                        showMessage(getString(R.string.authorized))
-                        supportFragmentManager.beginTransaction().replace(
-                            R.id.fragment,
-                            AuthorizedFragment.newInstance(customSignIn)
-                        ).commit()
-                    }
+                    AUTHORIZED -> signInSuccess()
                     SIGNED_OUT -> showMessage(getString(R.string.sign_out_success))
                 }
             }
@@ -171,18 +176,59 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
         webAuthClient?.signOutOfOkta(this)
     }
 
+    private fun signInSuccess() {
+        showMessage(getString(R.string.authorized))
+        supportFragmentManager.beginTransaction().replace(
+            R.id.fragment,
+            AuthorizedFragment.newInstance(customSignIn)
+        ).commit()
+    }
+
+    private fun signInError(msg: String?, exception: AuthorizationException?) {
+        network_progress.hide()
+        showMessage(msg ?: getString(R.string.unknown))
+        Log.d(tag, "onError: ", exception)
+    }
+
     private fun signIn(
         customSignIn: Boolean,
-        hintOrUsername: String? = null,
-        password: String? = null
+        hintOrUsername: String,
+        password: String
     ) {
-        networkCallInProgress()
         if (customSignIn) {
-            hintOrUsername.isNullOrEmpty().and(password.isNullOrEmpty())
-                .run { showMessage(getString(R.string.invalid_input)) }
-
+            hintOrUsername.isEmpty().or(password.isEmpty())
+                .run {
+                    if (this) {
+                        showMessage(getString(R.string.invalid_input))
+                    } else {
+                        networkCallInProgress()
+                        authenticateUser(hintOrUsername, password)
+                    }
+                }
         } else {
+            networkCallInProgress()
             webAuthClient?.signIn(this, AuthenticationPayload.Builder().setLoginHint(hintOrUsername).build())
+        }
+    }
+
+    private fun authenticateUser(username: String, password: String) {
+        GlobalScope.launch(Dispatchers.Main) {
+            withContext(Dispatchers.IO) {
+                authenticationClient?.authenticate(
+                    username, password.toCharArray(),
+                    null, null
+                )
+            }?.run {
+                authClient?.signIn(sessionToken, null, object : RequestCallback<Result, AuthorizationException> {
+                    override fun onSuccess(result: Result) {
+                        signInSuccess()
+                    }
+
+                    override fun onError(error: String?, exception: AuthorizationException?) {
+                        signInError(error, exception)
+                    }
+                })
+            }
         }
     }
 
