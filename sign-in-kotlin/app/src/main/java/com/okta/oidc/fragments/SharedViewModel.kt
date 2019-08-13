@@ -13,7 +13,7 @@
  * License.
  */
 
-package com.okta.browser.fragments
+package com.okta.oidc.fragments
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel

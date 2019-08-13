@@ -13,7 +13,7 @@
  * License.
  */
 
-package com.okta.browser
+package com.okta.oidc
 
 import android.content.Intent
 import android.os.Bundle

@@ -13,18 +13,17 @@
  * License.
  */
 
-package com.okta.browser.fragments
+package com.okta.oidc.fragments
 
 import android.os.Bundle
-import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProviders
-import com.okta.browser.R
+import androidx.lifecycle.ViewModelProvider
+import com.okta.oidc.R
 import kotlinx.android.synthetic.main.sign_in_fragment.*
 import kotlin.properties.Delegates.notNull
 
@@ -51,7 +50,7 @@ class SignInFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         activity?.run {
-            viewModel = ViewModelProviders.of(this).get(SharedViewModel::class.java)
+            viewModel = ViewModelProvider(this).get(SharedViewModel::class.java)
         }
 
         arguments?.run {

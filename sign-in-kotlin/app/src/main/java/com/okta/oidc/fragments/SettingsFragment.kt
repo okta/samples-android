@@ -13,11 +13,11 @@
  * License.
  */
 
-package com.okta.browser.fragments
+package com.okta.oidc.fragments
 
 import android.os.Bundle
 import androidx.preference.PreferenceFragmentCompat
-import com.okta.browser.R
+import com.okta.oidc.R
 
 class SettingsFragment : PreferenceFragmentCompat() {
 

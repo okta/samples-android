@@ -13,7 +13,7 @@
  * License.
  */
 
-package com.okta.browser.fragments
+package com.okta.oidc.fragments
 
 import android.app.AlertDialog
 import android.os.Bundle
@@ -23,8 +23,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.google.android.material.snackbar.Snackbar
-import com.okta.browser.MainActivity
-import com.okta.browser.R
+import com.okta.oidc.MainActivity
+import com.okta.oidc.R
 import com.okta.oidc.RequestCallback
 import com.okta.oidc.Tokens
 import com.okta.oidc.clients.sessions.SessionClient

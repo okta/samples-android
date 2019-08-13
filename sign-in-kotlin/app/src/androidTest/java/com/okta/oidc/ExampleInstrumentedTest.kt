@@ -1,4 +1,4 @@
-package com.okta.browser
+package com.okta.oidc
 
 import androidx.test.InstrumentationRegistry
 import androidx.test.runner.AndroidJUnit4

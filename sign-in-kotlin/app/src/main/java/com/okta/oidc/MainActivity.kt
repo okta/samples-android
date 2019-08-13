@@ -13,7 +13,7 @@
  * License.
  */
 
-package com.okta.browser
+package com.okta.oidc
 
 import android.content.SharedPreferences
 import android.os.Bundle
@@ -21,18 +21,16 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.*
 import androidx.preference.PreferenceManager
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import com.google.android.material.snackbar.Snackbar
 import com.okta.authn.sdk.client.AuthenticationClient
 import com.okta.authn.sdk.client.AuthenticationClients
-import com.okta.browser.fragments.AuthorizedFragment
-import com.okta.browser.fragments.SettingsFragment
-import com.okta.browser.fragments.SharedViewModel
-import com.okta.browser.fragments.SignInFragment
-import com.okta.oidc.*
+import com.okta.oidc.fragments.AuthorizedFragment
+import com.okta.oidc.fragments.SettingsFragment
+import com.okta.oidc.fragments.SharedViewModel
+import com.okta.oidc.fragments.SignInFragment
 import com.okta.oidc.AuthorizationStatus.AUTHORIZED
 import com.okta.oidc.AuthorizationStatus.SIGNED_OUT
 import com.okta.oidc.clients.AuthClient
@@ -73,7 +71,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
 
         setSupportActionBar(toolbar)
 
-        ViewModelProviders.of(this).get(SharedViewModel::class.java).run {
+        ViewModelProvider(this).get(SharedViewModel::class.java).run {
             hint.observe(this@MainActivity, Observer { signIn(false, it, "") })
             userAndPassword.observe(this@MainActivity, Observer { signIn(true, it.first, it.second) })
         }

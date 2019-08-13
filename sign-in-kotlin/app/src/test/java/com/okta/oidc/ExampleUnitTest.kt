@@ -1,4 +1,4 @@
-package com.okta.browser
+package com.okta.oidc
 
 import org.junit.Test
 
