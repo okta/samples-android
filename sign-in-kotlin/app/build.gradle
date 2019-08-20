@@ -20,10 +20,7 @@ android {
         if (project.rootProject.file('local.properties').exists()) {
             Properties properties = new Properties()
             properties.load(project.rootProject.file('local.properties').newDataInputStream())
-            def orgUrl = properties.getProperty('authn.orgUrl')
-            if (orgUrl != null) {
-                buildConfigField "String", "ORG_URL", orgUrl
-            }
+            buildConfigField "String", "ORG_URL", properties.getProperty('authn.orgUrl', '""')
         }
     }
     buildTypes {
