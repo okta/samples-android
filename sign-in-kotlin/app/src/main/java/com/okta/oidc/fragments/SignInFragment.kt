@@ -81,7 +81,12 @@ class SignInFragment : Fragment() {
         username.hint = activity?.getString(R.string.prompt_username)
         pass_layout.visibility = View.VISIBLE
         sign_in_button.setOnClickListener {
-            viewModel.userAndPassword.postValue(Pair(username.text?.toString() ?: "", password.text?.toString() ?: ""))
+            viewModel.userAndPassword.postValue(
+                Pair(
+                    username.text?.toString() ?: "",
+                    password.text?.toString() ?: ""
+                )
+            )
         }
         username.setOnEditorActionListener(TextView.OnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {

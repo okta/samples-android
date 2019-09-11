@@ -35,7 +35,8 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_manage_tokens.*
 
 class ManageTokensFragment : Fragment(), View.OnClickListener {
-    private val TAG: String = "ManageTokensFragment"
+
+    private val logTag: String = "ManageTokensFragment"
     private var sessionClient: SessionClient? = null
 
     companion object {
@@ -79,13 +80,22 @@ class ManageTokensFragment : Fragment(), View.OnClickListener {
             revoke_token.id -> selectToken(resources.getStringArray(R.array.tokens).dropLast(1).toTypedArray()) {
                 when (it) {
                     0 -> revokeToken(sessionClient?.tokens?.accessToken, TokenTypeHint.ACCESS_TOKEN)
-                    1 -> revokeToken(sessionClient?.tokens?.refreshToken, TokenTypeHint.REFRESH_TOKEN)
+                    1 -> revokeToken(
+                        sessionClient?.tokens?.refreshToken,
+                        TokenTypeHint.REFRESH_TOKEN
+                    )
                 }
             }
             introspect_token.id -> selectToken(resources.getStringArray(R.array.tokens)) {
                 when (it) {
-                    0 -> introspectToken(sessionClient?.tokens?.accessToken, TokenTypeHint.ACCESS_TOKEN)
-                    1 -> introspectToken(sessionClient?.tokens?.refreshToken, TokenTypeHint.REFRESH_TOKEN)
+                    0 -> introspectToken(
+                        sessionClient?.tokens?.accessToken,
+                        TokenTypeHint.ACCESS_TOKEN
+                    )
+                    1 -> introspectToken(
+                        sessionClient?.tokens?.refreshToken,
+                        TokenTypeHint.REFRESH_TOKEN
+                    )
                     2 -> introspectToken(sessionClient?.tokens?.idToken, TokenTypeHint.ID_TOKEN)
                 }
             }
@@ -120,13 +130,15 @@ class ManageTokensFragment : Fragment(), View.OnClickListener {
                     override fun onSuccess(result: IntrospectInfo) {
                         activity?.network_progress?.hide()
                         info_view.text = getString(R.string.active, hint, result.isActive)
-                        Snackbar.make(info_view, getString(R.string.success), Snackbar.LENGTH_SHORT).show()
+                        Snackbar.make(info_view, getString(R.string.success), Snackbar.LENGTH_SHORT)
+                            .show()
                     }
 
                     override fun onError(error: String?, exception: AuthorizationException?) {
                         activity?.network_progress?.hide()
-                        Log.d(TAG, "Error: ", exception)
-                        Snackbar.make(info_view, getString(R.string.error), Snackbar.LENGTH_SHORT).show()
+                        Log.d(logTag, "Error: ", exception)
+                        Snackbar.make(info_view, getString(R.string.error), Snackbar.LENGTH_SHORT)
+                            .show()
                     }
                 })
         }
@@ -141,13 +153,15 @@ class ManageTokensFragment : Fragment(), View.OnClickListener {
                     override fun onSuccess(result: Boolean) {
                         activity?.network_progress?.hide()
                         info_view.text = getString(R.string.revoked, hint, result)
-                        Snackbar.make(info_view, getString(R.string.success), Snackbar.LENGTH_SHORT).show()
+                        Snackbar.make(info_view, getString(R.string.success), Snackbar.LENGTH_SHORT)
+                            .show()
                     }
 
                     override fun onError(error: String?, exception: AuthorizationException?) {
                         activity?.network_progress?.hide()
-                        Log.d(TAG, "Error: ", exception)
-                        Snackbar.make(info_view, getString(R.string.error), Snackbar.LENGTH_SHORT).show()
+                        Log.d(logTag, "Error: ", exception)
+                        Snackbar.make(info_view, getString(R.string.error), Snackbar.LENGTH_SHORT)
+                            .show()
                     }
                 })
         }
@@ -159,13 +173,15 @@ class ManageTokensFragment : Fragment(), View.OnClickListener {
             refreshToken(object : RequestCallback<Tokens, AuthorizationException> {
                 override fun onSuccess(result: Tokens) {
                     activity?.network_progress?.hide()
-                    Snackbar.make(info_view, getString(R.string.success), Snackbar.LENGTH_SHORT).show()
+                    Snackbar.make(info_view, getString(R.string.success), Snackbar.LENGTH_SHORT)
+                        .show()
                 }
 
                 override fun onError(error: String?, exception: AuthorizationException?) {
                     activity?.network_progress?.hide()
-                    Log.d(TAG, "Error: ", exception)
-                    Snackbar.make(info_view, getString(R.string.error), Snackbar.LENGTH_SHORT).show()
+                    Log.d(logTag, "Error: ", exception)
+                    Snackbar.make(info_view, getString(R.string.error), Snackbar.LENGTH_SHORT)
+                        .show()
                 }
             })
         }

@@ -16,7 +16,9 @@
 package com.okta.oidc.fragments
 
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceFragmentCompat
+import com.okta.oidc.MainActivity
 import com.okta.oidc.R
 
 class SettingsFragment : PreferenceFragmentCompat() {
@@ -28,5 +30,19 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.settings)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        activity?.let {
+            (it as MainActivity).supportActionBar?.hide()
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        activity?.let {
+            (it as MainActivity).supportActionBar?.show()
+        }
     }
 }

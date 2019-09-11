@@ -42,11 +42,19 @@
     <string name="select_token">Select a token type</string>
     <string name="active">%s is active: %b</string>
     <string name="revoked">%s token has been revoked: %b</string>
-
+    <string name="use_biometric_summary">Select to enable or disable biometric</string>
+    <string name="use_biometric">Enable biometric</string>
+    <string name="biometric_title">Confirm credentials</string>
+    <string name="error_status">Authentication error code %d, %s</string>
+    <string name="retry">Retry</string>
+    <string name="exit">Exit</string>
+    <string name="unauthenticated">Unable to authenticate device</string>
+    <string name="migrate_error">Unable to switch encryption</string>
     <string-array name="tokens">
         <item>Access token</item>
         <item>Refresh token</item>
         <item>ID token</item>
     </string-array>
+
 
 </resources>

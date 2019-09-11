@@ -33,7 +33,8 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.authorized_fragment.*
 
 class AuthorizedFragment : Fragment(), View.OnClickListener {
-    private val TAG: String = "AuthorizedFragment"
+
+    private val logTag: String = "AuthorizedFragment"
     private var sessionClient: SessionClient? = null
     private var customSignIn: Boolean = false
 
@@ -102,7 +103,8 @@ class AuthorizedFragment : Fragment(), View.OnClickListener {
         sessionClient?.run {
             clear()
             Snackbar.make(info_view, getString(R.string.data_cleared), Snackbar.LENGTH_SHORT).show()
-            requireFragmentManager().beginTransaction().replace(R.id.fragment, SignInFragment.newInstance(customSignIn))
+            requireFragmentManager().beginTransaction()
+                .replace(R.id.fragment, SignInFragment.newInstance(customSignIn))
                 .commit()
         }
     }
@@ -120,13 +122,15 @@ class AuthorizedFragment : Fragment(), View.OnClickListener {
                 override fun onSuccess(user: UserInfo) {
                     activity?.network_progress?.hide()
                     info_view.text = user.toString()
-                    Snackbar.make(info_view, getString(R.string.success), Snackbar.LENGTH_SHORT).show()
+                    Snackbar.make(info_view, getString(R.string.success), Snackbar.LENGTH_SHORT)
+                        .show()
                 }
 
                 override fun onError(error: String?, exception: AuthorizationException) {
                     activity?.network_progress?.hide()
-                    Log.d(TAG, error, exception)
-                    Snackbar.make(info_view, getString(R.string.error), Snackbar.LENGTH_SHORT).show()
+                    Log.d(logTag, error, exception)
+                    Snackbar.make(info_view, getString(R.string.error), Snackbar.LENGTH_SHORT)
+                        .show()
                 }
             })
         }
