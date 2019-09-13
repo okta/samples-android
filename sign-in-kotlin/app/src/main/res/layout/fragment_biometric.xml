@@ -55,7 +55,7 @@
                 android:layout_marginStart="@dimen/horizontal_padding"
                 android:layout_marginTop="@dimen/vertical_padding"
                 android:layout_marginEnd="@dimen/horizontal_padding"
-                android:text="@string/clear_data"
+                android:text="@string/clear_data_reset"
                 android:theme="@style/AppTheme.Button" />
 
         <com.google.android.material.button.MaterialButton

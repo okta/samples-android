@@ -15,11 +15,13 @@
 
 package com.okta.oidc
 
+import android.annotation.SuppressLint
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -59,6 +61,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
 
     private val logTag = MainActivity::class.simpleName
     private val settingsTag = "SETTINGS_FRAGMENT"
+    private val biometricTag = "BIOMETRIC_FRAGMENT"
 
     private var hardwareKeystore: Boolean = false
     private var customSignIn: Boolean = false
@@ -87,10 +90,14 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                 Observer { signIn(true, it.first, it.second) })
             deviceAuthenticated.observe(this@MainActivity, Observer {
                 if (it) {
+                    showMessage(getString(R.string.authenticated), Snackbar.LENGTH_SHORT)
                     currentEncryptionManager.cipher ?: currentEncryptionManager.recreateCipher()
                     startFragmentTransaction()
                 } else {
-                    showMessage(getString(R.string.unauthenticated))
+                    showMessage(getString(R.string.unauthenticated), Snackbar.LENGTH_SHORT)
+                    supportFragmentManager.beginTransaction()
+                        .replace(R.id.fragment, BiometricFragment.newInstance(), biometricTag)
+                        .commit()
                 }
             })
         }
@@ -183,14 +190,6 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
             }
     }
 
-    private fun isAuthenticated(): Boolean {
-        return if (customSignIn) {
-            authClient.sessionClient.isAuthenticated
-        } else {
-            webAuthClient.sessionClient.isAuthenticated
-        }
-    }
-
     private fun startFragmentTransaction() {
         if (isAuthenticated() && !currentEncryptionManager.isUserAuthenticatedOnDevice) {
             return
@@ -206,9 +205,11 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
     }
 
     private fun biometricPrompt() {
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment, BiometricFragment.newInstance())
-            .commit()
+        if (supportFragmentManager.findFragmentByTag(biometricTag) == null) {
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment, BiometricFragment.newInstance(), biometricTag)
+                .commit()
+        }
     }
 
     private fun onHardwareRequirementChanged(on: Boolean): Boolean {
@@ -226,13 +227,21 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                 if (!keyGuardEncryptionManager.isValidKeys) {
                     keyGuardEncryptionManager.recreateKeys(this)
                 }
+                if (!defaultEncryptionManager.isValidKeys) {
+                    defaultEncryptionManager.recreateKeys(this)
+                }
                 keyGuardEncryptionManager.recreateCipher()
+                defaultEncryptionManager.recreateCipher()
+                getSession()?.migrateTo(
+                    if (useBiometric) keyGuardEncryptionManager else defaultEncryptionManager
+                )
                 currentEncryptionManager = if (useBiometric) {
+                    defaultEncryptionManager.removeKeys()
                     keyGuardEncryptionManager
                 } else {
+                    keyGuardEncryptionManager.removeKeys()
                     defaultEncryptionManager
                 }
-                getSession()?.migrateTo(currentEncryptionManager)
             } catch (e: AuthorizationException) {
                 showMessage(getString(R.string.migrate_error))
                 Log.d(logTag, "Error migrateTo", e)
@@ -286,18 +295,45 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
         }, this)
     }
 
-    fun signOut() {
+    private fun isAuthenticated(): Boolean {
+        return if (customSignIn) {
+            authClient.sessionClient.isAuthenticated
+        } else {
+            webAuthClient.sessionClient.isAuthenticated
+        }
+    }
+
+    internal fun signOut() {
         networkCallInProgress()
         webAuthClient.signOutOfOkta(this)
     }
 
+    @SuppressLint("InflateParams")
     private fun signInSuccess() {
-        showMessage(getString(R.string.authorized))
+        showMessage(getString(R.string.authorized), Snackbar.LENGTH_SHORT)
         network_progress.hide()
         supportFragmentManager.beginTransaction().replace(
             R.id.fragment,
             AuthorizedFragment.newInstance(customSignIn)
         ).commit()
+
+        if (!useBiometric) {
+            AlertDialog.Builder(this, R.style.PromptDialogStyle)
+                .setMessage(R.string.enable_biometric)
+                .setView(layoutInflater.inflate(R.layout.dialog_biometric, null))
+                .setPositiveButton(
+                    R.string.yes
+                ) { _, _ ->
+                    getDefaultSharedPreferences(baseContext).edit().putBoolean(
+                        PREF_BIOMETRIC, true
+                    ).apply()
+                    onBiometricChanged(true)
+                }
+                .setNegativeButton(R.string.no) { dialog, _ ->
+                    dialog.dismiss()
+                }
+                .show()
+        }
     }
 
     private fun signInError(msg: String?, exception: AuthorizationException?) {
@@ -384,8 +420,8 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
             }.show()
     }
 
-    private fun showMessage(message: String) {
-        Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_INDEFINITE)
+    private fun showMessage(message: String, length: Int = Snackbar.LENGTH_INDEFINITE) {
+        Snackbar.make(findViewById(android.R.id.content), message, length)
             .let { bar ->
                 bar.setAction(getString(R.string.dismiss)) {
                     bar.dismiss()

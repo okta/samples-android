@@ -6,13 +6,14 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.biometric.BiometricConstants.ERROR_USER_CANCELED
 import androidx.biometric.BiometricPrompt.AuthenticationCallback
 import androidx.biometric.BiometricPrompt.PromptInfo
 import androidx.lifecycle.ViewModelProvider
+import androidx.preference.PreferenceManager
 import com.google.android.material.snackbar.Snackbar
-import com.okta.oidc.MainActivity
+import com.okta.oidc.*
 
-import com.okta.oidc.R
 import kotlinx.android.synthetic.main.fragment_biometric.*
 import kotlinx.android.synthetic.main.fragment_biometric.clear_data
 import java.util.concurrent.Executors
@@ -20,12 +21,13 @@ import kotlin.properties.Delegates
 
 class BiometricFragment : Fragment(), View.OnClickListener {
     private var viewModel: SharedViewModel by Delegates.notNull()
+    private lateinit var biometricPrompt: BiometricPrompt
 
     companion object {
         @JvmStatic
         fun newInstance() = BiometricFragment()
     }
-    
+
     override fun onResume() {
         super.onResume()
         activity?.let {
@@ -59,9 +61,14 @@ class BiometricFragment : Fragment(), View.OnClickListener {
 
     override fun onClick(view: View?) {
         when (view?.id) {
-            retry.id -> promptCredentials()
+            retry.id -> viewModel.deviceAuthenticated.postValue(false)
             clear_data.id -> activity?.let {
                 (it as MainActivity).getSession()?.clear()
+                PreferenceManager.getDefaultSharedPreferences(it).edit()
+                    .putBoolean(PREF_BIOMETRIC, false)
+                    .putBoolean(PREF_HARDWARE, false)
+                    .apply()
+
                 Snackbar.make(clear_data, getString(R.string.data_cleared), Snackbar.LENGTH_SHORT)
                     .show()
             }
@@ -70,13 +77,16 @@ class BiometricFragment : Fragment(), View.OnClickListener {
     }
 
     private fun promptCredentials() {
-        BiometricPrompt(this, Executors.newSingleThreadExecutor(), object :
+        biometricPrompt = BiometricPrompt(this, Executors.newSingleThreadExecutor(), object :
             AuthenticationCallback() {
             override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                biometricPrompt.cancelAuthentication()
                 activity?.runOnUiThread {
                     status.text = getString(R.string.error_status, errorCode, errString)
                     buttons?.visibility = View.VISIBLE
-                    viewModel.deviceAuthenticated.postValue(false)
+                    if (errorCode != ERROR_USER_CANCELED) {
+                        viewModel.deviceAuthenticated.postValue(false)
+                    }
                 }
             }
 
@@ -85,12 +95,15 @@ class BiometricFragment : Fragment(), View.OnClickListener {
             }
 
             override fun onAuthenticationFailed() {
+                biometricPrompt.cancelAuthentication()
                 activity?.runOnUiThread {
                     buttons?.visibility = View.VISIBLE
                     viewModel.deviceAuthenticated.postValue(false)
                 }
             }
-        }).authenticate(
+        })
+
+        biometricPrompt.authenticate(
             PromptInfo.Builder()
                 .setTitle(getString(R.string.biometric_title))
                 .setDeviceCredentialAllowed(true)

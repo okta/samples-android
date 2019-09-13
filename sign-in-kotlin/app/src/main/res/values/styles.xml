@@ -45,4 +45,9 @@
         <item name="android:textColor">@color/light_blue</item>
         <item name="android:textSize">17sp</item>
     </style>
+
+    <style name="PromptDialogStyle" parent="ThemeOverlay.MaterialComponents.Dialog.Alert">
+        <item name="android:background">@drawable/dialog_background</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
 </resources>
