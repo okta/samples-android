@@ -28,6 +28,7 @@ import com.okta.oidc.R
 import com.okta.oidc.RequestCallback
 import com.okta.oidc.Tokens
 import com.okta.oidc.clients.sessions.SessionClient
+import com.okta.oidc.data.OktaAccessToken.Parser.parseAccessToken
 import com.okta.oidc.net.params.TokenTypeHint
 import com.okta.oidc.net.response.IntrospectInfo
 import com.okta.oidc.util.AuthorizationException
@@ -102,7 +103,11 @@ class ManageTokensFragment : Fragment(), View.OnClickListener {
             display_token.id -> {
                 selectToken(resources.getStringArray(R.array.tokens)) {
                     when (it) {
-                        0 -> info_view.text = sessionClient?.tokens?.accessToken
+                        0 -> info_view.text =
+                            sessionClient?.tokens?.accessToken?.run {
+                                parseAccessToken(this)
+                                    .toString()
+                            }
                         1 -> info_view.text = sessionClient?.tokens?.refreshToken
                         2 -> info_view.text = sessionClient?.tokens?.idToken
                     }
