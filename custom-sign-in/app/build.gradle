@@ -10,7 +10,7 @@ android {
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField("String", "BASE_URL", "\"{org-domain-with-https-schema}\"")
+        buildConfigField("String", "BASE_URL", "\"{valid-org-domain-with-https-schema}\"")
         manifestPlaceholders = [
                 hostName:"{only-org-domain}",
                 "appAuthRedirectScheme": "{redirect_uri_schema}"
@@ -33,6 +33,7 @@ android {
         }
     }
     compileOptions {
+        coreLibraryDesugaringEnabled true
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
@@ -77,4 +78,7 @@ dependencies {
 
     androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.2.0'
     androidTestImplementation 'org.hamcrest:hamcrest-integration:1.3'
+}
+repositories {
+    jcenter()
 }
