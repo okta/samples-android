@@ -36,6 +36,7 @@ import com.okta.oidc.AuthorizationStatus.SIGNED_OUT
 import com.okta.oidc.clients.AuthClient
 import com.okta.oidc.clients.sessions.SessionClient
 import com.okta.oidc.clients.web.WebAuthClient
+import com.okta.oidc.http.AuthenticationClientBuilder
 import com.okta.oidc.results.Result
 import com.okta.oidc.storage.SharedPreferenceStorage
 import com.okta.oidc.util.AuthorizationException
@@ -73,15 +74,19 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
 
         ViewModelProvider(this).get(SharedViewModel::class.java).run {
             hint.observe(this@MainActivity, Observer { signIn(false, it, "") })
-            userAndPassword.observe(this@MainActivity, Observer { signIn(true, it.first, it.second) })
+            userAndPassword.observe(
+                this@MainActivity,
+                Observer { signIn(true, it.first, it.second) })
         }
 
         config = OIDCConfig.Builder()
             .withJsonFile(this, R.raw.config)
             .create()
 
-        hardwareKeystore = PreferenceManager.getDefaultSharedPreferences(baseContext).getBoolean(PREF_HARDWARE, false)
-        customSignIn = PreferenceManager.getDefaultSharedPreferences(baseContext).getBoolean(PREF_CUSTOM, false)
+        hardwareKeystore = PreferenceManager.getDefaultSharedPreferences(baseContext)
+            .getBoolean(PREF_HARDWARE, false)
+        customSignIn = PreferenceManager.getDefaultSharedPreferences(baseContext)
+            .getBoolean(PREF_CUSTOM, false)
 
         createAuthClient()
         createWebClient()
@@ -96,7 +101,8 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
             supportFragmentManager.beginTransaction()
                 .replace(R.id.fragment, AuthorizedFragment.newInstance(customSignIn)).commit()
         } else {
-            supportFragmentManager.beginTransaction().replace(R.id.fragment, SignInFragment.newInstance(customSignIn))
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment, SignInFragment.newInstance(customSignIn))
                 .commit()
         }
     }
@@ -113,7 +119,8 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.action_settings) {
-            supportFragmentManager.beginTransaction().replace(R.id.fragment, SettingsFragment.newInstance())
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment, SettingsFragment.newInstance())
                 .addToBackStack(null).commit()
             return true
         }
@@ -137,7 +144,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
             .setRequireHardwareBackedKeyStore(hardwareKeystore)
             .create()
 
-        authenticationClient = AuthenticationClients.builder()
+        authenticationClient = AuthenticationClientBuilder()
             .setOrgUrl(BuildConfig.ORG_URL)
             .build()
     }
@@ -150,7 +157,8 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
             .setRequireHardwareBackedKeyStore(hardwareKeystore)
             .create()
 
-        webAuthClient.registerCallback(object : ResultCallback<AuthorizationStatus, AuthorizationException> {
+        webAuthClient.registerCallback(object :
+            ResultCallback<AuthorizationStatus, AuthorizationException> {
             override fun onCancel() {
                 network_progress.hide()
                 showMessage(getString(R.string.operation_cancelled))
@@ -206,7 +214,10 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                 }
         } else {
             networkCallInProgress()
-            webAuthClient.signIn(this, AuthenticationPayload.Builder().setLoginHint(hintOrUsername).build())
+            webAuthClient.signIn(
+                this,
+                AuthenticationPayload.Builder().setLoginHint(hintOrUsername).build()
+            )
         }
     }
 
@@ -218,15 +229,18 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                     null, null
                 )
             }?.run {
-                authClient.signIn(sessionToken, null, object : RequestCallback<Result, AuthorizationException> {
-                    override fun onSuccess(result: Result) {
-                        signInSuccess()
-                    }
+                authClient.signIn(
+                    sessionToken,
+                    null,
+                    object : RequestCallback<Result, AuthorizationException> {
+                        override fun onSuccess(result: Result) {
+                            signInSuccess()
+                        }
 
-                    override fun onError(error: String?, exception: AuthorizationException?) {
-                        signInError(error, exception)
-                    }
-                })
+                        override fun onError(error: String?, exception: AuthorizationException?) {
+                            signInError(error, exception)
+                        }
+                    })
             }
         }
     }
@@ -241,7 +255,11 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
 
     private fun networkCallInProgress() {
         network_progress?.show()
-        Snackbar.make(findViewById(android.R.id.content), getString(R.string.loading), Snackbar.LENGTH_INDEFINITE)
+        Snackbar.make(
+            findViewById(android.R.id.content),
+            getString(R.string.loading),
+            Snackbar.LENGTH_INDEFINITE
+        )
             .let { bar ->
                 bar.setAction(getString(R.string.cancel)) {
                     if (customSignIn) {
