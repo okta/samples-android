@@ -87,7 +87,7 @@ authenticationClient = AuthenticationClients.builder()
 This sample use [Okta OIDC Library] dependency in `build.gradle` file:
 
 ```bash
-implementation 'com.okta.android:oidc-androidx:1.0.2'
+implementation 'com.okta.android:oidc-androidx:1.0.14'
 ```
 
 ## Running This Example
