@@ -1,4 +1,4 @@
-package com.okta.oidc
+package com.okta.sample
 
 import org.junit.Test
 

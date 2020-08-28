@@ -13,7 +13,7 @@
  * License.
  */
 
-package com.okta.oidc.fragments
+package com.okta.sample.fragments
 
 import android.os.Bundle
 import android.util.Log
@@ -22,13 +22,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.google.android.material.snackbar.Snackbar
-import com.okta.oidc.MainActivity
+import com.okta.sample.MainActivity
 
-import com.okta.oidc.R
 import com.okta.oidc.RequestCallback
 import com.okta.oidc.clients.sessions.SessionClient
 import com.okta.oidc.net.response.UserInfo
 import com.okta.oidc.util.AuthorizationException
+import com.okta.sample.R
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.authorized_fragment.*
 
@@ -102,7 +102,9 @@ class AuthorizedFragment : Fragment(), View.OnClickListener {
         sessionClient?.run {
             clear()
             Snackbar.make(info_view, getString(R.string.data_cleared), Snackbar.LENGTH_SHORT).show()
-            requireFragmentManager().beginTransaction().replace(R.id.fragment, SignInFragment.newInstance(customSignIn))
+            requireFragmentManager().beginTransaction().replace(R.id.fragment,
+                SignInFragment.newInstance(customSignIn)
+            )
                 .commit()
         }
     }
