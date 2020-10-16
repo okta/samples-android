@@ -15,7 +15,7 @@ android {
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         manifestPlaceholders = [
-                "appAuthRedirectScheme": "{yourAppScheme}"
+                "appAuthRedirectScheme": "{customUriScheme}"
         ]
         if (project.rootProject.file('local.properties').exists()) {
             Properties properties = new Properties()
