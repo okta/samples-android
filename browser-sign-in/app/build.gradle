@@ -22,7 +22,7 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         manifestPlaceholders = [
-                "appAuthRedirectScheme": "{redirect_uri_schema}"
+                "appAuthRedirectScheme": "{customUriScheme}"
         ]
 
         if (username != null && password != null) {
