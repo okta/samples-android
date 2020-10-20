@@ -13,7 +13,7 @@ android {
         buildConfigField("String", "BASE_URL", "\"https://{yourOktaDomain}\"")
         manifestPlaceholders = [
                 hostName:"{yourOktaDomain}",
-                "appAuthRedirectScheme": "customUriScheme"
+                "appAuthRedirectScheme": "{customUriScheme}"
         ]
         if (project.rootProject.file('local.properties').exists()) {
             Properties properties = new Properties()
