@@ -13,20 +13,12 @@
  * License.
  */
 
-package com.okta.oidc.fragments
+package com.okta.sample.fragments
 
-import android.os.Bundle
-import androidx.preference.PreferenceFragmentCompat
-import com.okta.oidc.R
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 
-class SettingsFragment : PreferenceFragmentCompat() {
-
-    companion object {
-        @JvmStatic
-        fun newInstance() = SettingsFragment()
-    }
-
-    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-        addPreferencesFromResource(R.xml.settings)
-    }
+class SharedViewModel : ViewModel() {
+    val hint = MutableLiveData<String>()
+    val userAndPassword = MutableLiveData<Pair<String, String>>()
 }

@@ -13,7 +13,7 @@
  * License.
  */
 
-package com.okta.oidc.fragments
+package com.okta.sample.fragments
 
 import android.app.AlertDialog
 import android.os.Bundle
@@ -23,14 +23,14 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.google.android.material.snackbar.Snackbar
-import com.okta.oidc.MainActivity
-import com.okta.oidc.R
+import com.okta.sample.MainActivity
 import com.okta.oidc.RequestCallback
 import com.okta.oidc.Tokens
 import com.okta.oidc.clients.sessions.SessionClient
 import com.okta.oidc.net.params.TokenTypeHint
 import com.okta.oidc.net.response.IntrospectInfo
 import com.okta.oidc.util.AuthorizationException
+import com.okta.sample.R
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_manage_tokens.*
 

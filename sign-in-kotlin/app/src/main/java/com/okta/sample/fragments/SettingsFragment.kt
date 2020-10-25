@@ -13,17 +13,20 @@
  * License.
  */
 
-package com.okta.oidc
+package com.okta.sample.fragments
 
-import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
+import androidx.preference.PreferenceFragmentCompat
+import com.okta.sample.R
 
-class SplashActivity : AppCompatActivity() {
+class SettingsFragment : PreferenceFragmentCompat() {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        startActivity(Intent(this, MainActivity::class.java))
-        finish()
+    companion object {
+        @JvmStatic
+        fun newInstance() = SettingsFragment()
+    }
+
+    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+        addPreferencesFromResource(R.xml.settings)
     }
 }

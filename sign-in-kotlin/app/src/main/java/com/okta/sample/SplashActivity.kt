@@ -13,12 +13,17 @@
  * License.
  */
 
-package com.okta.oidc.fragments
+package com.okta.sample
 
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import android.content.Intent
+import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 
-class SharedViewModel : ViewModel() {
-    val hint = MutableLiveData<String>()
-    val userAndPassword = MutableLiveData<Pair<String, String>>()
+class SplashActivity : AppCompatActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        startActivity(Intent(this, MainActivity::class.java))
+        finish()
+    }
 }

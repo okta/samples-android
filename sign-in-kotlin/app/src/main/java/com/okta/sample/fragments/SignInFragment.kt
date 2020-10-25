@@ -13,7 +13,7 @@
  * License.
  */
 
-package com.okta.oidc.fragments
+package com.okta.sample.fragments
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -23,7 +23,7 @@ import android.view.inputmethod.EditorInfo
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.okta.oidc.R
+import com.okta.sample.R
 import kotlinx.android.synthetic.main.sign_in_fragment.*
 import kotlin.properties.Delegates.notNull
 

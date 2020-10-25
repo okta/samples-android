@@ -1,4 +1,4 @@
-package com.okta.oidc
+package com.okta.sample
 
 import androidx.test.InstrumentationRegistry
 import androidx.test.runner.AndroidJUnit4

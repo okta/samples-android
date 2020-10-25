@@ -13,7 +13,7 @@
  * License.
  */
 
-package com.okta.oidc
+package com.okta.sample
 
 import android.content.SharedPreferences
 import android.os.Bundle
@@ -27,18 +27,25 @@ import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import com.google.android.material.snackbar.Snackbar
 import com.okta.authn.sdk.client.AuthenticationClient
 import com.okta.authn.sdk.client.AuthenticationClients
-import com.okta.oidc.fragments.AuthorizedFragment
-import com.okta.oidc.fragments.SettingsFragment
-import com.okta.oidc.fragments.SharedViewModel
-import com.okta.oidc.fragments.SignInFragment
+import com.okta.oidc.AuthenticationPayload
+import com.okta.oidc.AuthorizationStatus
+import com.okta.sample.fragments.AuthorizedFragment
+import com.okta.sample.fragments.SettingsFragment
+import com.okta.sample.fragments.SharedViewModel
+import com.okta.sample.fragments.SignInFragment
 import com.okta.oidc.AuthorizationStatus.AUTHORIZED
 import com.okta.oidc.AuthorizationStatus.SIGNED_OUT
+import com.okta.oidc.OIDCConfig
+import com.okta.oidc.Okta
+import com.okta.oidc.RequestCallback
+import com.okta.oidc.ResultCallback
 import com.okta.oidc.clients.AuthClient
 import com.okta.oidc.clients.sessions.SessionClient
 import com.okta.oidc.clients.web.WebAuthClient
 import com.okta.oidc.results.Result
 import com.okta.oidc.storage.SharedPreferenceStorage
 import com.okta.oidc.util.AuthorizationException
+import com.okta.sample.BuildConfig.ORG_URL
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -80,8 +87,10 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
             .withJsonFile(this, R.raw.config)
             .create()
 
-        hardwareKeystore = PreferenceManager.getDefaultSharedPreferences(baseContext).getBoolean(PREF_HARDWARE, false)
-        customSignIn = PreferenceManager.getDefaultSharedPreferences(baseContext).getBoolean(PREF_CUSTOM, false)
+        hardwareKeystore = PreferenceManager.getDefaultSharedPreferences(baseContext).getBoolean(
+            PREF_HARDWARE, false)
+        customSignIn = PreferenceManager.getDefaultSharedPreferences(baseContext).getBoolean(
+            PREF_CUSTOM, false)
 
         createAuthClient()
         createWebClient()
@@ -138,7 +147,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
             .create()
 
         authenticationClient = AuthenticationClients.builder()
-            .setOrgUrl(BuildConfig.ORG_URL)
+            .setOrgUrl(ORG_URL)
             .build()
     }
 
@@ -150,7 +159,8 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
             .setRequireHardwareBackedKeyStore(hardwareKeystore)
             .create()
 
-        webAuthClient.registerCallback(object : ResultCallback<AuthorizationStatus, AuthorizationException> {
+        webAuthClient.registerCallback(object :
+            ResultCallback<AuthorizationStatus, AuthorizationException> {
             override fun onCancel() {
                 network_progress.hide()
                 showMessage(getString(R.string.operation_cancelled))
@@ -218,7 +228,8 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                     null, null
                 )
             }?.run {
-                authClient.signIn(sessionToken, null, object : RequestCallback<Result, AuthorizationException> {
+                authClient.signIn(sessionToken, null, object :
+                    RequestCallback<Result, AuthorizationException> {
                     override fun onSuccess(result: Result) {
                         signInSuccess()
                     }
