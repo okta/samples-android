@@ -32,10 +32,7 @@ import com.okta.android.samples.custom_sign_in.util.KeyboardUtil;
 import com.okta.authn.sdk.AuthenticationException;
 import com.okta.authn.sdk.AuthenticationStateHandler;
 import com.okta.authn.sdk.resource.AuthenticationResponse;
-import com.okta.sdk.resource.user.factor.FactorType;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import com.okta.authn.sdk.resource.FactorType;
 
 public class PasswordRecoveryFragment extends BaseFragment {
     private String TAG = "PasswordRecovery";

@@ -68,7 +68,7 @@ if your **Redirect URI** is `com.okta.example:/callback`, the **AppAuth Redirect
 This sample use [Okta OIDC Library] dependency in `build.gradle` file:
 
 ```bash
-implementation 'com.okta.android:oidc-androidx:1.0.1'
+implementation 'com.okta.android:oidc-androidx:1.0.16'
 ```
 
 ## Running This Example
