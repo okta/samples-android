@@ -1,6 +1,6 @@
 # Android Samples
 
-This repository contains 2 different Android sample applications that show you how to authenticate to Okta account and how to work with the OKTA API in your Android application.
+This repository contains 3 different Android sample applications that show you how to authenticate to Okta account and how to work with the OKTA API in your Android application.
 
 Please find the sample that fits your use-case from the table below.
 
@@ -10,6 +10,9 @@ Please find the sample that fits your use-case from the table below.
 | [Custom Sign In](/custom-sign-in) | An application that show how to authenticate to Okta account within app without any browsers. Also it shows how verify MFA(Multi Factor Authentication) such as Call, SMS, OktaVerify(Push, Code), Google Authenticator. Demonstrating how to implement password recovery process, answering security question.  | Native Android app. Implementing whole authenticate process within application without other apps (like browser) |
 | [Sign In Kotlin](/sign-in-kotlin) | A Kotlin example of authentication flows using the WebBrowser ([Chrome Custom Tabs][]) and custom sign-in. | Native Kotlin Android app. Authenticate via browser and custom sign-in using [Okta Authentication SDK](https://github.com/okta/okta-auth-java) |
 | [TOTP Generator](/totp) | A sample application that generates TOTP tokens. | An application that shows how developer can build their own Google Authenticator clone for their brand. |
+
+## MinSDK Requirements
+The [Okta OIDC Android SDK](https://github.com/okta/okta-oidc-android#requirements) supports Android 5.0 (lolipop) and above (minSdkVersion >= 21).
 
 [Okta Authentication API]: https://developer.okta.com/docs/api/resources/authn.html
 [Okta Java Authentication SDK]: https://github.com/okta/okta-auth-java

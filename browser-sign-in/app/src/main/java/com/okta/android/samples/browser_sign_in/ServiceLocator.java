@@ -16,10 +16,6 @@ package com.okta.android.samples.browser_sign_in;
 
 import android.content.Context;
 
-import androidx.annotation.VisibleForTesting;
-
-import com.okta.android.samples.browser_sign_in.rxClient.RxOkta;
-import com.okta.android.samples.browser_sign_in.rxClient.RxWebAuthClient;
 import com.okta.android.samples.browser_sign_in.util.OktaProgressDialog;
 import com.okta.android.samples.browser_sign_in.util.PreferenceRepository;
 import com.okta.android.samples.browser_sign_in.util.SmartLockHelper;
@@ -36,7 +32,6 @@ public class ServiceLocator {
     private final static String ANDROID_BROWSER = "com.android.browser";
     private static volatile WebAuthClient mWebAuth;
     private static volatile EncryptionManager mEncryptionManager;
-    private static volatile RxWebAuthClient  mRxWebAuth;
     private static volatile PreferenceRepository mPreferenceRepository;
 
     public static WebAuthClient provideWebAuthClient(Context context) {
@@ -101,30 +96,5 @@ public class ServiceLocator {
 
     public static OktaProgressDialog provideOktaProgressDialog(Context context) {
         return new OktaProgressDialog(context);
-    }
-
-    public static RxWebAuthClient provideRxWebAuthClient(Context context) {
-        RxWebAuthClient localWebAuth = mRxWebAuth;
-        if(localWebAuth == null) {
-            synchronized (ServiceLocator.class) {
-                localWebAuth = mRxWebAuth;
-                if (localWebAuth == null) {
-
-                    OIDCConfig mOidcConfig = new OIDCConfig.Builder()
-                            .withJsonFile(context, R.raw.okta_oidc_config)
-                            .create();
-
-                    mRxWebAuth = localWebAuth = new RxOkta.WebAuthBuilder()
-                            .withConfig(mOidcConfig)
-                            .withContext(context.getApplicationContext())
-                            .withStorage(new SharedPreferenceStorage(context))
-                            .withTabColor(context.getResources().getColor(R.color.colorPrimary))
-                            .supportedBrowsers(ANDROID_BROWSER, FIRE_FOX)
-                            .create();
-                }
-            }
-        }
-
-        return localWebAuth;
     }
 }
