@@ -41,12 +41,20 @@ the following contents:
     "profile",
     "offline_access"
   ],
-  "issuer_uri": "https://{yourOktaDomain}/oauth2/default"
+  "discovery_uri": "https://{yourOktaDomain}"
 }
 ```
 
-**Note**: *To receive a **refresh_token**, you must include the `offline_access` scope.*
-**Note**: `end_session_redirect_uri` is a mandatory parameter.
+```java
+OIDCConfig config = new OIDCConfig.Builder()
+    .withJsonFile(this, R.id.okta_app_auth_config)
+    .create();
+```
+
+**Notes:**
+- `discovery_uri` can be customized for specific authorization servers. See [Discovery URI Guidance](https://github.com/okta/okta-oidc-android#discovery-uri-guidance) for more info.
+- To receive a **refresh_token**, you must include the `offline_access` scope.
+- `end_session_redirect_uri` is a mandatory parameter.
 
 #### Update the URI Scheme
 
