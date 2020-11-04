@@ -29,7 +29,7 @@ Before running this sample, you will need the following:
 
 #### Setup configuration file
 
-Create a file called `config.json` in your application's `res/raw/` directory with
+Create a file called `okta_app_auth_config.json` in your application's `res/raw/` directory with
 the following contents:
 
 ```json
@@ -46,8 +46,16 @@ the following contents:
 }
 ```
 
-**Note**: *To receive a **refresh_token**, you must include the `offline_access` scope.*
-**Note**: `end_session_redirect_uri` is a mandatory parameter.
+```kotlin
+val config: OIDCConfig = OIDCConfig.Builder()
+    .withJsonFile(this, R.id.okta_app_auth_config)
+    .create()
+```
+
+**Notes:**
+- `discovery_uri` can be customized for specific authorization servers. See [Discovery URI Guidance](https://github.com/okta/okta-oidc-android#discovery-uri-guidance) for more info.
+- To receive a **refresh_token**, you must include the `offline_access` scope.
+- `end_session_redirect_uri` is a mandatory parameter.
 
 #### Update the URI Scheme
 
