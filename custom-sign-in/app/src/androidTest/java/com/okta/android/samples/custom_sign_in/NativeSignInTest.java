@@ -67,11 +67,11 @@ public class NativeSignInTest {
                         "requires Java 8",
                 Build.VERSION.SDK_INT >= 24
         );
-        onView(withId(R.id.native_sing_in)).withFailureHandler((error, viewMatcher) -> {
+        onView(withId(R.id.native_sign_in)).withFailureHandler((error, viewMatcher) -> {
             onView(withId(R.id.clear_data_btn)).check(matches(isDisplayed()));
             onView(withId(R.id.clear_data_btn)).perform(click());
         }).check(matches(isDisplayed()));
-        onView(withId(R.id.native_sing_in)).perform(click());
+        onView(withId(R.id.native_sign_in)).perform(click());
 
         onView(withId(R.id.login_edittext)).check(matches(isDisplayed()));
         onView(withId(R.id.login_edittext)).perform(click(), replaceText(BuildConfig.USERNAME));
