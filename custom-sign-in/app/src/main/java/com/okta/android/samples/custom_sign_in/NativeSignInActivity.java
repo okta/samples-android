@@ -56,7 +56,7 @@ public class NativeSignInActivity extends ContainerActivity implements IOktaAppA
         return intent;
     }
 
-    public static Intent createNativeSingInWithMFA(Context context) {
+    public static Intent createNativeSignInWithMFA(Context context) {
         Intent intent = new Intent(context, NativeSignInActivity.class);
         intent.putExtra(MODE_KEY, NativeSignInActivity.MODE.NATIVE_SIGN_IN_WITH_MFA.ordinal());
         return intent;

@@ -32,11 +32,11 @@ public class StartActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
 
-        ((Button)findViewById(R.id.native_sing_in)).setOnClickListener(v ->
+        ((Button)findViewById(R.id.native_sign_in)).setOnClickListener(v ->
                 startActivity(NativeSignInActivity.createNativeSignIn(this)));
 
-        ((Button)findViewById(R.id.native_sing_in_mfa)).setOnClickListener(v ->
-                startActivity(NativeSignInActivity.createNativeSingInWithMFA(this)));
+        ((Button)findViewById(R.id.native_sign_in_mfa)).setOnClickListener(v ->
+                startActivity(NativeSignInActivity.createNativeSignInWithMFA(this)));
 
         ((Button)findViewById(R.id.password_reset)).setOnClickListener(v ->
                 startActivity(RecoveryActivity.createPasswordRecovery(this)));
