@@ -27,9 +27,8 @@ Before running this sample, you will need the following:
 
 ### Configuration
 
-#### Setup configuration file 
-Create a file called `okta_app_auth_config.json` in your application's `res/raw/` directory with
-the following contents:
+#### Update configuration file 
+Update `okta_oidc_config.json` in your application's `res/raw/` directory with the following contents:
 
 ```json
 {
@@ -41,14 +40,8 @@ the following contents:
     "profile",
     "offline_access"
   ],
-  "discovery_uri": "https://{yourOktaDomain}"
+  "discovery_uri": "https://{yourOktaDomain}/oauth2/default/.well-known/openid-configuration"
 }
-```
-
-```java
-OIDCConfig config = new OIDCConfig.Builder()
-    .withJsonFile(this, R.id.okta_app_auth_config)
-    .create();
 ```
 
 **Notes:**
@@ -76,7 +69,7 @@ if your **Redirect URI** is `com.okta.example:/callback`, the **AppAuth Redirect
 This sample use [Okta OIDC Library] dependency in `build.gradle` file:
 
 ```bash
-implementation 'com.okta.android:oidc-androidx:1.0.16'
+implementation 'com.okta.android:oidc-androidx:1.0.18'
 ```
 
 ## Running This Example

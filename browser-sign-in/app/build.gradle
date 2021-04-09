@@ -88,15 +88,19 @@ task prepareDeviceForUITesting(type: Exec) {
     commandLine adb, 'shell', 'settings', 'put', 'global', 'animator_duration_scale', '0'
     //always finish activity
     commandLine adb, 'shell', 'settings', 'put', 'global', 'always_finish_activities', '1'
-    //enable smartlock
-    commandLine adb, 'shell', 'locksettings', 'set-pin', pincode
+    if (pincode != null) {
+        //enable smartlock
+        commandLine adb, 'shell', 'locksettings', 'set-pin', pincode
+    }
     // push keystore file to sdcard
     commandLine adb, 'push', 'src/androidTest/assets/mock.keystore.bks', '/sdcard/Download/'
 }
 
 //Disables smartlock (we need to keep it in separate task because of ordering of commandLine)
 task disableSmartLock(type: Exec) {
-    commandLine adb, 'shell', 'locksettings', 'clear', '--old', pincode
+    if (pincode != null) {
+        commandLine adb, 'shell', 'locksettings', 'clear', '--old', pincode
+    }
 }
 
 task clearData(type: Exec) {
