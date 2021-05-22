@@ -44,6 +44,7 @@ import com.okta.oidc.clients.sessions.SessionClient
 import com.okta.oidc.clients.web.WebAuthClient
 import com.okta.oidc.results.Result
 import com.okta.oidc.storage.SharedPreferenceStorage
+import com.okta.oidc.storage.security.DefaultEncryptionManager
 import com.okta.oidc.util.AuthorizationException
 import com.okta.sample.BuildConfig.ORG_URL
 import kotlinx.android.synthetic.main.activity_main.*
@@ -152,10 +153,17 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
     }
 
     private fun createWebClient() {
+        val combinedStorage = CombinedDefaultStorageAndEncryption(SharedPreferenceStorage(this),
+            DefaultEncryptionManager(this))
+
+        val encryptedSharedPreferenceStorage =
+            EncryptedSharedPreferenceStorage(this, "MyMasterKeyAlias", "MyEncryptedSharedPrefs")
+
         webAuthClient = Okta.WebAuthBuilder()
             .withConfig(config)
             .withContext(this)
-            .withStorage(SharedPreferenceStorage(this, PREF_STORAGE_WEB))
+            .withEncryptionManager(NoEncryption())
+            .withStorage(EncryptedStorage(combinedStorage, encryptedSharedPreferenceStorage))
             .setRequireHardwareBackedKeyStore(hardwareKeystore)
             .create()
 
