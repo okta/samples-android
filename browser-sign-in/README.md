@@ -80,7 +80,7 @@ cd browser-sign-in
 ./gradlew app:assembleRelease
 ```
 
-**BroserSignInActivity.java** - implementation authentication process.
+**BrowserSignInActivity.java** - implementation authentication process.
 **UserInfoActivity.java** - get user info, log out.
 
 [Okta Authentication API]: https://developer.okta.com/docs/api/resources/authn.html
