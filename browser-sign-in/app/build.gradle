@@ -12,11 +12,11 @@ if (project.rootProject.file('local.properties').exists()) {
 }
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 30
     defaultConfig {
         applicationId "com.okta.android.samples.browser_sign_in"
         minSdkVersion 21
-        targetSdkVersion 29
+        targetSdkVersion 30
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -46,7 +46,7 @@ android {
 dependencies {
     implementation fileTree(include: ['*.aar'], dir: 'libs')
 
-    implementation 'com.okta.android:oidc-androidx:1.0.16'
+    implementation 'com.okta.android:okta-oidc-android:1.2.2'
     implementation 'com.google.code.gson:gson:2.8.6'
     implementation "androidx.browser:browser:1.2.0"
     implementation "androidx.fragment:fragment:1.2.5"
@@ -58,16 +58,16 @@ dependencies {
     implementation 'de.hdodenhof:circleimageview:3.0.0'
 
     testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test:runner:1.1.1'
-    androidTestImplementation 'androidx.test:rules:1.1.1'
+    androidTestImplementation 'androidx.test:runner:1.4.0'
+    androidTestImplementation 'androidx.test:rules:1.4.0'
 
     // Espresso dependencies
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-contrib:3.1.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-intents:3.1.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-accessibility:3.1.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-web:3.1.1'
-    androidTestImplementation 'androidx.test.espresso.idling:idling-concurrent:3.1.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-contrib:3.4.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-intents:3.4.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-accessibility:3.4.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-web:3.4.0'
+    androidTestImplementation 'androidx.test.espresso.idling:idling-concurrent:3.4.0'
     androidTestImplementation "io.jsonwebtoken:jjwt-api:0.10.5"
     androidTestImplementation "io.jsonwebtoken:jjwt-impl:0.10.5"
     androidTestImplementation "io.jsonwebtoken:jjwt-jackson:0.10.5"
