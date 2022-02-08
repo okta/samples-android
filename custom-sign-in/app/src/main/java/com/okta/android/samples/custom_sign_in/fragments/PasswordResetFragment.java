@@ -41,9 +41,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class PasswordResetFragment extends BaseFragment {
-    private String TAG = "PasswordReset";
-    private static String STATE_TOKEN_KEY = "STATE_TOKEN_KEY";
-    private static String PASSWORD_POLICY_KEY = "PASSWORD_POLICY_KEY";
+    private final String TAG = "PasswordReset";
+    private static final String STATE_TOKEN_KEY = "STATE_TOKEN_KEY";
+    private static final String PASSWORD_POLICY_KEY = "PASSWORD_POLICY_KEY";
 
     private String stateToken = null;
     private Map<String,Integer> passwordPolicy = null;
