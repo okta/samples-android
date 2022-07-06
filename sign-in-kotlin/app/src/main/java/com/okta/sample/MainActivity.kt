@@ -221,24 +221,23 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
     }
 
     private fun authenticateUser(username: String, password: String) {
-        GlobalScope.launch(Dispatchers.Main) {
-            withContext(Dispatchers.IO) {
-                authenticationClient.authenticate(
-                    username, password.toCharArray(),
-                    null, null
-                )
-            }?.run {
-                authClient.signIn(sessionToken, null, object :
-                    RequestCallback<Result, AuthorizationException> {
-                    override fun onSuccess(result: Result) {
-                        signInSuccess()
-                    }
+        lifecycleScope.launch(Dispatchers.IO) {
+            authenticationClient.authenticate(
+                username, password.toCharArray(),
+                null, null
+            )
+                .run {
+                    authClient.signIn(sessionToken, null, object :
+                        RequestCallback<Result, AuthorizationException> {
+                        override fun onSuccess(result: Result) {
+                            signInSuccess()
+                        }
 
-                    override fun onError(error: String?, exception: AuthorizationException?) {
-                        signInError(error, exception)
-                    }
-                })
-            }
+                        override fun onError(error: String?, exception: AuthorizationException?) {
+                            signInError(error, exception)
+                        }
+                    })
+                }
         }
     }
 
