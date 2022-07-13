@@ -1,5 +1,7 @@
 # Android Samples
 
+> Note: These samples have not been updated to use the new [Okta Mobile SDK](https://github.com/okta/okta-mobile-kotlin), but you can visit the [quick start guide](https://developer.okta.com/docs/guides/sign-into-mobile-app-redirect/android/main/) to learn how to use it in your own applications.
+
 This repository contains 3 different Android sample applications that show you how to authenticate to Okta account and how to work with the OKTA API in your Android application.
 
 Please find the sample that fits your use-case from the table below.
