@@ -1,6 +1,6 @@
 # Browser Sign In Example
 
-This example shows you how to use the [Okta OIDC Library][] to authenticate a user. Authentication is done with the browser [Chrome Custom Tabs] [], which open Okta login web-page. After the user authenticates in browser, they are redirected back to the application and exchanging the received code for tokens and persist them.
+This example shows you how to use [Okta Mobile Kotlin][] to authenticate a user. Authentication is done with the browser [Chrome Custom Tabs][], which open Okta login web-page. After the user authenticates in browser, they are redirected back to the application and exchanging the received code for tokens and persist them.
 
 ## Prerequisites
 
@@ -27,21 +27,14 @@ Before running this sample, you will need the following:
 
 ### Configuration
 
-#### Update configuration file 
-Update `okta_oidc_config.json` in your application's `res/raw/` directory with the following contents:
+#### Update configuration file
+Update `okta.properties` in your application directory with the following contents:
 
-```json
-{
-  "client_id": "{clientId}",
-  "redirect_uri": "{redirectUri}",
-  "end_session_redirect_uri": "{endSessionUri}",
-  "scopes": [
-    "openid",
-    "profile",
-    "offline_access"
-  ],
-  "discovery_uri": "https://{yourOktaDomain}/oauth2/default/.well-known/openid-configuration"
-}
+```properties
+discoveryUrl=https://${yourOktaDomain}/oauth2/default/.well-known/openid-configuration
+clientId=${clientId}
+signInRedirectUri=${redirectUri}
+signOutRedirectUri=${endSessionUri}
 ```
 
 **Notes:**
@@ -49,28 +42,9 @@ Update `okta_oidc_config.json` in your application's `res/raw/` directory with t
 - To receive a **refresh_token**, you must include the `offline_access` scope.
 - `end_session_redirect_uri` is a mandatory parameter.
 
-#### Update the URI Scheme
-
-In order to redirect back to your application from a web browser, you must specify a unique URI to
-your app. To do this, you must define a gradle manifest placeholder in your app's `build.gradle`:
-
-```java
-android.defaultConfig.manifestPlaceholders = [
-    "appAuthRedirectScheme": "com.okta.example"
-]
-```
-
-Make sure this is consistent with the redirect URI used in `okta_app_auth_config.json`. For example,
-if your **Redirect URI** is `com.okta.example:/callback`, the **AppAuth Redirect Scheme** should be
-`com.okta.example`.
-
 ## Dependencies
 
-This sample use [Okta OIDC Library] dependency in `build.gradle` file:
-
-```bash
-implementation 'com.okta.android:oidc-androidx:1.0.18'
-```
+This sample uses [AuthFoundationBootstrap][] and [WebAuthenticationUI][] from [Okta Mobile Kotlin][]
 
 ## Running This Example
 
@@ -80,13 +54,10 @@ cd browser-sign-in
 ./gradlew app:assembleRelease
 ```
 
-**BrowserSignInActivity.java** - implementation authentication process.
-**UserInfoActivity.java** - get user info, log out.
-
-[Okta Authentication API]: https://developer.okta.com/docs/api/resources/authn.html
-[Okta Java Authentication SDK]: https://github.com/okta/okta-auth-java
-[Okta OIDC Library]: https://github.com/okta/okta-oidc-android
 [Chrome Custom Tabs]: https://developer.chrome.com/multidevice/android/customtabs
 [Authorization Code Flow with PKCE]: https://developer.okta.com/authentication-guide/implementing-authentication/auth-code-pkce
 [Google Authenticator]: https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2
 [Okta Verify]: https://play.google.com/store/apps/details?id=com.okta.android.auth
+[AuthFoundationBootstrap]: https://github.com/okta/okta-mobile-kotlin/tree/master/auth-foundation-bootstrap
+[WebAuthenticationUI]: https://github.com/okta/okta-mobile-kotlin/tree/master/web-authentication-ui
+[Okta Mobile Kotlin]: https://github.com/okta/okta-mobile-kotlin
