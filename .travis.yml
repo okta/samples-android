@@ -31,8 +31,3 @@ cache:
     - $HOME/.android/build-cache
 script:
   - "pushd ."
-  - "cd browser-sign-in"
-  - "./gradlew clean build test"
-  - "popd"
-  - "cd custom-sign-in"
-  - "./gradlew clean build test"

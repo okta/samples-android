@@ -1,121 +1,61 @@
-apply plugin: 'com.android.application'
-
-def username = "\"\""
-def password = "\"\""
-def pincode = "\"\""
-if (project.rootProject.file('local.properties').exists()) {
-    Properties properties = new Properties()
-    properties.load(project.rootProject.file('local.properties').newDataInputStream())
-    username = properties.getProperty('test.username')
-    password = properties.getProperty('test.password')
-    pincode = properties.getProperty('test.pincode')
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
 }
 
+def oktaProperties = new Properties()
+rootProject.file("okta.properties").withInputStream { oktaProperties.load(it) }
+
 android {
-    compileSdkVersion 30
+    compileSdk libs.versions.compile.sdk.get() as Integer
+
     defaultConfig {
         applicationId "com.okta.android.samples.browser_sign_in"
-        minSdkVersion 21
-        targetSdkVersion 30
+        minSdk libs.versions.min.sdk.get() as Integer
+        targetSdk libs.versions.target.sdk.get() as Integer
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
-        manifestPlaceholders = [
-                "appAuthRedirectScheme": "{customUriScheme}"
-        ]
+        buildConfigField "String", 'DISCOVERY_URL', "\"${oktaProperties.getProperty('discoveryUrl')}\""
+        buildConfigField "String", 'CLIENT_ID', "\"${oktaProperties.getProperty('clientId')}\""
+        buildConfigField "String", 'SIGN_IN_REDIRECT_URI', "\"${oktaProperties.getProperty('signInRedirectUri')}\""
+        buildConfigField "String", 'SIGN_OUT_REDIRECT_URI', "\"${oktaProperties.getProperty('signOutRedirectUri')}\""
+    }
 
-        if (username != null && password != null) {
-            buildConfigField "String", "USERNAME", username
-            buildConfigField "String", "PASSWORD", password
-            buildConfigField "String", "PINCODE", pincode
-        }
-    }
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
-    }
+    defaultConfig.manifestPlaceholders = [
+            "webAuthenticationRedirectScheme": parseScheme(oktaProperties.getProperty('signInRedirectUri'))
+    ]
+
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        coreLibraryDesugaringEnabled true
+    }
+
+    buildFeatures {
+        viewBinding true
     }
 }
 
 dependencies {
-    implementation fileTree(include: ['*.aar'], dir: 'libs')
+    coreLibraryDesugaring(libs.desugar.jdk)
 
-    implementation 'com.okta.android:okta-oidc-android:1.2.2'
-    implementation 'com.google.code.gson:gson:2.8.6'
-    implementation "androidx.browser:browser:1.2.0"
-    implementation "androidx.fragment:fragment:1.2.5"
-    implementation 'androidx.biometric:biometric:1.1.0-beta01'
+    implementation(libs.bundles.android)
+    implementation(libs.kotlin.stdlib)
+    implementation(libs.timber)
 
-    implementation 'androidx.appcompat:appcompat:1.2.0'
-    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    implementation(platform(libs.okta.bom))
+    implementation(libs.okta.auth.foundation.bootstrap)
+    implementation(libs.okta.web.authentication.ui)
 
-    implementation 'de.hdodenhof:circleimageview:3.0.0'
+    androidTestImplementation(libs.junit)
+    androidTestImplementation(libs.jackson.dataformat.yml)
+    androidTestImplementation(libs.bundles.android.instrumentation.testing)
+    androidTestImplementation(libs.bundles.okta.testing)
+}
 
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test:runner:1.4.0'
-    androidTestImplementation 'androidx.test:rules:1.4.0'
-
-    // Espresso dependencies
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-contrib:3.4.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-intents:3.4.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-accessibility:3.4.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-web:3.4.0'
-    androidTestImplementation 'androidx.test.espresso.idling:idling-concurrent:3.4.0'
-    androidTestImplementation "io.jsonwebtoken:jjwt-api:0.10.5"
-    androidTestImplementation "io.jsonwebtoken:jjwt-impl:0.10.5"
-    androidTestImplementation "io.jsonwebtoken:jjwt-jackson:0.10.5"
-    androidTestImplementation("io.jsonwebtoken:jjwt-orgjson:0.10.5") {
-        exclude group: 'org.json', module: 'json'
+static def parseScheme(String uri) {
+    def index = uri.indexOf(':/')
+    if (index == -1) {
+        throw new IllegalStateException("Scheme is not in a valid format.")
     }
-
-    androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.2.0'
-    androidTestImplementation 'org.hamcrest:hamcrest-integration:1.3'
-
-}
-
-def adb = System.getenv("ANDROID_HOME") + "/platform-tools/adb"
-task prepareDeviceForUITesting(type: Exec) {
-    //disable animations for testing
-    commandLine adb, 'shell', 'settings', 'put', 'global', 'window_animation_scale', '0'
-    commandLine adb, 'shell', 'settings', 'put', 'global', 'transition_animation_scale', '0'
-    commandLine adb, 'shell', 'settings', 'put', 'global', 'animator_duration_scale', '0'
-    //always finish activity
-    commandLine adb, 'shell', 'settings', 'put', 'global', 'always_finish_activities', '1'
-    if (pincode != null) {
-        //enable smartlock
-        commandLine adb, 'shell', 'locksettings', 'set-pin', pincode
-    }
-    // push keystore file to sdcard
-    commandLine adb, 'push', 'src/androidTest/assets/mock.keystore.bks', '/sdcard/Download/'
-}
-
-//Disables smartlock (we need to keep it in separate task because of ordering of commandLine)
-task disableSmartLock(type: Exec) {
-    if (pincode != null) {
-        commandLine adb, 'shell', 'locksettings', 'clear', '--old', pincode
-    }
-}
-
-task clearData(type: Exec) {
-    commandLine adb, 'shell', 'pm', 'clear', 'com.okta.android.samples.browser_sign_in'
-    commandLine adb, 'shell', 'pm', 'clear', 'com.okta.android.samples.browser_sign_in.test'
-    commandLine adb, 'shell', 'pm', 'clear', 'com.android.chrome'
-}
-
-task restoreDeviceSettings(type: Exec) {
-    //enable animations for testing
-    commandLine adb, 'shell', 'settings', 'put', 'global', 'window_animation_scale', '1'
-    commandLine adb, 'shell', 'settings', 'put', 'global', 'transition_animation_scale', '1'
-    commandLine adb, 'shell', 'settings', 'put', 'global', 'animator_duration_scale', '1'
-    //disable finish activity
-    commandLine adb, 'shell', 'settings', 'put', 'global', 'always_finish_activities', '0'
-    // remove keystore file to sdcard
-    commandLine adb, 'shell', 'rm', '/sdcard/Download/mock.keystore.bks'
+    return uri.substring(0, index)
 }
