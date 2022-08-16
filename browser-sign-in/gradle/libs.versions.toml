@@ -21,10 +21,12 @@ timber = "5.0.1"
 # Testing lib versions
 junit = "4.13.2"
 jackson = "2.13.3"
+truth = "1.1.3"
 androidx-test = "1.4.0"
+androidx-test-orchestrator = "1.4.1"
 androidx-test-espresso = "3.4.0"
 androidx-test-ext = "1.1.3"
-androidx-test-fragment = "1.5.1"
+androidx-test-fragment = "1.5.2"
 androidx-test-uiautomator = "2.2.0"
 okta-http-okhttp = "1.3.0"
 okta-management-sdk = "8.2.1"
@@ -53,16 +55,18 @@ timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 # Testing libs
 junit = { module = "junit:junit", version.ref = "junit" }
 jackson-dataformat-yml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version.ref = "jackson" }
+truth = { module = "com.google.truth:truth", version.ref = "truth" }
 
 androidx-test-core = { module = "androidx.test:core", version.ref = "androidx-test" }
 androidx-test-core-ktx = { module = "androidx.test:core-ktx", version.ref = "androidx-test" }
 androidx-test-espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "androidx-test-espresso"}
 androidx-test-espresso-contrib = { module = "androidx.test.espresso:espresso-contrib", version.ref = "androidx-test-espresso"}
 androidx-test-espresso-intents = { module = "androidx.test.espresso:espresso-intents", version.ref = "androidx-test-espresso"}
-androidx-test-ext = { module = "androidx.test.ext:junit", version.ref = "androidx-test-ext" }
+androidx-test-ext-junit = { module = "androidx.test.ext:junit", version.ref = "androidx-test-ext" }
+androidx-test-ext-junit-ktx = { module = "androidx.test.ext:junit-ktx", version.ref = "androidx-test-ext" }
 androidx-test-fragment = { module = "androidx.fragment:fragment-testing", version.ref = "androidx-test-fragment" }
 androidx-test-navigation = { module = "androidx.navigation:navigation-testing", version.ref = "android-navigation" }
-androidx-test-orchestrator = { module = "androidx.test:orchestrator", version.ref = "androidx-test" }
+androidx-test-orchestrator = { module = "androidx.test:orchestrator", version.ref = "androidx-test-orchestrator" }
 androidx-test-runner = { module = "androidx.test:runner", version.ref = "androidx-test" }
 androidx-test-rules = { module = "androidx.test:rules", version.ref = "androidx-test" }
 androidx-test-uiautomator = { module = "androidx.test.uiautomator:uiautomator", version.ref = "androidx-test-uiautomator" }
@@ -87,10 +91,9 @@ android-instrumentation-testing = [
     "androidx-test-espresso-core",
     "androidx-test-espresso-contrib",
     "androidx-test-espresso-intents",
-    "androidx-test-ext",
-    "androidx-test-fragment",
+    "androidx-test-ext-junit",
+    "androidx-test-ext-junit-ktx",
     "androidx-test-navigation",
-    "androidx-test-orchestrator",
     "androidx-test-runner",
     "androidx-test-rules",
     "androidx-test-uiautomator",
