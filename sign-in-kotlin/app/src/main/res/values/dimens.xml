@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <dimen name="horizontal_padding">20dp</dimen>
-    <dimen name="vertical_padding">10dp</dimen>
-    <dimen name="scroll_view_height">300dp</dimen>
-</resources>
