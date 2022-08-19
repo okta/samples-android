@@ -17,6 +17,9 @@ android {
         versionCode 1
         versionName "1.0"
 
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunnerArguments clearPackageData: 'true'
+
         buildConfigField "String", 'DISCOVERY_URL', "\"${oktaProperties.getProperty('discoveryUrl')}\""
         buildConfigField "String", 'CLIENT_ID', "\"${oktaProperties.getProperty('clientId')}\""
         buildConfigField "String", 'SIGN_IN_REDIRECT_URI', "\"${oktaProperties.getProperty('signInRedirectUri')}\""
@@ -33,6 +36,12 @@ android {
 
     buildFeatures {
         viewBinding true
+    }
+
+    testOptions {
+        animationsDisabled true
+
+        execution 'ANDROIDX_TEST_ORCHESTRATOR'
     }
 }
 
@@ -51,6 +60,8 @@ dependencies {
     androidTestImplementation(libs.jackson.dataformat.yml)
     androidTestImplementation(libs.bundles.android.instrumentation.testing)
     androidTestImplementation(libs.bundles.okta.testing)
+    androidTestUtil(libs.androidx.test.orchestrator)
+    debugImplementation(libs.androidx.test.fragment)
 }
 
 static def parseScheme(String uri) {
