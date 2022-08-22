@@ -9,7 +9,6 @@ Please find the sample that fits your use-case from the table below.
 | Sample | Description | Use-Case |
 |--------|-------------|----------|
 | [Browser Sign In](/browser-sign-in) | An application that show how to authenticate to Okta account via WebBrowser ([Chrome Custom Tabs][]) using OpenID protocol and get acccount detail info. | Native Android app. Authenticate to app via browser without creation any additional login form and using already authenticate session(if user do authentication in browser before). |
-| [Custom Sign In](/custom-sign-in) | An application that show how to authenticate to Okta account within app without any browsers. Also it shows how verify MFA(Multi Factor Authentication) such as Call, SMS, OktaVerify(Push, Code), Google Authenticator. Demonstrating how to implement password recovery process, answering security question.  | Native Android app. Implementing whole authenticate process within application without other apps (like browser) |
 | [TOTP Generator](/totp) | A sample application that generates TOTP tokens. | An application that shows how developer can build their own Google Authenticator clone for their brand. |
 
 ## MinSDK Requirements
