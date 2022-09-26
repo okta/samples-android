@@ -1,19 +1,73 @@
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
-    dependencies {
-        classpath libs.gradle
-        classpath libs.kotlin.gradle.plugin
-        classpath libs.android.navigation.safe.args
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+    id 'androidx.navigation.safeargs.kotlin'
+}
 
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
+def oktaProperties = new Properties()
+rootProject.file("okta.properties").withInputStream { oktaProperties.load(it) }
+
+android {
+    compileSdk libs.versions.compile.sdk.get() as Integer
+
+    defaultConfig {
+        applicationId "com.okta.android.samples.browser_sign_in"
+        minSdk libs.versions.min.sdk.get() as Integer
+        targetSdk libs.versions.target.sdk.get() as Integer
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunnerArguments clearPackageData: 'true'
+
+        buildConfigField "String", 'DISCOVERY_URL', "\"${oktaProperties.getProperty('discoveryUrl')}\""
+        buildConfigField "String", 'CLIENT_ID', "\"${oktaProperties.getProperty('clientId')}\""
+        buildConfigField "String", 'SIGN_IN_REDIRECT_URI', "\"${oktaProperties.getProperty('signInRedirectUri')}\""
+        buildConfigField "String", 'SIGN_OUT_REDIRECT_URI', "\"${oktaProperties.getProperty('signOutRedirectUri')}\""
+    }
+
+    defaultConfig.manifestPlaceholders = [
+            "webAuthenticationRedirectScheme": parseScheme(oktaProperties.getProperty('signInRedirectUri'))
+    ]
+
+    compileOptions {
+        coreLibraryDesugaringEnabled true
+    }
+
+    buildFeatures {
+        viewBinding true
+    }
+
+    testOptions {
+        animationsDisabled true
+
+        execution 'ANDROIDX_TEST_ORCHESTRATOR'
     }
 }
 
-task clean(type: Delete) {
-    delete rootProject.buildDir
+dependencies {
+    coreLibraryDesugaring(libs.desugar.jdk)
+
+    implementation(libs.bundles.android)
+    implementation(libs.kotlin.stdlib)
+    implementation(libs.timber)
+
+    implementation(platform(libs.okta.bom))
+    implementation(libs.okta.auth.foundation.bootstrap)
+    implementation(libs.okta.web.authentication.ui)
+
+    androidTestImplementation(libs.junit)
+    androidTestImplementation(libs.jackson.dataformat.yml)
+    androidTestImplementation(libs.bundles.android.instrumentation.testing)
+    androidTestImplementation(libs.bundles.okta.testing)
+    androidTestUtil(libs.androidx.test.orchestrator)
+    debugImplementation(libs.androidx.test.fragment)
+}
+
+static def parseScheme(String uri) {
+    def index = uri.indexOf(':/')
+    if (index == -1) {
+        throw new IllegalStateException("Scheme is not in a valid format.")
+    }
+    return uri.substring(0, index)
 }
