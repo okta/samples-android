@@ -43,6 +43,7 @@ android {
 
         execution 'ANDROIDX_TEST_ORCHESTRATOR'
     }
+    namespace 'com.okta.android.samples.browser_sign_in'
 }
 
 dependencies {
