@@ -1,33 +1,55 @@
 [versions]
-gradle = "7.3.0"
-kotlin-gradle-plugin = "1.7.10"
+gradle = "7.3.1"
+kotlin-gradle-plugin = "1.7.20"
 min-sdk = "23"
-compile-sdk = "31"
-target-sdk = "31"
+compile-sdk = "33"
+target-sdk = "33"
 desugar-jdk = "1.1.6"
+kotlin-compiler-extension-version = "1.3.2"
 
 android-appcompat = "1.5.1"
 android-material = "1.6.1"
 android-navigation = "2.5.2"
 android-constraintlayout = "2.1.4"
-lifecycle-viewmodel-ktx = "2.5.1"
+lifecycle-ktx = "2.5.1"
 activity-ktx = "1.6.0"
+core-ktx = "1.9.0"
+
+activity-compose = "1.6.0"
+compose-ui = "1.2.1"
+accompanist = "0.25.1"
+
+coroutines = "1.6.4"
+turbine = "0.12.0"
+
+hilt = "2.44"
+hilt-navigation-compose = "1.0.0"
+
+camerax = "1.2.0-beta02"
+mlkit-barcode-scanning = "18.1.0"
+
+security-crypto-ktx = "1.1.0-alpha03"
 
 okta-bom = "1.1.0"
 
-kotlin-stdlib = "1.7.10"
+kotlin-stdlib = "1.7.20"
 timber = "5.0.1"
+
+kotlin-onetimepassword = "2.4.0"
+commons-codec = "1.15"
 
 # Testing lib versions
 junit = "4.13.2"
 jackson = "2.13.4"
 truth = "1.1.3"
+mockk = "1.13.2"
 androidx-test = "1.4.0"
 androidx-test-orchestrator = "1.4.1"
 androidx-test-espresso = "3.4.0"
 androidx-test-ext = "1.1.3"
 androidx-test-fragment = "1.5.3"
 androidx-test-uiautomator = "2.2.0"
+robolectric = "4.8.1"
 okta-http-okhttp = "1.3.1"
 okta-management-sdk = "8.2.2"
 
@@ -42,8 +64,41 @@ android-navigation-ui = { module = "androidx.navigation:navigation-ui-ktx", vers
 android-navigation-fragment = { module = "androidx.navigation:navigation-fragment-ktx", version.ref = "android-navigation" }
 android-navigation-safe-args = { module = "androidx.navigation:navigation-safe-args-gradle-plugin", version.ref = "android-navigation" }
 android-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "android-constraintlayout" }
-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycle-viewmodel-ktx" }
+lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle-ktx"}
+lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycle-ktx" }
 activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "activity-ktx" }
+core-ktx = { module = "androidx.core:core-ktx", version.ref = "core-ktx" }
+
+activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activity-compose" }
+compose-ui = { module = "androidx.compose.ui:ui", version.ref = "compose-ui" }
+compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "compose-ui" }
+compose-material = { module = "androidx.compose.material:material", version.ref = "compose-ui" }
+accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist" }
+navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "android-navigation" }
+
+compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose-ui" }
+compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "compose-ui" }
+compose-ui-test-junit = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "compose-ui" }
+
+coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
+coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
+turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
+
+hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
+hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" }
+hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hilt-navigation-compose" }
+
+camera-core = { module = "androidx.camera:camera-core", version.ref = "camerax" }
+camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "camerax" }
+camera-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref = "camerax" }
+camera-video = { module = "androidx.camera:camera-video", version.ref = "camerax" }
+camera-view = { module = "androidx.camera:camera-view", version.ref = "camerax" }
+camera-extensions = { module = "androidx.camera:camera-extensions", version.ref = "camerax" }
+camera-mlkit-vision = { module = "androidx.camera:camera-mlkit-vision", version.ref = "camerax" }
+
+mlkit-barcode-scanning = { module = "com.google.android.gms:play-services-mlkit-barcode-scanning", version.ref = "mlkit-barcode-scanning" }
+security-crypto-ktx = { module = "androidx.security:security-crypto-ktx", version.ref = "security-crypto-ktx" }
 
 okta-bom = { module = "com.okta.kotlin:bom", version.ref = "okta-bom" }
 okta-auth-foundation-bootstrap = { module = "com.okta.kotlin:auth-foundation-bootstrap" }
@@ -52,10 +107,15 @@ okta-web-authentication-ui = { module = "com.okta.kotlin:web-authentication-ui" 
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin-stdlib" }
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 
+kotlin-onetimepassword = { module = "dev.turingcomplete:kotlin-onetimepassword", version.ref = "kotlin-onetimepassword" }
+commons-codec = { group = "commons-codec", name = "commons-codec", version.ref = "commons-codec" }
+
 # Testing libs
 junit = { module = "junit:junit", version.ref = "junit" }
 jackson-dataformat-yml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version.ref = "jackson" }
 truth = { module = "com.google.truth:truth", version.ref = "truth" }
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 
 androidx-test-core = { module = "androidx.test:core", version.ref = "androidx-test" }
 androidx-test-core-ktx = { module = "androidx.test:core-ktx", version.ref = "androidx-test" }
@@ -82,8 +142,43 @@ android = [
     "android-navigation-ui",
     "android-navigation-fragment",
     "android-constraintlayout",
+    "lifecycle-runtime-ktx",
     "lifecycle-viewmodel-ktx",
     "activity-ktx",
+    "core-ktx",
+]
+camerax = [
+    "camera-core",
+    "camera-camera2",
+    "camera-lifecycle",
+    "camera-video",
+    "camera-view",
+    "camera-extensions",
+    "camera-mlkit-vision",
+]
+compose-ui = [
+    "activity-compose",
+    "compose-ui",
+    "compose-ui-tooling-preview",
+    "compose-material",
+    "accompanist-permissions",
+    "navigation-compose",
+]
+compose-debug = [
+    "compose-ui-tooling",
+    "compose-ui-test-manifest",
+]
+coroutines = [
+    "coroutines-core",
+    "coroutines-android",
+]
+unit-testing = [
+    "junit",
+    "truth",
+    "robolectric",
+    "mockk",
+    "coroutines-test",
+    "turbine",
 ]
 android-instrumentation-testing = [
     "androidx-test-core",
