@@ -23,14 +23,14 @@ import dagger.hilt.components.SingletonComponent
 
 @InstallIn(SingletonComponent::class)
 @Module
-abstract class PasswordGeneratorModule {
+interface PasswordGeneratorModule {
     @Binds
-    abstract fun bindPasswordGenerator(
+    fun bindPasswordGenerator(
         passwordGenerator: PasswordGeneratorImpl
     ): PasswordGenerator
 
     @Binds
-    abstract fun bindPasswordGeneratorFactory(
+    fun bindPasswordGeneratorFactory(
         passwordGeneratorFactoryImpl: PasswordGeneratorFactoryImpl
     ): PasswordGeneratorFactory
 }

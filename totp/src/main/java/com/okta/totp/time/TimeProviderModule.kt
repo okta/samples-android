@@ -23,9 +23,9 @@ import dagger.hilt.components.SingletonComponent
 
 @InstallIn(SingletonComponent::class)
 @Module
-abstract class TimeProviderModule {
+interface TimeProviderModule {
     @Binds
-    abstract fun bindTimeProvider(
+    fun bindTimeProvider(
         timeProviderImpl: TimeProviderImpl
     ) : TimeProvider
 }

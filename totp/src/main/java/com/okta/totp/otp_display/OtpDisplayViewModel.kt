@@ -20,6 +20,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.okta.totp.coroutine.IoDispatcher
+import com.okta.totp.coroutine.ticker.TickerFlowFactory
 import com.okta.totp.otp_repository.OtpUriSharedPreferences
 import com.okta.totp.parsing.OtpUriParser
 import com.okta.totp.parsing.OtpUriParsingResults
@@ -27,9 +28,9 @@ import com.okta.totp.password_generator.PasswordGenerator
 import com.okta.totp.password_generator.PasswordGeneratorFactory
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.launch
@@ -41,10 +42,9 @@ class OtpDisplayViewModel @Inject constructor(
     private val otpUriSharedPreferences: OtpUriSharedPreferences,
     private val otpUriParser: OtpUriParser,
     private val passwordGeneratorFactory: PasswordGeneratorFactory,
+    tickerFlowFactory: TickerFlowFactory,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
-    private var limitUpdates = false
-    private var maxUpdates = 0
     private val events = MutableSharedFlow<OtpDisplayViewModelEvents>()
 
     private val otpEntryFlow = events.scan(getInitialOtpCodes()) { otpEntryList, event ->
@@ -80,13 +80,15 @@ class OtpDisplayViewModel @Inject constructor(
         .flowOn(ioDispatcher)
 
     init {
-        viewModelScope.launch(ioDispatcher) {
-            var updates = 0
-            while (limitUpdates && updates++ < maxUpdates) {
-                delay(OTP_REFRESH_TIME_SECS.seconds)
+        tickerFlowFactory.getTickerFlow(
+            period = OTP_REFRESH_DURATION,
+            initialDelay = OTP_REFRESH_DURATION
+        )
+            .map {
                 events.emit(OtpDisplayViewModelEvents.UpdateOtpEntries)
             }
-        }
+            .flowOn(ioDispatcher)
+            .launchIn(viewModelScope)
     }
 
     private fun getInitialOtpCodes(): List<OtpViewmodelData> {
@@ -106,15 +108,9 @@ class OtpDisplayViewModel @Inject constructor(
             }
     }
 
-    @VisibleForTesting
-    fun setMaxUpdateCycles(maxUpdates: Int) {
-        limitUpdates = true
-        this.maxUpdates = maxUpdates
-    }
-
     companion object {
         @VisibleForTesting
-        const val OTP_REFRESH_TIME_SECS = 5L
+        val OTP_REFRESH_DURATION = 5.seconds
     }
 }
 
