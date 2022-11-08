@@ -18,6 +18,8 @@ package com.okta.totp.otp_display
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.okta.totp.coroutine.CoroutineDispatcherRule
+import com.okta.totp.coroutine.ticker.TestTickerFlowFactory
 import com.okta.totp.otp_repository.OtpUriSharedPreferences
 import com.okta.totp.parsing.OtpUriParser
 import com.okta.totp.parsing.OtpUriParsingResults
@@ -33,7 +35,6 @@ import io.mockk.just
 import io.mockk.runs
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
@@ -46,6 +47,9 @@ import org.robolectric.RobolectricTestRunner
 internal class OtpDisplayViewModelTest {
     @get:Rule
     val mockRule = MockKRule(this)
+
+    @get:Rule
+    val coroutineDispatcherRule = CoroutineDispatcherRule()
 
     @MockK
     private lateinit var otpUriSharedPreferences: OtpUriSharedPreferences
@@ -67,7 +71,7 @@ internal class OtpDisplayViewModelTest {
     @Test
     fun `emit empty list if no otp uri strings are stored`() = runTest {
         every { otpUriSharedPreferences.getOtpUriStrings() } returns emptyList()
-        val otpDisplayViewModel = getOtpDisplayViewModel(maxUpdateCycles = 0)
+        val otpDisplayViewModel = getOtpDisplayViewModel(maxUpdates = 0)
         otpDisplayViewModel.otpScreenUiStateFlow.test {
             assertThat(awaitItem()).isEmpty()
             expectNoEvents()
@@ -79,7 +83,7 @@ internal class OtpDisplayViewModelTest {
         every { otpUriSharedPreferences.getOtpUriStrings() } returns listOf(
             "otpauth://totp/issuer:name?secret=secret"
         )
-        val otpDisplayViewModel = getOtpDisplayViewModel(maxUpdateCycles = 0)
+        val otpDisplayViewModel = getOtpDisplayViewModel(maxUpdates = 0)
 
         val expectedTimeStep = 0L
         val expectedName = "name"
@@ -108,7 +112,7 @@ internal class OtpDisplayViewModelTest {
     @Test
     fun `emit initial totp codes for all entries in list`() = runTest {
         every { otpUriSharedPreferences.getOtpUriStrings() } returns otpUriStringList
-        val otpDisplayViewModel = getOtpDisplayViewModel(maxUpdateCycles = 0)
+        val otpDisplayViewModel = getOtpDisplayViewModel(maxUpdates = 0)
 
         val expectedResult = (0..9).map {
             val expectedTimeStep = it.toLong()
@@ -138,7 +142,7 @@ internal class OtpDisplayViewModelTest {
     fun `updating otp entries once should emit entry with otp code regenerated at new timestep`() = runTest {
         every { otpUriSharedPreferences.getOtpUriStrings() } returns otpUriStringList
         val numUpdates = 1
-        val otpDisplayViewModel = getOtpDisplayViewModel(maxUpdateCycles = numUpdates)
+        val otpDisplayViewModel = getOtpDisplayViewModel(maxUpdates = numUpdates)
 
         val expectedEmission1 = (0..9).map {
             val expectedTimeStep = it.toLong()
@@ -187,7 +191,7 @@ internal class OtpDisplayViewModelTest {
     fun `updating otp entries over multiple timesteps regenerates otp codes at each new timestep`() = runTest {
         every { otpUriSharedPreferences.getOtpUriStrings() } returns otpUriStringList
         val numUpdates = 10
-        val otpDisplayViewModel = getOtpDisplayViewModel(maxUpdateCycles = numUpdates)
+        val otpDisplayViewModel = getOtpDisplayViewModel(maxUpdates = numUpdates)
 
         val emissions = (0 .. numUpdates).map { numOfPreviousEmissions ->
             (0..9).map {
@@ -210,8 +214,8 @@ internal class OtpDisplayViewModelTest {
         }
 
         otpDisplayViewModel.otpScreenUiStateFlow.test {
-            emissions.map {
-                assertThat(awaitItem()).isEqualTo(it)
+            emissions.take(emissions.size).mapIndexed { index, item ->
+                assertThat(awaitItem()).isEqualTo(item)
             }
             expectNoEvents()
         }
@@ -221,7 +225,7 @@ internal class OtpDisplayViewModelTest {
     fun `deleting otp code emits a new list with that otp code removed`() = runTest {
         every { otpUriSharedPreferences.getOtpUriStrings() } returns otpUriStringList
         every { otpUriSharedPreferences.removeOtpUriString(any()) } just runs
-        val otpDisplayViewModel = getOtpDisplayViewModel(maxUpdateCycles = 0)
+        val otpDisplayViewModel = getOtpDisplayViewModel(maxUpdates = 0)
 
         val expectedEmission1 = (0..9).map {
             val expectedTimeStep = it.toLong()
@@ -252,15 +256,15 @@ internal class OtpDisplayViewModelTest {
         }
     }
 
-    private fun TestScope.getOtpDisplayViewModel(maxUpdateCycles: Int): OtpDisplayViewModel {
+    private fun getOtpDisplayViewModel(maxUpdates: Int): OtpDisplayViewModel {
+        val testTickerFlowFactory = TestTickerFlowFactory(maxUpdates)
         return OtpDisplayViewModel(
             otpUriSharedPreferences = otpUriSharedPreferences,
             otpUriParser = otpUriParser,
             passwordGeneratorFactory = passwordGeneratorFactory,
-            ioDispatcher = StandardTestDispatcher(testScheduler),
-        ).apply {
-            setMaxUpdateCycles(maxUpdateCycles)
-        }
+            ioDispatcher = StandardTestDispatcher(),
+            tickerFlowFactory = testTickerFlowFactory,
+        )
     }
 
     private fun getExpectedOtpCodeAtTimestepWithInfo(
