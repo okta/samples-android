@@ -42,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -61,12 +62,16 @@ fun OtpScreen(otpDisplayViewModel: OtpDisplayViewModel, onNavigateToBarcodeScree
                 modifier = Modifier
                     .background(color = Color.LightGray)
                     .fillMaxWidth()
-                    .padding(16.dp),
+                    .padding(16.dp)
+                    .testTag(OtpScreenTestTags.TITLE),
             )
         },
         floatingActionButtonPosition = FabPosition.End,
         floatingActionButton = {
-            FloatingActionButton(onClick = onNavigateToBarcodeScreen) {
+            FloatingActionButton(
+                onClick = onNavigateToBarcodeScreen,
+                modifier = Modifier.testTag(OtpScreenTestTags.ADD_BUTTON),
+            ) {
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = stringResource(id = R.string.otp_screen_add_button_description)
@@ -84,7 +89,9 @@ fun OtpScreen(otpDisplayViewModel: OtpDisplayViewModel, onNavigateToBarcodeScree
 @Composable
 fun OtpScreenList(otpEntryList: List<OtpEntry>, modifier: Modifier = Modifier) {
     LazyColumn(
-        modifier = modifier.padding(16.dp),
+        modifier = modifier
+            .padding(16.dp)
+            .testTag(OtpScreenTestTags.OTP_SCREEN_LIST),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         items(otpEntryList) { otpData ->
@@ -95,24 +102,32 @@ fun OtpScreenList(otpEntryList: List<OtpEntry>, modifier: Modifier = Modifier) {
 
 @Composable
 fun OtpCode(otpEntry: OtpEntry, modifier: Modifier = Modifier) {
-    Row(modifier = modifier) {
-        Column {
+    Row(modifier = modifier.testTag(OtpScreenTestTags.OTP_CODE)) {
+        Column(modifier = Modifier.weight(5f)) {
             Text(
                 otpEntry.otpCode,
                 fontWeight = FontWeight.Bold,
                 color = Color.Blue,
-                fontSize = 16.sp
+                fontSize = 16.sp,
+                modifier = Modifier.testTag(OtpScreenTestTags.OTP_CODE_TEXT)
             )
-            Text(stringResource(id = R.string.account_label, otpEntry.account))
+            Text(
+                stringResource(id = R.string.account_label, otpEntry.account),
+                modifier = Modifier.testTag(OtpScreenTestTags.OTP_CODE_ACCOUNT)
+            )
             otpEntry.issuer?.let {
-                Text(stringResource(id = R.string.issuer_label, otpEntry.issuer))
+                Text(
+                    stringResource(id = R.string.issuer_label, otpEntry.issuer),
+                    modifier = Modifier.testTag(OtpScreenTestTags.OTP_CODE_ISSUER)
+                )
             }
         }
         Spacer(modifier = Modifier.weight(1f))
         Button(
             modifier = Modifier
                 .align(Alignment.CenterVertically)
-                .padding(16.dp),
+                .padding(16.dp)
+                .testTag(OtpScreenTestTags.OTP_CODE_DELETE_BUTTON),
             onClick = { otpEntry.delete() },
         ) {
             Icon(

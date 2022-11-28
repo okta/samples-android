@@ -16,7 +16,9 @@ android {
         versionCode 1
         versionName "1.0"
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "com.okta.totp.HiltTestRunner"
+        testInstrumentationRunnerArguments clearPackageData: 'true'
+
         vectorDrawables {
             useSupportLibrary true
         }
@@ -37,6 +39,11 @@ android {
     }
     buildFeatures {
         compose true
+    }
+    testOptions {
+        animationsDisabled true
+
+        execution 'ANDROIDX_TEST_ORCHESTRATOR'
     }
     composeOptions {
         kotlinCompilerExtensionVersion libs.versions.kotlin.compiler.extension.version.get()
@@ -59,8 +66,12 @@ dependencies {
     implementation(libs.kotlin.onetimepassword)
     implementation(libs.commons.codec)
     kapt(libs.hilt.compiler)
+
     testImplementation(libs.bundles.unit.testing)
+    kaptAndroidTest(libs.hilt.compiler.testing)
+    androidTestImplementation(libs.hilt.android.testing)
     androidTestImplementation(libs.bundles.android.instrumentation.testing)
+    androidTestUtil(libs.androidx.test.orchestrator)
     androidTestImplementation(libs.compose.ui.test.junit)
     debugImplementation(libs.bundles.compose.debug)
 }
