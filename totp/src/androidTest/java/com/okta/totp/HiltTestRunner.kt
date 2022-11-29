@@ -14,20 +14,15 @@
  * limitations under the License.
  */
 
-package com.okta.totp.coroutine.ticker
+package com.okta.totp
 
-import dagger.Binds
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import javax.inject.Singleton
+import android.app.Application
+import android.content.Context
+import androidx.test.runner.AndroidJUnitRunner
+import dagger.hilt.android.testing.HiltTestApplication
 
-@InstallIn(SingletonComponent::class)
-@Module
-interface TickerFlowModule {
-    @Singleton
-    @Binds
-    fun bindTickerFlowFactory(
-        tickerFlowFactoryImpl: TickerFlowFactoryImpl
-    ): TickerFlowFactory
+class HiltTestRunner : AndroidJUnitRunner() {
+    override fun newApplication(cl: ClassLoader?, name: String?, context: Context?): Application {
+        return super.newApplication(cl, HiltTestApplication::class.java.name, context)
+    }
 }

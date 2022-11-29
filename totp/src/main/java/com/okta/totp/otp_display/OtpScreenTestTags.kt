@@ -14,20 +14,15 @@
  * limitations under the License.
  */
 
-package com.okta.totp.coroutine.ticker
+package com.okta.totp.otp_display
 
-import dagger.Binds
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import javax.inject.Singleton
-
-@InstallIn(SingletonComponent::class)
-@Module
-interface TickerFlowModule {
-    @Singleton
-    @Binds
-    fun bindTickerFlowFactory(
-        tickerFlowFactoryImpl: TickerFlowFactoryImpl
-    ): TickerFlowFactory
+object OtpScreenTestTags {
+    const val TITLE = "otp_screen_title"
+    const val ADD_BUTTON = "otp_screen_add_button"
+    const val OTP_SCREEN_LIST = "otp_screen_list"
+    const val OTP_CODE = "otp_screen_otp_code"
+    const val OTP_CODE_TEXT = "otp_screen_otp_code_text"
+    const val OTP_CODE_ACCOUNT = "otp_screen_otp_code_account"
+    const val OTP_CODE_ISSUER = "otp_screen_otp_code_issuer"
+    const val OTP_CODE_DELETE_BUTTON = "otp_screen_otp_code_delete"
 }

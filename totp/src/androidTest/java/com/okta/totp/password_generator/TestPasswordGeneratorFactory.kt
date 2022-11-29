@@ -14,20 +14,16 @@
  * limitations under the License.
  */
 
-package com.okta.totp.coroutine.ticker
+package com.okta.totp.password_generator
 
-import dagger.Binds
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import javax.inject.Singleton
+import com.okta.totp.parsing.OtpUriParsingResults
+import com.okta.totp.time.TimeProvider
+import javax.inject.Inject
 
-@InstallIn(SingletonComponent::class)
-@Module
-interface TickerFlowModule {
-    @Singleton
-    @Binds
-    fun bindTickerFlowFactory(
-        tickerFlowFactoryImpl: TickerFlowFactoryImpl
-    ): TickerFlowFactory
+class TestPasswordGeneratorFactory @Inject constructor(
+    private val timeProvider: TimeProvider,
+) : PasswordGeneratorFactory {
+    override fun getPasswordGenerator(otpParams: OtpUriParsingResults.OtpData): PasswordGenerator {
+        return TestPasswordGenerator(otpParams, timeProvider)
+    }
 }

@@ -14,20 +14,12 @@
  * limitations under the License.
  */
 
-package com.okta.totp.coroutine.ticker
+package com.okta.totp.otp_display
 
-import dagger.Binds
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import javax.inject.Singleton
+import androidx.compose.ui.test.junit4.ComposeContentTestRule
+import dagger.assisted.AssistedFactory
 
-@InstallIn(SingletonComponent::class)
-@Module
-interface TickerFlowModule {
-    @Singleton
-    @Binds
-    fun bindTickerFlowFactory(
-        tickerFlowFactoryImpl: TickerFlowFactoryImpl
-    ): TickerFlowFactory
+@AssistedFactory
+interface OtpDisplayPageFactory {
+    fun create(composeRule: ComposeContentTestRule): OtpDisplayPage
 }

@@ -14,20 +14,11 @@
  * limitations under the License.
  */
 
-package com.okta.totp.coroutine.ticker
+package com.okta.totp.barcode_scan
 
-import dagger.Binds
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import javax.inject.Singleton
-
-@InstallIn(SingletonComponent::class)
-@Module
-interface TickerFlowModule {
-    @Singleton
-    @Binds
-    fun bindTickerFlowFactory(
-        tickerFlowFactoryImpl: TickerFlowFactoryImpl
-    ): TickerFlowFactory
+object BarcodeScanScreenTestTags {
+    const val BACK_BUTTON = "barcode_screen_back_button"
+    const val TITLE = "barcode_screen_title"
+    const val REQUEST_PERMISSION_TEXT = "barcode_screen_request_permission_text"
+    const val REQUEST_PERMISSION_BUTTON = "barcode_screen_request_permission_button"
 }

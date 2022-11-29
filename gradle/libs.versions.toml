@@ -8,21 +8,21 @@ desugar-jdk = "1.1.6"
 kotlin-compiler-extension-version = "1.3.2"
 
 android-appcompat = "1.5.1"
-android-material = "1.6.1"
-android-navigation = "2.5.2"
+android-material = "1.7.0"
+android-navigation = "2.5.3"
 android-constraintlayout = "2.1.4"
 lifecycle-ktx = "2.5.1"
-activity-ktx = "1.6.0"
+activity-ktx = "1.6.1"
 core-ktx = "1.9.0"
 
-activity-compose = "1.6.0"
-compose-ui = "1.2.1"
-accompanist = "0.25.1"
+activity-compose = "1.6.1"
+compose-ui = "1.3.1"
+accompanist = "0.27.0"
 
 coroutines = "1.6.4"
-turbine = "0.12.0"
+turbine = "0.12.1"
 
-hilt = "2.44"
+hilt = "2.44.2"
 hilt-navigation-compose = "1.0.0"
 
 camerax = "1.2.0-beta02"
@@ -30,7 +30,7 @@ mlkit-barcode-scanning = "18.1.0"
 
 security-crypto-ktx = "1.1.0-alpha03"
 
-okta-bom = "1.1.0"
+okta-bom = "1.1.1"
 
 kotlin-stdlib = "1.7.20"
 timber = "5.0.1"
@@ -40,17 +40,17 @@ commons-codec = "1.15"
 
 # Testing lib versions
 junit = "4.13.2"
-jackson = "2.13.4"
+jackson = "2.14.0"
 truth = "1.1.3"
 mockk = "1.13.2"
-androidx-test = "1.4.0"
-androidx-test-orchestrator = "1.4.1"
-androidx-test-espresso = "3.4.0"
-androidx-test-ext = "1.1.3"
-androidx-test-fragment = "1.5.3"
+androidx-test = "1.5.0"
+androidx-test-orchestrator = "1.4.2"
+androidx-test-espresso = "3.5.0"
+androidx-test-ext = "1.1.4"
+androidx-test-fragment = "1.5.4"
 androidx-test-uiautomator = "2.2.0"
-robolectric = "4.8.1"
-okta-http-okhttp = "1.3.1"
+robolectric = "4.9"
+okta-http-okhttp = "1.3.2"
 okta-management-sdk = "8.2.2"
 
 [libraries]
@@ -88,6 +88,9 @@ turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
 hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" }
 hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hilt-navigation-compose" }
+
+hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "hilt" }
+hilt-compiler-testing = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt" }
 
 camera-core = { module = "androidx.camera:camera-core", version.ref = "camerax" }
 camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "camerax" }

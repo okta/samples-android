@@ -46,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -73,6 +74,7 @@ fun BarcodeScanScreen(
                     modifier = Modifier
                         .clickable(onClick = onNavigateToOtpScreen)
                         .padding(16.dp)
+                        .testTag(BarcodeScanScreenTestTags.BACK_BUTTON)
                 )
                 Text(
                     text = stringResource(id = R.string.barcode_screen_title),
@@ -81,7 +83,8 @@ fun BarcodeScanScreen(
                     modifier = Modifier
                         .background(color = Color.LightGray)
                         .fillMaxWidth()
-                        .align(Alignment.CenterVertically),
+                        .align(Alignment.CenterVertically)
+                        .testTag(BarcodeScanScreenTestTags.TITLE),
                 )
             }
         }
@@ -111,8 +114,14 @@ fun CameraPreviewWithPermissions(
         }
         is PermissionStatus.Denied -> {
             Column(modifier.padding(8.dp)) {
-                Text(stringResource(id = R.string.camera_permission_request))
-                Button(onClick = { cameraPermissionState.launchPermissionRequest() }) {
+                Text(
+                    stringResource(id = R.string.camera_permission_request),
+                    modifier = Modifier.testTag(BarcodeScanScreenTestTags.REQUEST_PERMISSION_TEXT),
+                )
+                Button(
+                    onClick = { cameraPermissionState.launchPermissionRequest() },
+                    modifier = Modifier.testTag(BarcodeScanScreenTestTags.REQUEST_PERMISSION_BUTTON),
+                ) {
                     Text(stringResource(id = R.string.request_permission))
                 }
             }

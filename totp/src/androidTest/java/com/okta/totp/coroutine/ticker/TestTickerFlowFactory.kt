@@ -16,18 +16,20 @@
 
 package com.okta.totp.coroutine.ticker
 
-import dagger.Binds
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import javax.inject.Singleton
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import javax.inject.Inject
+import kotlin.time.Duration
 
-@InstallIn(SingletonComponent::class)
-@Module
-interface TickerFlowModule {
-    @Singleton
-    @Binds
-    fun bindTickerFlowFactory(
-        tickerFlowFactoryImpl: TickerFlowFactoryImpl
-    ): TickerFlowFactory
+class TestTickerFlowFactory @Inject constructor() : TickerFlowFactory {
+    private val _tickerEmitters = mutableListOf<MutableSharedFlow<Unit>>()
+    val tickerEmitters: List<MutableSharedFlow<Unit>> = _tickerEmitters
+
+    override fun getTickerFlow(period: Duration, initialDelay: Duration): Flow<Unit> {
+        val tickerEmitter = MutableSharedFlow<Unit>()
+        _tickerEmitters.add(tickerEmitter)
+        return tickerEmitter
+    }
+
+    fun clearTickers() = _tickerEmitters.clear()
 }

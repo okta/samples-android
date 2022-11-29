@@ -18,16 +18,19 @@ package com.okta.totp.coroutine.ticker
 
 import dagger.Binds
 import dagger.Module
-import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import dagger.hilt.testing.TestInstallIn
 import javax.inject.Singleton
 
-@InstallIn(SingletonComponent::class)
 @Module
-interface TickerFlowModule {
+@TestInstallIn(
+    components = [SingletonComponent::class],
+    replaces = [TickerFlowModule::class]
+)
+interface TestTickerFlowModule {
     @Singleton
     @Binds
     fun bindTickerFlowFactory(
-        tickerFlowFactoryImpl: TickerFlowFactoryImpl
+        testTickerFlowFactory: TestTickerFlowFactory,
     ): TickerFlowFactory
 }

@@ -14,20 +14,14 @@
  * limitations under the License.
  */
 
-package com.okta.totp.coroutine.ticker
+package com.okta.totp.time
 
-import dagger.Binds
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import javax.inject.Singleton
+import javax.inject.Inject
 
-@InstallIn(SingletonComponent::class)
-@Module
-interface TickerFlowModule {
-    @Singleton
-    @Binds
-    fun bindTickerFlowFactory(
-        tickerFlowFactoryImpl: TickerFlowFactoryImpl
-    ): TickerFlowFactory
+class TestTimeProvider @Inject constructor() : TimeProvider {
+    private var callCounter = 0L
+
+    override fun getCurrentTimeMillis(): Long {
+        return callCounter++
+    }
 }
