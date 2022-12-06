@@ -30,6 +30,7 @@ mlkit-barcode-scanning = "18.1.0"
 
 security-crypto-stable = "1.0.0"
 security-crypto-ktx = "1.1.0-alpha03"
+androidx-biometrics = "1.1.0"
 
 okta-bom = "1.1.1"
 
@@ -100,11 +101,11 @@ camera-video = { module = "androidx.camera:camera-video", version.ref = "camerax
 camera-view = { module = "androidx.camera:camera-view", version.ref = "camerax" }
 camera-extensions = { module = "androidx.camera:camera-extensions", version.ref = "camerax" }
 camera-mlkit-vision = { module = "androidx.camera:camera-mlkit-vision", version.ref = "camerax" }
-
 mlkit-barcode-scanning = { module = "com.google.android.gms:play-services-mlkit-barcode-scanning", version.ref = "mlkit-barcode-scanning" }
 
 security-crypto-ktx = { module = "androidx.security:security-crypto-ktx", version.ref = "security-crypto-ktx" }
 security-crypto-stable = { module = "androidx.security:security-crypto", version.ref = "security-crypto-stable" }
+androidx-biometrics = { module = "androidx.biometric:biometric", version.ref = "androidx-biometrics" }
 
 okta-bom = { module = "com.okta.kotlin:bom", version.ref = "okta-bom" }
 okta-auth-foundation-bootstrap = { module = "com.okta.kotlin:auth-foundation-bootstrap" }
