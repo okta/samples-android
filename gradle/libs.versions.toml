@@ -28,6 +28,7 @@ hilt-navigation-compose = "1.0.0"
 camerax = "1.2.0-beta02"
 mlkit-barcode-scanning = "18.1.0"
 
+security-crypto-stable = "1.0.0"
 security-crypto-ktx = "1.1.0-alpha03"
 
 okta-bom = "1.1.1"
@@ -101,7 +102,9 @@ camera-extensions = { module = "androidx.camera:camera-extensions", version.ref 
 camera-mlkit-vision = { module = "androidx.camera:camera-mlkit-vision", version.ref = "camerax" }
 
 mlkit-barcode-scanning = { module = "com.google.android.gms:play-services-mlkit-barcode-scanning", version.ref = "mlkit-barcode-scanning" }
+
 security-crypto-ktx = { module = "androidx.security:security-crypto-ktx", version.ref = "security-crypto-ktx" }
+security-crypto-stable = { module = "androidx.security:security-crypto", version.ref = "security-crypto-stable" }
 
 okta-bom = { module = "com.okta.kotlin:bom", version.ref = "okta-bom" }
 okta-auth-foundation-bootstrap = { module = "com.okta.kotlin:auth-foundation-bootstrap" }
