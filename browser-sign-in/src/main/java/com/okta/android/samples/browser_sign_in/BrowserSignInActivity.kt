@@ -19,7 +19,9 @@ package com.okta.android.samples.browser_sign_in
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.okta.android.samples.browser_sign_in.databinding.ActivityBrowserSignInBinding
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class BrowserSignInActivity : AppCompatActivity() {
     private lateinit var binding: ActivityBrowserSignInBinding
 

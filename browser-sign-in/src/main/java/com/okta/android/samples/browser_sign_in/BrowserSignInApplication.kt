@@ -23,9 +23,11 @@ import com.okta.authfoundation.client.OidcConfiguration
 import com.okta.authfoundation.client.SharedPreferencesCache
 import com.okta.authfoundation.credential.CredentialDataSource.Companion.createCredentialDataSource
 import com.okta.authfoundationbootstrap.CredentialBootstrap
+import dagger.hilt.android.HiltAndroidApp
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import timber.log.Timber
 
+@HiltAndroidApp
 class BrowserSignInApplication : Application() {
     override fun onCreate() {
         super.onCreate()

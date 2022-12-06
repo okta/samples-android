@@ -25,7 +25,9 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.okta.android.samples.browser_sign_in.R
 import com.okta.android.samples.browser_sign_in.databinding.FragmentUserDashboardBinding
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class UserDashboardFragment : Fragment() {
     private val viewModel: UserDashboardViewModel by viewModels()
     private var _binding: FragmentUserDashboardBinding? = null

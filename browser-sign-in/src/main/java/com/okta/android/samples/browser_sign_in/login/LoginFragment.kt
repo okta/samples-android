@@ -24,7 +24,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.okta.android.samples.browser_sign_in.databinding.FragmentLoginBinding
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class LoginFragment : Fragment() {
     private val viewModel: LoginViewModel by viewModels()
     private var _binding: FragmentLoginBinding? = null

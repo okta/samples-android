@@ -27,12 +27,15 @@ import com.okta.authfoundation.claims.name
 import com.okta.authfoundation.client.OidcClientResult
 import com.okta.authfoundationbootstrap.CredentialBootstrap
 import com.okta.webauthenticationui.WebAuthenticationClient.Companion.createWebAuthenticationClient
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import timber.log.Timber
+import javax.inject.Inject
 
-class UserDashboardViewModel : ViewModel() {
+@HiltViewModel
+class UserDashboardViewModel @Inject constructor() : ViewModel() {
     private val _loginState = MutableLiveData<UserDashboardLoginState>(UserDashboardLoginState.Loading)
     private val _userGreetingState = MutableLiveData<UserGreetingState>(UserGreetingState.Loading)
     private val _userInfoState = MutableLiveData<UserInfoState>(UserInfoState.Empty)
