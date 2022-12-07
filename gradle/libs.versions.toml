@@ -46,6 +46,7 @@ jackson = "2.14.0"
 truth = "1.1.3"
 mockk = "1.13.2"
 androidx-test = "1.5.0"
+androidx-test-runner = "1.5.1"
 androidx-test-orchestrator = "1.4.2"
 androidx-test-espresso = "3.5.0"
 androidx-test-ext = "1.1.4"
@@ -134,7 +135,7 @@ androidx-test-ext-junit-ktx = { module = "androidx.test.ext:junit-ktx", version.
 androidx-test-fragment = { module = "androidx.fragment:fragment-testing", version.ref = "androidx-test-fragment" }
 androidx-test-navigation = { module = "androidx.navigation:navigation-testing", version.ref = "android-navigation" }
 androidx-test-orchestrator = { module = "androidx.test:orchestrator", version.ref = "androidx-test-orchestrator" }
-androidx-test-runner = { module = "androidx.test:runner", version.ref = "androidx-test" }
+androidx-test-runner = { module = "androidx.test:runner", version.ref = "androidx-test-runner" }
 androidx-test-rules = { module = "androidx.test:rules", version.ref = "androidx-test" }
 androidx-test-uiautomator = { module = "androidx.test.uiautomator:uiautomator", version.ref = "androidx-test-uiautomator" }
 
