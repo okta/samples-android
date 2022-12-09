@@ -17,6 +17,7 @@
 package com.okta.android.samples.browser_sign_in
 
 import android.app.Application
+import com.okta.android.samples.browser_sign_in.storage.CredentialTokenStorage
 import com.okta.authfoundation.AuthFoundationDefaults
 import com.okta.authfoundation.client.OidcClient
 import com.okta.authfoundation.client.OidcConfiguration
@@ -26,9 +27,13 @@ import com.okta.authfoundationbootstrap.CredentialBootstrap
 import dagger.hilt.android.HiltAndroidApp
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import timber.log.Timber
+import javax.inject.Inject
 
 @HiltAndroidApp
 class BrowserSignInApplication : Application() {
+    @Inject
+    lateinit var credentialTokenStorage: CredentialTokenStorage
+
     override fun onCreate() {
         super.onCreate()
 
@@ -46,6 +51,6 @@ class BrowserSignInApplication : Application() {
             oidcConfiguration,
             "${BuildConfig.ISSUER}/.well-known/openid-configuration".toHttpUrl(),
         )
-        CredentialBootstrap.initialize(client.createCredentialDataSource(this))
+        CredentialBootstrap.initialize(client.createCredentialDataSource(credentialTokenStorage))
     }
 }
