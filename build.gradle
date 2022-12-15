@@ -11,6 +11,7 @@ buildscript {
         classpath libs.gradle
         classpath libs.kotlin.gradle.plugin
         classpath libs.android.navigation.safe.args
+        classpath libs.spotless
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -22,6 +23,35 @@ plugins {
     id 'org.jetbrains.kotlin.android' version '1.7.20' apply false
 }
 
-task clean(type: Delete) {
-    delete rootProject.buildDir
+allprojects {
+    configureSpotless(it)
+}
+
+def configureSpotless(Project project) {
+    project.apply plugin: 'com.diffplug.spotless'
+
+    project.spotless {
+        format 'misc', {
+            target '**/*.gradle', '**/*.md', '**/.gitignore', '**/*.xml', '**/*.json', '**/*.properties', '**/*.yml', '**/*.kt'
+            targetExclude '.idea/**', '**/build/**', '.gradle/**'
+
+            trimTrailingWhitespace()
+            endWithNewline()
+
+        }
+    }
+
+    project.plugins.withId('kotlin-android') {
+        project.spotless {
+            kotlin {
+                target '**/*.kt'
+                targetExclude '**/build/**'
+                ktlint()
+                    .editorConfigOverride([
+                        ktlint_disabled_rules : "package-name"
+                    ])
+                licenseHeaderFile rootProject.file('licenseTemplate.txt')
+            }
+        }
+    }
 }

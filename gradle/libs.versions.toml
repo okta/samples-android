@@ -6,6 +6,7 @@ compile-sdk = "33"
 target-sdk = "33"
 desugar-jdk = "1.1.6"
 kotlin-compiler-extension-version = "1.3.2"
+spotless = "6.12.0"
 
 android-appcompat = "1.5.1"
 android-material = "1.7.0"
@@ -60,6 +61,7 @@ okta-management-sdk = "8.2.2"
 gradle = { module = "com.android.tools.build:gradle", version.ref = "gradle" }
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin-gradle-plugin" }
 desugar-jdk = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar-jdk" }
+spotless = { module = "com.diffplug.spotless:spotless-plugin-gradle", version.ref = "spotless" }
 
 android-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "android-appcompat"}
 android-material = { module = "com.google.android.material:material", version.ref = "android-material" }
