@@ -62,7 +62,9 @@ dependencies {
     androidTestImplementation(libs.bundles.android.instrumentation.testing)
     androidTestImplementation(libs.bundles.okta.testing)
     androidTestUtil(libs.androidx.test.orchestrator)
-    debugImplementation(libs.androidx.test.fragment)
+    debugImplementation(libs.androidx.test.fragment) {
+        transitive false
+    }
 }
 
 static def parseScheme(String uri) {
