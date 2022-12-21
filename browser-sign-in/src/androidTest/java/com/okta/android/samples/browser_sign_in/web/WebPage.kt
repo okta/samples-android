@@ -26,6 +26,7 @@ import androidx.test.uiautomator.Until
 import com.okta.android.samples.browser_sign_in.test.*
 import com.okta.android.samples.browser_sign_in.user_dashboard.DashboardPage
 import timber.log.Timber
+import kotlin.time.Duration.Companion.seconds
 
 internal class WebPage<PreviousPage>(
     private val previousPage: PreviousPage,
@@ -34,29 +35,35 @@ internal class WebPage<PreviousPage>(
     companion object {
         fun clearData() {
             execShellCommand("pm clear com.android.chrome")
-
-            Thread.sleep(2000)
+            Thread.sleep(2.seconds.inWholeMilliseconds)
 
             val application = ApplicationProvider.getApplicationContext<Application>()
             val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://okta.com"))
+            val buttonTimeout = 1.seconds.inWholeMilliseconds
             browserIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
             application.startActivity(browserIntent)
 
             try {
-                clickButtonWithText("Accept & continue")
+                clickButtonWithText("Use without an account", buttonTimeout)
+            } catch (e: Throwable) {
+                Timber.e(e, "Error calling Use without an account")
+            }
+
+            try {
+                clickButtonWithText("Accept & continue", buttonTimeout)
             } catch (e: Throwable) {
                 Timber.e(e, "Error Calling accept and continue")
             }
 
             try {
-                clickButtonWithTextMatching("No [t|T]hanks")
+                clickButtonWithTextMatching("No [t|T]hanks", buttonTimeout)
             } catch (e: Throwable) {
                 Timber.e(e, "Error Calling No thanks")
             }
 
-            Thread.sleep(2000)
+            Thread.sleep(1.seconds.inWholeMilliseconds)
             execShellCommand("am force-stop com.android.chrome")
-            Thread.sleep(2000)
+            Thread.sleep(1.seconds.inWholeMilliseconds)
         }
     }
 
