@@ -42,7 +42,7 @@ class BrowserSignInApplication : Application() {
         )
         val client = OidcClient.createFromDiscoveryUrl(
             oidcConfiguration,
-            BuildConfig.DISCOVERY_URL.toHttpUrl(),
+            "${BuildConfig.ISSUER}/.well-known/openid-configuration".toHttpUrl(),
         )
         CredentialBootstrap.initialize(client.createCredentialDataSource(this))
     }

@@ -31,7 +31,7 @@ Before running this sample, you will need the following:
 Update `okta.properties` in your application directory with the following contents:
 
 ```properties
-discoveryUrl=https://${yourOktaDomain}/oauth2/default/.well-known/openid-configuration
+issuer=https://${yourOktaDomain}/oauth2/default
 clientId=${clientId}
 signInRedirectUri=${redirectUri}
 signOutRedirectUri=${endSessionUri}
