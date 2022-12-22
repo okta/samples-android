@@ -3,7 +3,6 @@ name: main
 on:
   push:
   pull_request:
-    types: [opened, labeled, unlabeled, synchronize]
 
 env:
   GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx4g -Dorg.gradle.daemon=false -Dkotlin.incremental=false"
@@ -40,14 +39,14 @@ jobs:
         run: ./gradlew assembleDebug testDebugUnitTest assembleAndroidTest
 
       - name: Authenticate Gcloud command line
-        if: ${{ github.event.repository.fork == false && (github.ref == 'refs/heads/master' || contains(github.event.pull_request.labels.*.name, 'e2e')) }}
+        if: ${{ github.event.repository.fork == false }}
         env:
           GOOGLE_PROJECT_ID: ${{ secrets.GOOGLE_PROJECT_ID }}
           GOOGLE_SERVICE_JSON_BASE64: ${{ secrets.GOOGLE_SERVICE_JSON_BASE64 }}
         run: ./signInToGcloud.sh && source $HOME/google-cloud-sdk/path.bash.inc && export CLOUDSDK_CORE_DISABLE_PROMPTS=1
 
       - name: Run End to End Tests
-        if: ${{ github.event.repository.fork == false && (github.ref == 'refs/heads/master' || contains(github.event.pull_request.labels.*.name, 'e2e')) }}
+        if: ${{ github.event.repository.fork == false }}
         run: ./runTestsInFirebaseTestLab.sh
 
       - name: Upload Test Failures
