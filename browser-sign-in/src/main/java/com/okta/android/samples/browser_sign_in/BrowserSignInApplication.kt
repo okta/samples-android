@@ -51,6 +51,18 @@ class BrowserSignInApplication : Application() {
             oidcConfiguration,
             "${BuildConfig.ISSUER}/.well-known/openid-configuration".toHttpUrl(),
         )
-        CredentialBootstrap.initialize(client.createCredentialDataSource(credentialTokenStorage))
+
+        // CredentialTokenStorage is a custom TokenStorage that allows switching between different
+        // SharedPreferences. This sample toggles between biometric EncryptedSharedPreferences, and
+        // non-biometric EncryptedSharedPreferences
+        val credentialDataSource = client.createCredentialDataSource(credentialTokenStorage)
+        // If switching between different credential encryption is not needed, create a
+        // CredentialDataSource by passing in the encryption specs as follows:
+        // val credentialDataSource = client.createCredentialDataSource(
+        //     this,
+        //     keyGenParameterSpec = <KeygenParameterSpec>
+        // )
+        // See SharedPreferencesModule.kt for example of KeyGenParameterSpec used by this sample
+        CredentialBootstrap.initialize(credentialDataSource)
     }
 }

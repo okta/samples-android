@@ -30,6 +30,11 @@ import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Implementation of okta-mobile-kotlin's TokenStorage interface that allows moving credentials
+ * between different SharedPreferences. EncryptedSharedPreferences with different encryption models
+ * are used in this sample to toggle between biometric and non-biometric EncryptedSharedPreferences.
+ */
 @Singleton
 class CredentialTokenStorage @Inject constructor(
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,

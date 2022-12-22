@@ -28,6 +28,10 @@ import dagger.hilt.android.scopes.FragmentScoped
 import javax.inject.Inject
 import javax.inject.Provider
 
+/**
+ * Helper class for toggling between biometric and non-biometric storage, and for requesting
+ * biometric prompt
+ */
 @FragmentScoped
 class BiometricCredentialsManager @Inject constructor(
     private val fragment: Fragment,
