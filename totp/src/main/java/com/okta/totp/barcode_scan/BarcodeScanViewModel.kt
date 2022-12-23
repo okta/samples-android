@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.okta.totp.barcode_scan
 
 import androidx.lifecycle.ViewModel
@@ -29,7 +28,7 @@ import javax.inject.Inject
 class BarcodeScanViewModel @Inject constructor(
     private val otpUriParser: OtpUriParser,
     private val otpUriSharedPreferences: OtpUriSharedPreferences,
-    private val resourceManager: ResourceManager,
+    private val resourceManager: ResourceManager
 ) : ViewModel() {
 
     fun addOtpUriString(otpUriString: String): AddOtpResult {
@@ -40,7 +39,8 @@ class BarcodeScanViewModel @Inject constructor(
                 otpUriSharedPreferences.addOtpUriString(otpUriString)
                 return AddOtpResult.Success(
                     resourceManager.getString(
-                        R.string.otp_scan_success, parsingResult.name
+                        R.string.otp_scan_success,
+                        parsingResult.name
                     )
                 )
             }
@@ -50,10 +50,10 @@ class BarcodeScanViewModel @Inject constructor(
 
 sealed interface AddOtpResult {
     data class Success(
-        val message: String,
+        val message: String
     ) : AddOtpResult
 
     data class Error(
-        val errorMessage: String,
+        val errorMessage: String
     ) : AddOtpResult
 }

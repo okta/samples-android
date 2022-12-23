@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.okta.android.samples.browser_sign_in.user_dashboard
 
 import android.content.Context
@@ -58,13 +57,13 @@ class UserDashboardViewModel @Inject constructor() : ViewModel() {
                 CredentialBootstrap.oidcClient.createWebAuthenticationClient().logoutOfBrowser(
                     context = context,
                     redirectUrl = BuildConfig.SIGN_OUT_REDIRECT_URI,
-                    CredentialBootstrap.defaultCredential().token?.idToken ?: "",
+                    CredentialBootstrap.defaultCredential().token?.idToken ?: ""
                 )
             when (result) {
                 is OidcClientResult.Error -> {
                     Timber.e(result.exception, "Failed to logout.")
                     _loginState.value = UserDashboardLoginState.LogoutFailed(
-                        errorMessage = "Failed to logout.",
+                        errorMessage = "Failed to logout."
                     )
                 }
                 is OidcClientResult.Success -> {
@@ -84,14 +83,14 @@ class UserDashboardViewModel @Inject constructor() : ViewModel() {
                 is OidcClientResult.Error -> {
                     Timber.e(result.exception, "Failed to fetch userinfo.")
                     _userInfoState.value = UserInfoState.Loaded(
-                        userInfoText = "Failed to fetch userinfo.",
+                        userInfoText = "Failed to fetch userinfo."
                     )
                 }
                 is OidcClientResult.Success -> {
                     val userClaimsList =
                         result.result.deserializeClaims(JsonObject.serializer()).asList()
                     _userInfoState.value = UserInfoState.Loaded(
-                        userInfoText = userClaimsList.joinToString("\n"),
+                        userInfoText = userClaimsList.joinToString("\n")
                     )
                 }
             }
@@ -108,7 +107,7 @@ class UserDashboardViewModel @Inject constructor() : ViewModel() {
             val userEmail = idToken.email ?: ""
             _userGreetingState.value = UserGreetingState.Loaded(
                 name = userName,
-                email = userEmail,
+                email = userEmail
             )
             _loginState.value = UserDashboardLoginState.LoggedIn
         }
@@ -134,7 +133,7 @@ sealed class UserGreetingState {
     object Loading : UserGreetingState()
     data class Loaded(
         val name: String,
-        val email: String,
+        val email: String
     ) : UserGreetingState()
 }
 
@@ -145,7 +144,7 @@ sealed class UserInfoState {
     object Loading : UserInfoState()
     object Empty : UserInfoState()
     data class Loaded(
-        val userInfoText: String,
+        val userInfoText: String
     ) : UserInfoState()
 }
 
@@ -156,7 +155,7 @@ private fun JsonObject.asList(): List<String> {
         if (value is JsonPrimitive) {
             list.add("${entry.key}: ${value.content}")
         } else {
-            list.add("${entry.key}: ${value}")
+            list.add("${entry.key}: $value")
         }
     }
     return list

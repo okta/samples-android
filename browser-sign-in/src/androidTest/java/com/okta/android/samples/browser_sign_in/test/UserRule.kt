@@ -45,7 +45,7 @@ internal class UserRule : TestRule {
 private class UserStatement(
     private val rule: UserRule,
     private val base: Statement,
-    private val client: Client,
+    private val client: Client
 ) : Statement() {
     override fun evaluate() {
         val user = createUser()

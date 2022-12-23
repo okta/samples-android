@@ -56,7 +56,7 @@ internal class DashboardTest {
             .fetchUserInfo()
             .assertUserInfoContainsNameAndEmail(
                 name = "${userRule.firstName} ${userRule.lastName}",
-                email = userRule.email,
+                email = userRule.email
             )
             .assertUserInfoContainsExpectedClaims()
     }

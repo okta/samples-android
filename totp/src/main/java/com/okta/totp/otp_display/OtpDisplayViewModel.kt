@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.okta.totp.otp_display
 
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.okta.totp.coroutine.IoDispatcher
+import com.okta.totp.coroutine.qualifiers.IoDispatcher
 import com.okta.totp.coroutine.ticker.TickerFlowFactory
 import com.okta.totp.otp_repository.OtpUriSharedPreferences
 import com.okta.totp.parsing.OtpUriParser
@@ -43,7 +42,7 @@ class OtpDisplayViewModel @Inject constructor(
     private val otpUriParser: OtpUriParser,
     private val passwordGeneratorFactory: PasswordGeneratorFactory,
     tickerFlowFactory: TickerFlowFactory,
-    @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : ViewModel() {
     private val events = MutableSharedFlow<OtpDisplayViewModelEvents>()
 
@@ -103,7 +102,7 @@ class OtpDisplayViewModel @Inject constructor(
                     account = otpParams.name,
                     issuer = otpParams.issuer,
                     passwordGenerator = passwordGenerator,
-                    otpUriString = otpUriString,
+                    otpUriString = otpUriString
                 )
             }
     }
@@ -126,5 +125,5 @@ private data class OtpViewmodelData(
     val account: String,
     val issuer: String?,
     val passwordGenerator: PasswordGenerator,
-    val otpUriString: String,
+    val otpUriString: String
 )

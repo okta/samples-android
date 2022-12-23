@@ -13,10 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.okta.totp.time
 
-internal class TestTimeProvider: TimeProvider {
+internal class TestTimeProvider : TimeProvider {
     private var callCounter = 0L
 
     override fun getCurrentTimeMillis(): Long {

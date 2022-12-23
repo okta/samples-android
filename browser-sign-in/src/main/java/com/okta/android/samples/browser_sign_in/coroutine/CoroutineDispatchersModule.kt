@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.okta.android.samples.browser_sign_in.coroutine
 
+import com.okta.android.samples.browser_sign_in.coroutine.qualifiers.IoDispatcher
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

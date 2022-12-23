@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.okta.android.samples.browser_sign_in.login
 
 import android.content.Context
@@ -48,7 +47,7 @@ class LoginViewModel @Inject constructor() : ViewModel() {
 
             val result = CredentialBootstrap.oidcClient.createWebAuthenticationClient().login(
                 context = context,
-                redirectUrl = BuildConfig.SIGN_IN_REDIRECT_URI,
+                redirectUrl = BuildConfig.SIGN_IN_REDIRECT_URI
             )
 
             when (result) {

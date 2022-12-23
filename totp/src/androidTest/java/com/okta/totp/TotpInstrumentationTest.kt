@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.okta.totp
 
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -71,7 +70,7 @@ class TotpInstrumentationTest {
     private val otpUriString = getOtpUriString(
         otpSecret = otpSecret,
         otpAccount = otpAccount,
-        otpIssuer = otpIssuer,
+        otpIssuer = otpIssuer
     )
 
     @Before
@@ -94,7 +93,7 @@ class TotpInstrumentationTest {
             otpCode = TestPasswordGenerator.getExpectedOtpCodeAtTimestep(0, otpParams),
             account = otpAccount,
             issuer = otpIssuer,
-            onDeleteOtpEntry = {},
+            onDeleteOtpEntry = {}
         )
 
         val otpDisplayPage = otpDisplayPageFactory.create(composeRule)
@@ -145,7 +144,7 @@ class TotpInstrumentationTest {
                 otpCode = TestPasswordGenerator.getExpectedOtpCodeAtTimestep(timeStep, otpParams),
                 account = otpAccount,
                 issuer = otpIssuer,
-                onDeleteOtpEntry = {},
+                onDeleteOtpEntry = {}
             )
             otpDisplayPage.assertOtpListContentEquals(listOf(expectedOtpEntry))
             runBlocking {
@@ -187,7 +186,7 @@ class TotpInstrumentationTest {
                     otpCode = TestPasswordGenerator.getExpectedOtpCodeAtTimestep(timeStep++, it),
                     account = it.name,
                     issuer = it.issuer,
-                    onDeleteOtpEntry = {},
+                    onDeleteOtpEntry = {}
                 )
             }
             otpDisplayPage.assertOtpListContentEquals(expectedOtpEntries)
@@ -200,7 +199,7 @@ class TotpInstrumentationTest {
     private fun getOtpUriString(
         otpSecret: String,
         otpAccount: String,
-        otpIssuer: String,
+        otpIssuer: String
     ): String {
         val otpUriStringTemplate = "otpauth://totp/%s:%s?secret=%s&issuer=%s"
         return otpUriStringTemplate.format(otpIssuer, otpAccount, otpSecret, otpIssuer)

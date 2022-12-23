@@ -13,18 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.totp.time
+package com.okta.android.samples.browser_sign_in.coroutine.qualifiers
 
-import dagger.Binds
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
+import javax.inject.Qualifier
 
-@InstallIn(SingletonComponent::class)
-@Module
-interface TimeProviderModule {
-    @Binds
-    fun bindTimeProvider(
-        timeProviderImpl: TimeProviderImpl
-    ): TimeProvider
-}
+@Retention(AnnotationRetention.RUNTIME)
+@Qualifier
+annotation class IoDispatcher

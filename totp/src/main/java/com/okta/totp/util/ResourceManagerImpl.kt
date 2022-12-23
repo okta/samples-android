@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.okta.totp.util
 
 import android.content.Context
@@ -24,7 +23,7 @@ import javax.inject.Singleton
 
 @Singleton
 class ResourceManagerImpl @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @ApplicationContext private val context: Context
 ) : ResourceManager {
     override fun getString(@StringRes resId: Int, vararg formatArgs: Any): String {
         return context.getString(resId, *formatArgs)

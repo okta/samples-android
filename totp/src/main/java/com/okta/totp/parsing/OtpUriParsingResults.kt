@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.okta.totp.parsing
 
 import dev.turingcomplete.kotlinonetimepassword.HmacAlgorithm
@@ -25,7 +24,7 @@ sealed interface OtpUriParsingResults {
         val base32Secret: String,
         val period: Long,
         val digits: Int,
-        val algorithm: HmacAlgorithm,
+        val algorithm: HmacAlgorithm
     ) : OtpUriParsingResults
 
     data class Error(

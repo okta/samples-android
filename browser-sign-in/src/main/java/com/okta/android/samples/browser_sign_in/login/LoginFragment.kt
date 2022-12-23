@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.okta.android.samples.browser_sign_in.login
 
 import android.os.Bundle
@@ -46,7 +45,8 @@ class LoginFragment : Fragment() {
     private val binding get() = _binding!!
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentLoginBinding.inflate(layoutInflater, container, false)
@@ -125,8 +125,8 @@ class LoginFragment : Fragment() {
 
                 override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
                     Timber.e(
-                        "Failed biometric authentication with errorCode: ${errorCode}" +
-                                " and errorString: $errString"
+                        "Failed biometric authentication with errorCode: $errorCode" +
+                            " and errorString: $errString"
                     )
                     displayBiometricAuthFailure()
                     checkBoxView.isChecked = false

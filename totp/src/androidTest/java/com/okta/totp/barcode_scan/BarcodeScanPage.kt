@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.okta.totp.barcode_scan
 
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
@@ -31,7 +30,7 @@ class BarcodeScanPage @AssistedInject constructor(
     private val otpUriSharedPreferences: OtpUriSharedPreferences,
     private val otpDisplayPageFactory: OtpDisplayPageFactory,
     private val tickerFlowFactory: TickerFlowFactory,
-    @Assisted private val composeRule: ComposeContentTestRule,
+    @Assisted private val composeRule: ComposeContentTestRule
 ) {
     init {
         composeRule.apply {

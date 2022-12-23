@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.okta.totp.otp_display
 
 import androidx.compose.ui.test.assertTextEquals
@@ -35,7 +34,7 @@ import org.hamcrest.MatcherAssert.assertThat
 class OtpDisplayPage @AssistedInject constructor(
     private val barcodeScanPageFactory: BarcodeScanPageFactory,
     private val resourceManager: ResourceManager,
-    @Assisted private val composeRule: ComposeContentTestRule,
+    @Assisted private val composeRule: ComposeContentTestRule
 ) {
     init {
         composeRule.apply {

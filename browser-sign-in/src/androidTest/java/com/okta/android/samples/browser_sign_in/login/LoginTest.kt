@@ -46,7 +46,7 @@ internal class LoginTest {
             .login()
             .assertUserGreetingWithNameAndEmail(
                 name = "${userRule.firstName} ${userRule.lastName}",
-                email = userRule.email,
+                email = userRule.email
             )
     }
 

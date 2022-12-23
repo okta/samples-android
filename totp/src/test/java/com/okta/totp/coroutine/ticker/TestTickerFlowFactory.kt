@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.okta.totp.coroutine.ticker
 
 import kotlinx.coroutines.flow.Flow
@@ -22,7 +21,7 @@ import kotlinx.coroutines.flow.take
 import kotlin.time.Duration
 
 internal class TestTickerFlowFactory(
-    private val maxUpdates: Int,
+    private val maxUpdates: Int
 ) : TickerFlowFactory {
 
     override fun getTickerFlow(period: Duration, initialDelay: Duration): Flow<Unit> {
