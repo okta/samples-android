@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.okta.totp.coroutine.ticker
 
 import dagger.Binds
@@ -31,6 +30,6 @@ interface TestTickerFlowModule {
     @Singleton
     @Binds
     fun bindTickerFlowFactory(
-        testTickerFlowFactory: TestTickerFlowFactory,
+        testTickerFlowFactory: TestTickerFlowFactory
     ): TickerFlowFactory
 }

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.okta.totp.otp_display
 
 import android.widget.Toast
@@ -63,14 +62,14 @@ fun OtpScreen(otpDisplayViewModel: OtpDisplayViewModel, onNavigateToBarcodeScree
                     .background(color = Color.LightGray)
                     .fillMaxWidth()
                     .padding(16.dp)
-                    .testTag(OtpScreenTestTags.TITLE),
+                    .testTag(OtpScreenTestTags.TITLE)
             )
         },
         floatingActionButtonPosition = FabPosition.End,
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onNavigateToBarcodeScreen,
-                modifier = Modifier.testTag(OtpScreenTestTags.ADD_BUTTON),
+                modifier = Modifier.testTag(OtpScreenTestTags.ADD_BUTTON)
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
@@ -81,7 +80,7 @@ fun OtpScreen(otpDisplayViewModel: OtpDisplayViewModel, onNavigateToBarcodeScree
     ) { padding ->
         OtpScreenList(
             otpEntryList = otpEntryList,
-            modifier = Modifier.padding(padding),
+            modifier = Modifier.padding(padding)
         )
     }
 }
@@ -92,7 +91,7 @@ fun OtpScreenList(otpEntryList: List<OtpEntry>, modifier: Modifier = Modifier) {
         modifier = modifier
             .padding(16.dp)
             .testTag(OtpScreenTestTags.OTP_SCREEN_LIST),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         items(otpEntryList) { otpData ->
             OtpCode(otpEntry = otpData)
@@ -128,11 +127,11 @@ fun OtpCode(otpEntry: OtpEntry, modifier: Modifier = Modifier) {
                 .align(Alignment.CenterVertically)
                 .padding(16.dp)
                 .testTag(OtpScreenTestTags.OTP_CODE_DELETE_BUTTON),
-            onClick = { otpEntry.delete() },
+            onClick = { otpEntry.delete() }
         ) {
             Icon(
                 imageVector = Icons.Filled.Delete,
-                contentDescription = stringResource(id = R.string.delete_button_description),
+                contentDescription = stringResource(id = R.string.delete_button_description)
             )
         }
     }
@@ -179,8 +178,8 @@ private fun PreviewOtpScreenList() {
                         Toast.LENGTH_SHORT
                     ).show()
                 }
-            ),
-        ),
+            )
+        )
     )
 }
 
@@ -188,7 +187,7 @@ class OtpEntry(
     val otpCode: String,
     val account: String,
     val issuer: String?,
-    private val onDeleteOtpEntry: () -> Unit,
+    private val onDeleteOtpEntry: () -> Unit
 ) {
     fun delete() {
         onDeleteOtpEntry()

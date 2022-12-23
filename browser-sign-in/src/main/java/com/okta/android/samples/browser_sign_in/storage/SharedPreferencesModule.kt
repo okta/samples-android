@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.okta.android.samples.browser_sign_in.storage
 
 import android.annotation.SuppressLint
@@ -46,7 +45,7 @@ object SharedPreferencesModule {
     private fun createSharedPreferences(
         applicationContext: Context,
         fileName: String,
-        keyGenParameterSpec: KeyGenParameterSpec,
+        keyGenParameterSpec: KeyGenParameterSpec
     ): SharedPreferences {
         val getSharedPreferencesWithMasterKey = { masterKeyAlias: String ->
             EncryptedSharedPreferences.create(
@@ -70,14 +69,18 @@ object SharedPreferencesModule {
             }
             // Clear shared preference and try again
             val sharedPreferences = applicationContext.getSharedPreferences(
-                fileName, Context.MODE_PRIVATE)
+                fileName,
+                Context.MODE_PRIVATE
+            )
             sharedPreferences.edit().clear().commit()
             val masterKeyAlias = MasterKeys.getOrCreate(keyGenParameterSpec)
             getSharedPreferencesWithMasterKey(masterKeyAlias)
         } catch (e: Exception) {
             // Clear shared preference and try again
             val sharedPreferences = applicationContext.getSharedPreferences(
-                fileName, Context.MODE_PRIVATE)
+                fileName,
+                Context.MODE_PRIVATE
+            )
             sharedPreferences.edit().clear().commit()
             val masterKeyAlias = MasterKeys.getOrCreate(keyGenParameterSpec)
             getSharedPreferencesWithMasterKey(masterKeyAlias)
@@ -92,7 +95,7 @@ object SharedPreferencesModule {
         return createSharedPreferences(
             context,
             NON_BIOMETRIC_FILE_NAME,
-            keyGenParameterSpec,
+            keyGenParameterSpec
         )
     }
 
@@ -102,7 +105,7 @@ object SharedPreferencesModule {
     @Singleton
     fun providesBiometricCredentialSharedPrefs(
         @ApplicationContext context: Context,
-        biometricToggleStorage: BiometricToggleStorage,
+        biometricToggleStorage: BiometricToggleStorage
     ): SharedPreferences {
         if (!biometricToggleStorage.biometricAuthenticated) {
             throw IllegalStateException(
@@ -133,7 +136,7 @@ object SharedPreferencesModule {
         return createSharedPreferences(
             context,
             BIOMETRIC_FILE_NAME,
-            keyGenParameterSpec,
+            keyGenParameterSpec
         )
     }
 }

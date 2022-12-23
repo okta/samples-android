@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.okta.totp.otp_display
 
 import app.cash.turbine.test
@@ -97,7 +96,7 @@ internal class OtpDisplayViewModelTest {
                             timeStep = expectedTimeStep,
                             name = expectedName,
                             issuer = expectedIssuer,
-                            secret = expectedSecret,
+                            secret = expectedSecret
                         ),
                         account = expectedName,
                         issuer = expectedIssuer,
@@ -124,7 +123,7 @@ internal class OtpDisplayViewModelTest {
                     timeStep = expectedTimeStep,
                     name = expectedName,
                     issuer = expectedIssuer,
-                    secret = expectedSecret,
+                    secret = expectedSecret
                 ),
                 account = expectedName,
                 issuer = expectedIssuer,
@@ -154,7 +153,7 @@ internal class OtpDisplayViewModelTest {
                     timeStep = expectedTimeStep,
                     name = expectedName,
                     issuer = expectedIssuer,
-                    secret = expectedSecret,
+                    secret = expectedSecret
                 ),
                 account = expectedName,
                 issuer = expectedIssuer,
@@ -172,7 +171,7 @@ internal class OtpDisplayViewModelTest {
                     timeStep = expectedTimestep,
                     name = expectedName,
                     issuer = expectedIssuer,
-                    secret = expectedSecret,
+                    secret = expectedSecret
                 ),
                 account = expectedName,
                 issuer = expectedIssuer,
@@ -193,9 +192,9 @@ internal class OtpDisplayViewModelTest {
         val numUpdates = 10
         val otpDisplayViewModel = getOtpDisplayViewModel(maxUpdates = numUpdates)
 
-        val emissions = (0 .. numUpdates).map { numOfPreviousEmissions ->
+        val emissions = (0..numUpdates).map { numOfPreviousEmissions ->
             (0..9).map {
-                val expectedTimeStep = (numOfPreviousEmissions * otpUriStringList.size)  + it.toLong()
+                val expectedTimeStep = (numOfPreviousEmissions * otpUriStringList.size) + it.toLong()
                 val expectedName = "name$it"
                 val expectedIssuer = "issuer$it"
                 val expectedSecret = "secret$it"
@@ -204,7 +203,7 @@ internal class OtpDisplayViewModelTest {
                         timeStep = expectedTimeStep,
                         name = expectedName,
                         issuer = expectedIssuer,
-                        secret = expectedSecret,
+                        secret = expectedSecret
                     ),
                     account = expectedName,
                     issuer = expectedIssuer,
@@ -237,7 +236,7 @@ internal class OtpDisplayViewModelTest {
                     timeStep = expectedTimeStep,
                     name = expectedName,
                     issuer = expectedIssuer,
-                    secret = expectedSecret,
+                    secret = expectedSecret
                 ),
                 account = expectedName,
                 issuer = expectedIssuer,
@@ -263,7 +262,7 @@ internal class OtpDisplayViewModelTest {
             otpUriParser = otpUriParser,
             passwordGeneratorFactory = passwordGeneratorFactory,
             ioDispatcher = StandardTestDispatcher(),
-            tickerFlowFactory = testTickerFlowFactory,
+            tickerFlowFactory = testTickerFlowFactory
         )
     }
 
@@ -271,7 +270,7 @@ internal class OtpDisplayViewModelTest {
         timeStep: Long,
         name: String,
         issuer: String,
-        secret: String,
+        secret: String
     ): String {
         val otpParams = OtpUriParsingResults.OtpData(
             name = name,
@@ -279,7 +278,7 @@ internal class OtpDisplayViewModelTest {
             base32Secret = secret,
             period = OtpUriParser.DEFAULT_PERIOD,
             digits = OtpUriParser.DEFAULT_DIGITS,
-            algorithm = OtpUriParser.DEFAULT_ALGORITHM,
+            algorithm = OtpUriParser.DEFAULT_ALGORITHM
         )
         return TestPasswordGenerator.getExpectedOtpCodeAtTimestep(timeStep, otpParams)
     }

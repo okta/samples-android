@@ -13,15 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.okta.totp.password_generator
 
 import com.okta.totp.parsing.OtpUriParsingResults
 import com.okta.totp.time.TimeProvider
 
 internal class TestPasswordGeneratorFactory(
-    val timeProvider: TimeProvider,
-): PasswordGeneratorFactory {
+    val timeProvider: TimeProvider
+) : PasswordGeneratorFactory {
     override fun getPasswordGenerator(otpParams: OtpUriParsingResults.OtpData): PasswordGenerator {
         return TestPasswordGenerator(otpParams, timeProvider)
     }

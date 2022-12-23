@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.okta.totp.barcode_scan
 
 import com.google.common.truth.Truth.assertThat
@@ -21,6 +20,7 @@ import com.okta.totp.R
 import com.okta.totp.otp_repository.OtpUriSharedPreferences
 import com.okta.totp.parsing.OtpUriParser
 import com.okta.totp.parsing.OtpUriParsingResults
+import com.okta.totp.util.TestResourceManager
 import dev.turingcomplete.kotlinonetimepassword.HmacAlgorithm
 import io.mockk.Called
 import io.mockk.Runs
@@ -32,7 +32,6 @@ import io.mockk.verify
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import com.okta.totp.util.TestResourceManager
 
 internal class BarcodeScanViewModelTest {
     @get:Rule
@@ -53,7 +52,7 @@ internal class BarcodeScanViewModelTest {
         base32Secret = "",
         period = 1,
         digits = 1,
-        algorithm = HmacAlgorithm.SHA1,
+        algorithm = HmacAlgorithm.SHA1
     )
 
     @Before
@@ -61,14 +60,14 @@ internal class BarcodeScanViewModelTest {
         barcodeScanViewModel = BarcodeScanViewModel(
             otpUriParser,
             otpUriSharedPreferences,
-            TestResourceManager(),
+            TestResourceManager()
         )
     }
 
     @Test
     fun `adding invalid otpUriString returns error`() {
         every { otpUriParser.parseOtpUriString("invalidUriString") } returns
-                otpParsingErrorResult
+            otpParsingErrorResult
 
         val result = barcodeScanViewModel.addOtpUriString("invalidUriString")
 
@@ -82,7 +81,7 @@ internal class BarcodeScanViewModelTest {
     @Test
     fun `adding valid otpUriString adds it to OtpUriSharedPreferences`() {
         every { otpUriParser.parseOtpUriString("validUriString") } returns
-                otpParsingNonErrorResult
+            otpParsingNonErrorResult
         every { otpUriSharedPreferences.addOtpUriString("validUriString") } just Runs
 
         val result = barcodeScanViewModel.addOtpUriString("validUriString").let {

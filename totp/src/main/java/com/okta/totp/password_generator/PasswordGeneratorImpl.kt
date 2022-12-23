@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.okta.totp.password_generator
 
 import com.okta.totp.parsing.OtpUriParsingResults
@@ -25,15 +24,15 @@ import java.util.concurrent.TimeUnit
 
 class PasswordGeneratorImpl(
     otpParams: OtpUriParsingResults.OtpData,
-    private val timeProvider: TimeProvider,
-): PasswordGenerator {
+    private val timeProvider: TimeProvider
+) : PasswordGenerator {
     private val timeBasedOneTimePasswordGenerator = TimeBasedOneTimePasswordGenerator(
         secret = Base32().decode(otpParams.base32Secret),
         config = TimeBasedOneTimePasswordConfig(
             codeDigits = otpParams.digits,
             hmacAlgorithm = otpParams.algorithm,
             timeStep = otpParams.period,
-            timeStepUnit = TimeUnit.SECONDS,
+            timeStepUnit = TimeUnit.SECONDS
         )
     )
 

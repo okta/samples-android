@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.okta.totp.time
 
 import javax.inject.Inject
 
-class TimeProviderImpl @Inject constructor(): TimeProvider {
+class TimeProviderImpl @Inject constructor() : TimeProvider {
     override fun getCurrentTimeMillis(): Long {
         return System.currentTimeMillis()
     }

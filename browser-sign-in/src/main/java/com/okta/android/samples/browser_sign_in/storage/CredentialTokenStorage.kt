@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.okta.android.samples.browser_sign_in.storage
 
 import android.annotation.SuppressLint
 import android.content.SharedPreferences
-import com.okta.android.samples.browser_sign_in.coroutine.IoDispatcher
+import com.okta.android.samples.browser_sign_in.coroutine.qualifiers.IoDispatcher
 import com.okta.authfoundation.credential.TokenStorage
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.sync.Mutex
@@ -37,7 +36,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class CredentialTokenStorage @Inject constructor(
-    @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : TokenStorage {
     companion object {
         private const val PREFERENCE_KEY = "com.okta.sample.storage_entries"
@@ -137,18 +136,20 @@ private class StoredTokens(
     class Entry(
         @SerialName("identifier") val identifier: String,
         @SerialName("token") val token: SerializableToken?,
-        @SerialName("tags") val tags: Map<String, String>,
+        @SerialName("tags") val tags: Map<String, String>
     )
 
     companion object {
         fun from(entries: List<TokenStorage.Entry>): StoredTokens {
-            return StoredTokens(entries.map {
-                Entry(
-                    it.identifier,
-                    it.token?.asSerializableToken(),
-                    it.tags
-                )
-            })
+            return StoredTokens(
+                entries.map {
+                    Entry(
+                        it.identifier,
+                        it.token?.asSerializableToken(),
+                        it.tags
+                    )
+                }
+            )
         }
     }
 

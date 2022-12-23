@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.okta.totp.parsing
 
 import android.net.Uri
@@ -24,7 +23,7 @@ import dev.turingcomplete.kotlinonetimepassword.HmacAlgorithm
 import javax.inject.Inject
 
 class OtpUriParser @Inject constructor(
-    private val resourceManager: ResourceManager,
+    private val resourceManager: ResourceManager
 ) {
     fun parseOtpUriString(otpUriString: String): OtpUriParsingResults {
         val uri = Uri.parse(otpUriString)
@@ -113,7 +112,7 @@ class OtpUriParser @Inject constructor(
             base32Secret = secretKey,
             period = period,
             digits = digits,
-            algorithm = algorithm,
+            algorithm = algorithm
         )
     }
 
@@ -122,12 +121,15 @@ class OtpUriParser @Inject constructor(
         private const val TOTP = "totp"
         private const val SECRET = "secret"
         private const val PERIOD = "period"
+
         @VisibleForTesting
         const val DEFAULT_PERIOD = 30L
         private const val DIGITS = "digits"
+
         @VisibleForTesting
         const val DEFAULT_DIGITS = 6
         private const val ALGORITHM = "algorithm"
+
         @VisibleForTesting
         val DEFAULT_ALGORITHM = HmacAlgorithm.SHA1
         private const val ISSUER = "issuer"

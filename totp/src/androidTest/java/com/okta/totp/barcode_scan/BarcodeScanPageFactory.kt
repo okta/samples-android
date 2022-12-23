@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.okta.totp.barcode_scan
 
 import androidx.compose.ui.test.junit4.ComposeContentTestRule

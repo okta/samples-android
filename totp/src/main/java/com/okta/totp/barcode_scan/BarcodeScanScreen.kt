@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.okta.totp.barcode_scan
 
 import android.Manifest
@@ -84,7 +83,7 @@ fun BarcodeScanScreen(
                         .background(color = Color.LightGray)
                         .fillMaxWidth()
                         .align(Alignment.CenterVertically)
-                        .testTag(BarcodeScanScreenTestTags.TITLE),
+                        .testTag(BarcodeScanScreenTestTags.TITLE)
                 )
             }
         }
@@ -92,7 +91,7 @@ fun BarcodeScanScreen(
         CameraPreviewWithPermissions(
             modifier = Modifier.padding(paddingValues),
             onAddOtpUriString = { otpUriString -> barcodeScanViewModel.addOtpUriString(otpUriString) },
-            onNavigateToOtpScreen = onNavigateToOtpScreen,
+            onNavigateToOtpScreen = onNavigateToOtpScreen
         )
     }
 }
@@ -102,7 +101,7 @@ fun BarcodeScanScreen(
 fun CameraPreviewWithPermissions(
     modifier: Modifier = Modifier,
     onAddOtpUriString: (String) -> AddOtpResult,
-    onNavigateToOtpScreen: () -> Unit,
+    onNavigateToOtpScreen: () -> Unit
 ) {
     val cameraPermissionState = rememberPermissionState(
         Manifest.permission.CAMERA
@@ -116,11 +115,11 @@ fun CameraPreviewWithPermissions(
             Column(modifier.padding(8.dp)) {
                 Text(
                     stringResource(id = R.string.camera_permission_request),
-                    modifier = Modifier.testTag(BarcodeScanScreenTestTags.REQUEST_PERMISSION_TEXT),
+                    modifier = Modifier.testTag(BarcodeScanScreenTestTags.REQUEST_PERMISSION_TEXT)
                 )
                 Button(
                     onClick = { cameraPermissionState.launchPermissionRequest() },
-                    modifier = Modifier.testTag(BarcodeScanScreenTestTags.REQUEST_PERMISSION_BUTTON),
+                    modifier = Modifier.testTag(BarcodeScanScreenTestTags.REQUEST_PERMISSION_BUTTON)
                 ) {
                     Text(stringResource(id = R.string.request_permission))
                 }
@@ -133,7 +132,7 @@ fun CameraPreviewWithPermissions(
 fun CameraPreview(
     modifier: Modifier = Modifier,
     onAddOtpUriString: (String) -> AddOtpResult,
-    onNavigateToOtpScreen: () -> Unit,
+    onNavigateToOtpScreen: () -> Unit
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
@@ -159,10 +158,11 @@ fun CameraPreview(
                         onClick = {
                             openDialog = false
                             dialogDismissAction()
-                        }) {
+                        }
+                    ) {
                         Text(stringResource(id = R.string.ok))
                     }
-                },
+                }
             )
         }
         AndroidView(
@@ -177,7 +177,8 @@ fun CameraPreview(
                 val executor = ContextCompat.getMainExecutor(ctx)
 
                 cameraController.clearImageAnalysisAnalyzer()
-                cameraController.setImageAnalysisAnalyzer(executor,
+                cameraController.setImageAnalysisAnalyzer(
+                    executor,
                     MlKitAnalyzer(
                         listOf(barcodeScanner),
                         CameraController.COORDINATE_SYSTEM_VIEW_REFERENCED,
@@ -204,7 +205,7 @@ fun CameraPreview(
                 cameraController.cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
                 previewView
             },
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize()
         )
     }
 }

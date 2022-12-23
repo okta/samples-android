@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.okta.android.samples.browser_sign_in.biometric
 
 import android.content.SharedPreferences
@@ -40,7 +39,7 @@ class BiometricCredentialsManager @Inject constructor(
     @BiometricCredentialSharedPrefs
     private val biometricSharedPrefsProvider: Provider<SharedPreferences>, // Using Provider for lazy instantiation
     @DefaultCredentialSharedPrefs
-    private val defaultSharedPrefsProvider: Provider<SharedPreferences>, // Using Provider for lazy instantiation
+    private val defaultSharedPrefsProvider: Provider<SharedPreferences> // Using Provider for lazy instantiation
 ) {
     val biometricEnabled get() = biometricToggleStorage.biometricEnabled
     val biometricAuthenticated get() = biometricToggleStorage.biometricAuthenticated
@@ -73,7 +72,7 @@ class BiometricCredentialsManager @Inject constructor(
                 .setTitle("Authenticate")
                 .setNegativeButtonText("Cancel")
                 .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG)
-                .build(),
+                .build()
         )
     }
 

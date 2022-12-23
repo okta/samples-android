@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.okta.android.samples.browser_sign_in.storage
 
 import com.okta.authfoundation.credential.Token
@@ -30,7 +29,7 @@ class SerializableToken internal constructor(
     @SerialName("refresh_token") val refreshToken: String? = null,
     @SerialName("id_token") val idToken: String? = null,
     @SerialName("device_secret") val deviceSecret: String? = null,
-    @SerialName("issued_token_type") val issuedTokenType: String? = null,
+    @SerialName("issued_token_type") val issuedTokenType: String? = null
 ) {
     fun asToken(): Token {
         return Token(
@@ -41,7 +40,7 @@ class SerializableToken internal constructor(
             refreshToken = refreshToken,
             idToken = idToken,
             deviceSecret = deviceSecret,
-            issuedTokenType = issuedTokenType,
+            issuedTokenType = issuedTokenType
         )
     }
 }
@@ -55,6 +54,6 @@ fun Token.asSerializableToken(): SerializableToken {
         refreshToken = refreshToken,
         idToken = idToken,
         deviceSecret = deviceSecret,
-        issuedTokenType = issuedTokenType,
+        issuedTokenType = issuedTokenType
     )
 }

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.okta.totp.time
 
 import dagger.Binds
@@ -27,5 +26,5 @@ interface TimeProviderModule {
     @Binds
     fun bindTimeProvider(
         timeProviderImpl: TimeProviderImpl
-    ) : TimeProvider
+    ): TimeProvider
 }

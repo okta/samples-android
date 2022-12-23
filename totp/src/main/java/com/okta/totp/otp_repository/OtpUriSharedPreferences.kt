@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.okta.totp.otp_repository
 
 import android.content.Context
@@ -25,7 +24,7 @@ import javax.inject.Singleton
 
 @Singleton
 class OtpUriSharedPreferences @Inject constructor(
-    @ApplicationContext context: Context,
+    @ApplicationContext context: Context
 ) {
     private val masterKey = MasterKey
         .Builder(context)
@@ -37,7 +36,7 @@ class OtpUriSharedPreferences @Inject constructor(
         SHARED_PREFS_FILE_NAME,
         masterKey,
         EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
+        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
     )
 
     private val sharedPrefsEditor = sharedPrefs.edit()

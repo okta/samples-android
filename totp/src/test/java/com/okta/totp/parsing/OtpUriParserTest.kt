@@ -13,17 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.okta.totp.parsing
 
 import com.google.common.truth.Truth.assertThat
 import com.okta.totp.R
+import com.okta.totp.util.TestResourceManager
 import dev.turingcomplete.kotlinonetimepassword.HmacAlgorithm
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import com.okta.totp.util.TestResourceManager
 
 // Robolectric for Android Uri class
 @RunWith(RobolectricTestRunner::class)
@@ -54,7 +53,7 @@ internal class OtpUriParserTest {
                 base32Secret = secret,
                 period = OtpUriParser.DEFAULT_PERIOD,
                 digits = OtpUriParser.DEFAULT_DIGITS,
-                algorithm = OtpUriParser.DEFAULT_ALGORITHM,
+                algorithm = OtpUriParser.DEFAULT_ALGORITHM
             )
         )
     }
@@ -70,7 +69,7 @@ internal class OtpUriParserTest {
                 base32Secret = secret,
                 period = OtpUriParser.DEFAULT_PERIOD,
                 digits = OtpUriParser.DEFAULT_DIGITS,
-                algorithm = OtpUriParser.DEFAULT_ALGORITHM,
+                algorithm = OtpUriParser.DEFAULT_ALGORITHM
             )
         )
     }
@@ -86,7 +85,7 @@ internal class OtpUriParserTest {
                 base32Secret = secret,
                 period = OtpUriParser.DEFAULT_PERIOD,
                 digits = OtpUriParser.DEFAULT_DIGITS,
-                algorithm = OtpUriParser.DEFAULT_ALGORITHM,
+                algorithm = OtpUriParser.DEFAULT_ALGORITHM
             )
         )
     }
@@ -94,7 +93,7 @@ internal class OtpUriParserTest {
     @Test
     fun `parse valid uri code with all optional params`() {
         val validUriString = "otpauth://totp/$issuer:$name?secret=$secret&issuer=$issuer&" +
-                "algorithm=$algorithmString&digits=$digits&period=$period"
+            "algorithm=$algorithmString&digits=$digits&period=$period"
         val result = otpUriParser.parseOtpUriString(validUriString)
         assertThat(result).isEqualTo(
             OtpUriParsingResults.OtpData(
@@ -103,7 +102,7 @@ internal class OtpUriParserTest {
                 base32Secret = secret,
                 period = period,
                 digits = digits,
-                algorithm = algorithm,
+                algorithm = algorithm
             )
         )
     }
@@ -146,7 +145,7 @@ internal class OtpUriParserTest {
     @Test
     fun `parse uri code with missing secret parameter`() {
         val uriStringWithMissingSecret = "otpauth://totp/$issuer:$name?&issuer=$issuer&" +
-                "algorithm=$algorithmString&digits=$digits&period=$period"
+            "algorithm=$algorithmString&digits=$digits&period=$period"
         val result = otpUriParser.parseOtpUriString(uriStringWithMissingSecret)
         assertThat(result).isEqualTo(
             OtpUriParsingResults.Error(
@@ -158,7 +157,7 @@ internal class OtpUriParserTest {
     @Test
     fun `parse uri code with secret parameter with missing argument`() {
         val uriStringWithMissingSecretArgument = "otpauth://totp/$issuer:$name?&secret&issuer=$issuer&" +
-                "algorithm=$algorithmString&digits=$digits&period=$period"
+            "algorithm=$algorithmString&digits=$digits&period=$period"
         val result = otpUriParser.parseOtpUriString(uriStringWithMissingSecretArgument)
         assertThat(result).isEqualTo(
             OtpUriParsingResults.Error(

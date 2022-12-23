@@ -13,8 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package com.okta.totp.coroutine
+package com.okta.totp.coroutine.qualifiers
 
 import javax.inject.Qualifier
 

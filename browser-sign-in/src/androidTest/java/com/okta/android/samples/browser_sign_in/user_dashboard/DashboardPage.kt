@@ -18,7 +18,10 @@ package com.okta.android.samples.browser_sign_in.user_dashboard
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.ViewMatchers.*
+import androidx.test.espresso.matcher.ViewMatchers
+import androidx.test.espresso.matcher.ViewMatchers.withEffectiveVisibility
+import androidx.test.espresso.matcher.ViewMatchers.withId
+import androidx.test.espresso.matcher.ViewMatchers.withText
 import com.okta.android.samples.browser_sign_in.R
 import com.okta.android.samples.browser_sign_in.login.LoginPage
 import com.okta.android.samples.browser_sign_in.test.waitForResourceId
@@ -41,13 +44,13 @@ internal class DashboardPage {
     }
 
     fun assertUserGreetingWithNameAndEmail(name: String, email: String): DashboardPage {
-        val greetingText = "Welcome ${name}\n" + "Email: ${email}"
+        val greetingText = "Welcome ${name}\n" + "Email: $email"
         onView(withId(R.id.user_greeting_text_view)).check(matches(withText(greetingText)))
         return this
     }
 
     fun assertEmptyUserInfo(): DashboardPage {
-        onView(withId(R.id.user_info_text_view)).check(matches(withEffectiveVisibility(Visibility.GONE)))
+        onView(withId(R.id.user_info_text_view)).check(matches(withEffectiveVisibility(ViewMatchers.Visibility.GONE)))
         return this
     }
 
@@ -81,7 +84,7 @@ internal class DashboardPage {
             "family_name",
             "zoneinfo",
             "updated_at",
-            "email_verified",
+            "email_verified"
         )
     }
 }

@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.okta.totp.coroutine
 
+import com.okta.totp.coroutine.qualifiers.IoDispatcher
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

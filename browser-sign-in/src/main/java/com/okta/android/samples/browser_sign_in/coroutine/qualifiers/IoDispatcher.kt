@@ -13,8 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package com.okta.android.samples.browser_sign_in.coroutine
+package com.okta.android.samples.browser_sign_in.coroutine.qualifiers
 
 import javax.inject.Qualifier
 

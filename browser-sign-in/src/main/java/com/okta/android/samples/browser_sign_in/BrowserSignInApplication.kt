@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.okta.android.samples.browser_sign_in
 
 import android.app.Application
@@ -45,11 +44,11 @@ class BrowserSignInApplication : Application() {
         AuthFoundationDefaults.cache = SharedPreferencesCache.create(this)
         val oidcConfiguration = OidcConfiguration(
             clientId = BuildConfig.CLIENT_ID,
-            defaultScope = "openid email profile offline_access",
+            defaultScope = "openid email profile offline_access"
         )
         val client = OidcClient.createFromDiscoveryUrl(
             oidcConfiguration,
-            "${BuildConfig.ISSUER}/.well-known/openid-configuration".toHttpUrl(),
+            "${BuildConfig.ISSUER}/.well-known/openid-configuration".toHttpUrl()
         )
 
         // CredentialTokenStorage is a custom TokenStorage that allows switching between different

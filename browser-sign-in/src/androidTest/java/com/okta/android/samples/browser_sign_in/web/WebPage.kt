@@ -23,7 +23,11 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
-import com.okta.android.samples.browser_sign_in.test.*
+import com.okta.android.samples.browser_sign_in.test.clickButtonWithText
+import com.okta.android.samples.browser_sign_in.test.clickButtonWithTextMatching
+import com.okta.android.samples.browser_sign_in.test.execShellCommand
+import com.okta.android.samples.browser_sign_in.test.setTextForIndex
+import com.okta.android.samples.browser_sign_in.test.waitForText
 import com.okta.android.samples.browser_sign_in.user_dashboard.DashboardPage
 import timber.log.Timber
 import kotlin.time.Duration.Companion.seconds

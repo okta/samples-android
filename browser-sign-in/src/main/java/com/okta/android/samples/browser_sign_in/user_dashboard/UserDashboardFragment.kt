@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.okta.android.samples.browser_sign_in.user_dashboard
 
 import android.os.Bundle
@@ -45,7 +44,8 @@ class UserDashboardFragment : Fragment() {
     private val binding get() = _binding!!
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentUserDashboardBinding.inflate(layoutInflater, container, false)
@@ -188,8 +188,8 @@ class UserDashboardFragment : Fragment() {
 
                 override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
                     Timber.e(
-                        "Failed biometric authentication with errorCode: ${errorCode}" +
-                                " and errorString: $errString"
+                        "Failed biometric authentication with errorCode: $errorCode" +
+                            " and errorString: $errString"
                     )
                     displayBiometricAuthFailure()
                     checkBoxView.isChecked = false
