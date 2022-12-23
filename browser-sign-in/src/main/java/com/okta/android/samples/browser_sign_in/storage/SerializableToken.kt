@@ -20,6 +20,7 @@ import com.okta.authfoundation.credential.Token
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+// TODO(OKTA-557900): Remove this class when switching to new token model in okta-mobile-kotlin
 @Serializable
 class SerializableToken internal constructor(
     @SerialName("token_type") val tokenType: String,
