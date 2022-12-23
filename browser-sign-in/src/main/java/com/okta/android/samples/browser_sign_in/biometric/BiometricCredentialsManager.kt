@@ -53,8 +53,8 @@ class BiometricCredentialsManager @Inject constructor(
             ContextCompat.getMainExecutor(fragment.requireContext()),
             object : BiometricPrompt.AuthenticationCallback() {
                 override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                    biometricPromptAuthenticationCallback.onAuthenticationSucceeded(result)
                     biometricToggleStorage.biometricAuthenticated = true
+                    biometricPromptAuthenticationCallback.onAuthenticationSucceeded(result)
                 }
 
                 override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
@@ -78,12 +78,12 @@ class BiometricCredentialsManager @Inject constructor(
     }
 
     suspend fun useBiometricCredentialStorage() {
-        biometricToggleStorage.biometricEnabled = true
         credentialTokenStorage.setSharedPreferences(biometricSharedPrefsProvider.get())
+        biometricToggleStorage.biometricEnabled = true
     }
 
     suspend fun useDefaultCredentialStorage() {
-        biometricToggleStorage.biometricEnabled = false
         credentialTokenStorage.setSharedPreferences(defaultSharedPrefsProvider.get())
+        biometricToggleStorage.biometricEnabled = false
     }
 }

@@ -24,11 +24,14 @@ import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
+import com.okta.android.samples.browser_sign_in.biometric.BiometricToggleStorage
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import java.security.KeyStore
+import java.security.KeyStoreException
 import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
@@ -45,9 +48,7 @@ object SharedPreferencesModule {
         fileName: String,
         keyGenParameterSpec: KeyGenParameterSpec,
     ): SharedPreferences {
-        val masterKeyAlias = MasterKeys.getOrCreate(keyGenParameterSpec)
-
-        return try {
+        val getSharedPreferencesWithMasterKey = { masterKeyAlias: String ->
             EncryptedSharedPreferences.create(
                 fileName,
                 masterKeyAlias,
@@ -55,18 +56,31 @@ object SharedPreferencesModule {
                 EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
                 EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
             )
+        }
+
+        return try {
+            val masterKeyAlias = MasterKeys.getOrCreate(keyGenParameterSpec)
+            getSharedPreferencesWithMasterKey(masterKeyAlias)
+        } catch (e: KeyStoreException) {
+            // Key invalidated, so delete it and create it again. This can happen in case of
+            // biometric encryption when the user adds or removes fingerprints
+            KeyStore.getInstance("AndroidKeystore").apply {
+                load(null)
+                deleteEntry(keyGenParameterSpec.keystoreAlias)
+            }
+            // Clear shared preference and try again
+            val sharedPreferences = applicationContext.getSharedPreferences(
+                fileName, Context.MODE_PRIVATE)
+            sharedPreferences.edit().clear().commit()
+            val masterKeyAlias = MasterKeys.getOrCreate(keyGenParameterSpec)
+            getSharedPreferencesWithMasterKey(masterKeyAlias)
         } catch (e: Exception) {
             // Clear shared preference and try again
             val sharedPreferences = applicationContext.getSharedPreferences(
                 fileName, Context.MODE_PRIVATE)
             sharedPreferences.edit().clear().commit()
-            EncryptedSharedPreferences.create(
-                fileName,
-                masterKeyAlias,
-                applicationContext,
-                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-            )
+            val masterKeyAlias = MasterKeys.getOrCreate(keyGenParameterSpec)
+            getSharedPreferencesWithMasterKey(masterKeyAlias)
         }
     }
 
@@ -86,7 +100,16 @@ object SharedPreferencesModule {
     @BiometricCredentialSharedPrefs
     @Provides
     @Singleton
-    fun providesBiometricCredentialSharedPrefs(@ApplicationContext context: Context): SharedPreferences {
+    fun providesBiometricCredentialSharedPrefs(
+        @ApplicationContext context: Context,
+        biometricToggleStorage: BiometricToggleStorage,
+    ): SharedPreferences {
+        if (!biometricToggleStorage.biometricAuthenticated) {
+            throw IllegalStateException(
+                "Attempted accessing biometric shared preferences without biometric authentication"
+            )
+        }
+
         val biometricKeyGenParameterSpecBuilder = KeyGenParameterSpec.Builder(
             "com_okta_sample_storage",
             KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
