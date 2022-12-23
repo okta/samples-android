@@ -2,7 +2,11 @@ name: main
 
 on:
   push:
+    branches:
+      - master
   pull_request:
+    branches:
+      - master
 
 env:
   GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx4g -Dorg.gradle.daemon=false -Dkotlin.incremental=false"
