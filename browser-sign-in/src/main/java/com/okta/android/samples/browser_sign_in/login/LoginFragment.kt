@@ -20,12 +20,26 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CompoundButton
+import android.widget.Toast
+import androidx.biometric.BiometricPrompt
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.okta.android.samples.browser_sign_in.R
+import com.okta.android.samples.browser_sign_in.biometric.BiometricCredentialsManager
 import com.okta.android.samples.browser_sign_in.databinding.FragmentLoginBinding
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+import timber.log.Timber
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class LoginFragment : Fragment() {
+    @Inject
+    lateinit var biometricCredentialsManager: BiometricCredentialsManager
+
     private val viewModel: LoginViewModel by viewModels()
     private var _binding: FragmentLoginBinding? = null
 
@@ -36,6 +50,7 @@ class LoginFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentLoginBinding.inflate(layoutInflater, container, false)
+        binding.biometricCheckbox.isChecked = biometricCredentialsManager.biometricEnabled
         return binding.root
     }
 
@@ -43,6 +58,19 @@ class LoginFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.loginButton.setOnClickListener {
             viewModel.login(requireContext())
+        }
+        binding.biometricCheckbox.setOnCheckedChangeListener { checkBoxView, isChecked ->
+            lifecycleScope.launch {
+                if (isChecked) {
+                    if (biometricCredentialsManager.biometricAuthenticated) {
+                        biometricCredentialsManager.useBiometricCredentialStorage()
+                    } else {
+                        requestBiometricAuthentication(checkBoxView)
+                    }
+                } else {
+                    biometricCredentialsManager.useDefaultCredentialStorage()
+                }
+            }
         }
 
         /**
@@ -84,5 +112,35 @@ class LoginFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun requestBiometricAuthentication(checkBoxView: CompoundButton) {
+        biometricCredentialsManager.requestBiometricAuthentication(
+            object : BiometricPrompt.AuthenticationCallback() {
+                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                    lifecycleScope.launch {
+                        biometricCredentialsManager.useBiometricCredentialStorage()
+                    }
+                }
+
+                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                    Timber.e(
+                        "Failed biometric authentication with errorCode: ${errorCode}" +
+                                " and errorString: $errString"
+                    )
+                    displayBiometricAuthFailure()
+                    checkBoxView.isChecked = false
+                }
+
+                override fun onAuthenticationFailed() {
+                    displayBiometricAuthFailure()
+                    checkBoxView.isChecked = false
+                }
+            }
+        )
+    }
+
+    private fun displayBiometricAuthFailure() {
+        Toast.makeText(context, R.string.biometric_authentication_error, Toast.LENGTH_LONG).show()
     }
 }

@@ -14,20 +14,14 @@
  * limitations under the License.
  */
 
-package com.okta.android.samples.browser_sign_in
+package com.okta.android.samples.browser_sign_in.storage
 
-import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
-import com.okta.android.samples.browser_sign_in.databinding.ActivityBrowserSignInBinding
-import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Qualifier
 
-@AndroidEntryPoint
-class BrowserSignInActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityBrowserSignInBinding
+@Retention(AnnotationRetention.RUNTIME)
+@Qualifier
+annotation class DefaultCredentialSharedPrefs
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = ActivityBrowserSignInBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-    }
-}
+@Retention(AnnotationRetention.RUNTIME)
+@Qualifier
+annotation class BiometricCredentialSharedPrefs

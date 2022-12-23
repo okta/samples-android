@@ -66,6 +66,12 @@
             android:text="@string/fetch_userinfo_button"
             android:textColor="@color/white" />
 
+        <CheckBox
+            android:id="@+id/biometric_checkbox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/biometric_checkbox" />
+
         <TextView
             android:id="@+id/error_text_view"
             android:layout_width="match_parent"

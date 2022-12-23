@@ -17,16 +17,23 @@
 package com.okta.android.samples.browser_sign_in
 
 import android.app.Application
+import com.okta.android.samples.browser_sign_in.storage.CredentialTokenStorage
 import com.okta.authfoundation.AuthFoundationDefaults
 import com.okta.authfoundation.client.OidcClient
 import com.okta.authfoundation.client.OidcConfiguration
 import com.okta.authfoundation.client.SharedPreferencesCache
 import com.okta.authfoundation.credential.CredentialDataSource.Companion.createCredentialDataSource
 import com.okta.authfoundationbootstrap.CredentialBootstrap
+import dagger.hilt.android.HiltAndroidApp
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import timber.log.Timber
+import javax.inject.Inject
 
+@HiltAndroidApp
 class BrowserSignInApplication : Application() {
+    @Inject
+    lateinit var credentialTokenStorage: CredentialTokenStorage
+
     override fun onCreate() {
         super.onCreate()
 
@@ -44,6 +51,18 @@ class BrowserSignInApplication : Application() {
             oidcConfiguration,
             "${BuildConfig.ISSUER}/.well-known/openid-configuration".toHttpUrl(),
         )
-        CredentialBootstrap.initialize(client.createCredentialDataSource(this))
+
+        // CredentialTokenStorage is a custom TokenStorage that allows switching between different
+        // SharedPreferences. This sample toggles between biometric EncryptedSharedPreferences, and
+        // non-biometric EncryptedSharedPreferences
+        val credentialDataSource = client.createCredentialDataSource(credentialTokenStorage)
+        // If switching between different credential encryption is not needed, create a
+        // CredentialDataSource by passing in the encryption specs as follows:
+        // val credentialDataSource = client.createCredentialDataSource(
+        //     this,
+        //     keyGenParameterSpec = <KeygenParameterSpec>
+        // )
+        // See SharedPreferencesModule.kt for example of KeyGenParameterSpec used by this sample
+        CredentialBootstrap.initialize(credentialDataSource)
     }
 }

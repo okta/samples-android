@@ -2,6 +2,9 @@ plugins {
     id 'com.android.application'
     id 'kotlin-android'
     id 'androidx.navigation.safeargs.kotlin'
+    id 'kotlin-kapt'
+    id 'com.google.dagger.hilt.android'
+    id 'org.jetbrains.kotlin.plugin.serialization' version '1.7.20'
 }
 
 def oktaProperties = new Properties()
@@ -31,6 +34,11 @@ android {
     ]
 
     compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    compileOptions {
         coreLibraryDesugaringEnabled true
     }
 
@@ -56,6 +64,11 @@ dependencies {
     implementation(platform(libs.okta.bom))
     implementation(libs.okta.auth.foundation.bootstrap)
     implementation(libs.okta.web.authentication.ui)
+    implementation(libs.security.crypto.stable)
+    implementation(libs.androidx.biometrics)
+
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.compiler)
 
     androidTestImplementation(libs.junit)
     androidTestImplementation(libs.jackson.dataformat.yml)

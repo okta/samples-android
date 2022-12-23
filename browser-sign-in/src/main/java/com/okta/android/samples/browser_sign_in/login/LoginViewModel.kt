@@ -25,10 +25,13 @@ import com.okta.android.samples.browser_sign_in.BuildConfig
 import com.okta.authfoundation.client.OidcClientResult
 import com.okta.authfoundationbootstrap.CredentialBootstrap
 import com.okta.webauthenticationui.WebAuthenticationClient.Companion.createWebAuthenticationClient
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import javax.inject.Inject
 
-class LoginViewModel : ViewModel() {
+@HiltViewModel
+class LoginViewModel @Inject constructor() : ViewModel() {
     private val _loginState = MutableLiveData<LoginScreenLoginState>(LoginScreenLoginState.Loading)
 
     val loginState: LiveData<LoginScreenLoginState> = _loginState

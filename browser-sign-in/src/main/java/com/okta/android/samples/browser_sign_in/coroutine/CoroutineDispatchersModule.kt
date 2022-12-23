@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-package com.okta.android.samples.browser_sign_in
+package com.okta.android.samples.browser_sign_in.coroutine
 
-import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
-import com.okta.android.samples.browser_sign_in.databinding.ActivityBrowserSignInBinding
-import dagger.hilt.android.AndroidEntryPoint
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 
-@AndroidEntryPoint
-class BrowserSignInActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityBrowserSignInBinding
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = ActivityBrowserSignInBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-    }
+@InstallIn(SingletonComponent::class)
+@Module
+object CoroutineDispatchersModule {
+    @IoDispatcher
+    @Provides
+    fun providesIoDispatcher(): CoroutineDispatcher = Dispatchers.IO
 }

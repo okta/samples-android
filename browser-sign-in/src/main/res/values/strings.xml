@@ -5,4 +5,9 @@
     <string name="fetch_userinfo_button">Fetch userinfo</string>
     <string name="have_account">Have an account?</string>
     <string name="welcome_user">Welcome %1$s\nEmail: %2$s</string>
+    <string name="biometric_checkbox">Enable biometric login</string>
+    <string name="biometric_authentication_success">Successful biometric authentication</string>
+    <string name="biometric_authentication_error">Failed to authenticate</string>
+    <string name="launch_biometric_failure">Failed to authenticate biometrics. Try again?</string>
+    <string name="launch_login_with_biometrics">Login with biometrics</string>
 </resources>
