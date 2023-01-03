@@ -16,13 +16,17 @@
 package com.okta.android.samples.browser_sign_in
 
 import android.app.Application
+import androidx.browser.customtabs.CustomTabColorSchemeParams
 import com.okta.android.samples.browser_sign_in.storage.CredentialTokenStorage
 import com.okta.authfoundation.AuthFoundationDefaults
 import com.okta.authfoundation.client.OidcClient
 import com.okta.authfoundation.client.OidcConfiguration
 import com.okta.authfoundation.client.SharedPreferencesCache
 import com.okta.authfoundation.credential.CredentialDataSource.Companion.createCredentialDataSource
+import com.okta.authfoundation.events.EventCoordinator
+import com.okta.authfoundation.events.EventHandler
 import com.okta.authfoundationbootstrap.CredentialBootstrap
+import com.okta.webauthenticationui.events.CustomizeCustomTabsEvent
 import dagger.hilt.android.HiltAndroidApp
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import timber.log.Timber
@@ -42,6 +46,29 @@ class BrowserSignInApplication : Application() {
 
         // Initializes Auth Foundation and Credential Bootstrap classes for use in the Activity.
         AuthFoundationDefaults.cache = SharedPreferencesCache.create(this)
+
+        // Optionally customize Chrome custom tab colors
+        AuthFoundationDefaults.eventCoordinator = EventCoordinator(
+            object : EventHandler {
+                override fun onEvent(event: Any) {
+                    when (event) {
+                        is CustomizeCustomTabsEvent -> {
+                            val toolbarColor = applicationContext.getColor(R.color.purple_700)
+                            val navbarColor = applicationContext.getColor(R.color.teal_700)
+                            val colorScheme = CustomTabColorSchemeParams.Builder()
+                                .setNavigationBarColor(navbarColor)
+                                .setToolbarColor(toolbarColor)
+                                .build()
+                            event.intentBuilder
+                                .setDefaultColorSchemeParams(colorScheme)
+                                .build()
+                            event.intentBuilder
+                        }
+                    }
+                }
+            }
+        )
+
         val oidcConfiguration = OidcConfiguration(
             clientId = BuildConfig.CLIENT_ID,
             defaultScope = "openid email profile offline_access"
