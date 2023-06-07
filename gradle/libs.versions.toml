@@ -33,7 +33,7 @@ security-crypto-stable = "1.0.0"
 security-crypto-ktx = "1.1.0-alpha03"
 androidx-biometrics = "1.1.0"
 
-okta-bom = "1.1.1"
+okta-bom = "1.1.3"
 
 kotlin-stdlib = "1.7.20"
 timber = "5.0.1"
@@ -43,7 +43,7 @@ commons-codec = "1.15"
 
 # Testing lib versions
 junit = "4.13.2"
-jackson = "2.14.0"
+jackson = "2.15.2"
 truth = "1.1.3"
 mockk = "1.13.2"
 androidx-test = "1.5.0"
@@ -54,8 +54,7 @@ androidx-test-ext = "1.1.4"
 androidx-test-fragment = "1.5.4"
 androidx-test-uiautomator = "2.2.0"
 robolectric = "4.9"
-okta-http-okhttp = "1.3.2"
-okta-management-sdk = "8.2.2"
+okta-management-sdk = "10.3.0"
 
 [libraries]
 gradle = { module = "com.android.tools.build:gradle", version.ref = "gradle" }
@@ -142,7 +141,6 @@ androidx-test-rules = { module = "androidx.test:rules", version.ref = "androidx-
 androidx-test-uiautomator = { module = "androidx.test.uiautomator:uiautomator", version.ref = "androidx-test-uiautomator" }
 
 okta-management-sdk = { module = "com.okta.sdk:okta-sdk-impl", version.ref = "okta-management-sdk" }
-okta-http-okhttp = { module = "com.okta.commons:okta-http-okhttp", version.ref = "okta-http-okhttp" }
 
 [bundles]
 # Common android imports
@@ -202,8 +200,4 @@ android-instrumentation-testing = [
     "androidx-test-runner",
     "androidx-test-rules",
     "androidx-test-uiautomator",
-]
-okta-testing = [
-    "okta-management-sdk",
-    "okta-http-okhttp",
 ]

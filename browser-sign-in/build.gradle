@@ -51,6 +51,15 @@ android {
 
         execution 'ANDROIDX_TEST_ORCHESTRATOR'
     }
+
+    packagingOptions {
+        resources {
+            excludes += '/META-INF/*'
+            excludes += 'draftv3/schema'
+            excludes += 'draftv4/schema'
+        }
+    }
+
     namespace 'com.okta.android.samples.browser_sign_in'
 }
 
@@ -73,7 +82,10 @@ dependencies {
     androidTestImplementation(libs.junit)
     androidTestImplementation(libs.jackson.dataformat.yml)
     androidTestImplementation(libs.bundles.android.instrumentation.testing)
-    androidTestImplementation(libs.bundles.okta.testing)
+    androidTestImplementation(libs.okta.management.sdk) {
+        exclude group: "javax.validation"
+        exclude group: "org.slf4j", module: "jcl-over-slf4j"
+    }
     androidTestUtil(libs.androidx.test.orchestrator)
     debugImplementation(libs.androidx.test.fragment) {
         transitive false
