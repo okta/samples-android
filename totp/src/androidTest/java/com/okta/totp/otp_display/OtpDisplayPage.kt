@@ -21,6 +21,9 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onChildAt
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
+import androidx.test.uiautomator.By
+import androidx.test.uiautomator.UiDevice
 import com.okta.totp.R
 import com.okta.totp.barcode_scan.BarcodeScanPage
 import com.okta.totp.barcode_scan.BarcodeScanPageFactory
@@ -47,7 +50,14 @@ class OtpDisplayPage @AssistedInject constructor(
     }
 
     fun assertOtpListEmpty(): OtpDisplayPage {
-        composeRule.onNodeWithTag(OtpScreenTestTags.OTP_CODE).assertDoesNotExist()
+        // composeRule currently doesn't detect empty list properly. So, this test uses UiAutomator
+        // for detecting if list is empty. Switch back to composeRule instead of UiAutomator
+        // when this is fixed with future compose-ui version update
+        // composeRule.onNodeWithTag(OtpScreenTestTags.OTP_CODE).assertDoesNotExist()
+
+        val uiDevice = UiDevice.getInstance(getInstrumentation())
+        val otpList = uiDevice.findObjects(By.res(OtpScreenTestTags.OTP_CODE))
+        assertThat(otpList.size, equalTo(0))
         return this
     }
 
@@ -81,6 +91,7 @@ class OtpDisplayPage @AssistedInject constructor(
     fun deleteOtpCodeAt(index: Int): OtpDisplayPage {
         composeRule.apply {
             onAllNodesWithTag(OtpScreenTestTags.OTP_CODE_DELETE_BUTTON)[index].performClick()
+            waitForIdle()
         }
         return this
     }

@@ -15,22 +15,23 @@
  */
 package com.okta.android.samples.browser_sign_in.test
 
+import com.okta.sdk.client.Clients
+import com.okta.sdk.resource.api.UserApi
+import com.okta.sdk.resource.client.ApiClient
+import com.okta.sdk.resource.model.User
 import com.okta.sdk.resource.user.UserBuilder
 import org.junit.Assert
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
-import org.openapitools.client.ApiClient
-import org.openapitools.client.api.UserApi
-import org.openapitools.client.model.User
 import java.util.UUID
 
 internal class UserRule : TestRule {
-    private val client: ApiClient = TestClientBuilder(
-        clientId = EndToEndCredentials["/managementSdk/clientId"],
-        orgUrl = EndToEndCredentials["/managementSdk/orgUrl"],
-        clientCredentials = { EndToEndCredentials["/managementSdk/token"] }
-    ).build()
+    private val client = Clients.builder()
+        .setClientId(EndToEndCredentials["/managementSdk/clientId"])
+        .setOrgUrl(EndToEndCredentials["/managementSdk/orgUrl"])
+        .setClientCredentials { EndToEndCredentials["/managementSdk/token"] }
+        .build()
 
     lateinit var email: String
     lateinit var password: String
