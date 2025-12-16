@@ -54,7 +54,7 @@ androidx-test-ext = "1.1.5"
 androidx-test-fragment = "1.6.1"
 androidx-test-uiautomator = "2.2.0"
 robolectric = "4.10"
-okta-management-sdk = "13.0.2"
+okta-management-sdk = "24.0.1"
 
 [libraries]
 gradle = { module = "com.android.tools.build:gradle", version.ref = "gradle" }
