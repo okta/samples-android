@@ -40,6 +40,7 @@ timber = "5.0.1"
 
 kotlin-onetimepassword = "2.4.0"
 commons-codec = "1.15"
+bcpkix-jdk18on = "1.84"
 
 # Testing lib versions
 junit = "4.13.2"
@@ -118,6 +119,7 @@ timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 
 kotlin-onetimepassword = { module = "dev.turingcomplete:kotlin-onetimepassword", version.ref = "kotlin-onetimepassword" }
 commons-codec = { group = "commons-codec", name = "commons-codec", version.ref = "commons-codec" }
+bcpkix-jdk18on = { module = "org.bouncycastle:bcpkix-jdk18on", version.ref = "bcpkix-jdk18on" }
 
 # Testing libs
 junit = { module = "junit:junit", version.ref = "junit" }
