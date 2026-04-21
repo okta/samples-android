@@ -90,6 +90,9 @@ dependencies {
         exclude group: "javax.validation"
         exclude group: "org.slf4j", module: "jcl-over-slf4j"
     }
+    constraints {
+        androidTestImplementation(libs.bcpkix.jdk18on)
+    }
     androidTestUtil(libs.androidx.test.orchestrator)
     debugImplementation(libs.androidx.test.fragment) {
         transitive false
