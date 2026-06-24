@@ -92,6 +92,7 @@ dependencies {
     }
     constraints {
         androidTestImplementation(libs.bcpkix.jdk18on)
+        androidTestImplementation(libs.jackson.core)
     }
     androidTestUtil(libs.androidx.test.orchestrator)
     debugImplementation(libs.androidx.test.fragment) {
