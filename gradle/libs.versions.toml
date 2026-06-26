@@ -44,7 +44,7 @@ bcpkix-jdk18on = "1.84"
 
 # Testing lib versions
 junit = "4.13.2"
-jackson = "2.19.0"
+jackson = "2.21.2"
 truth = "1.1.3"
 mockk = "1.13.2"
 androidx-test = "1.5.0"
